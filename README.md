@@ -1,6 +1,6 @@
-# Dark Fantasy RPG — Three.js Gameplay Prototype
+# Three.js Gameplay Prototype
 
-A dark fantasy RPG gameplay prototype running entirely in the browser (no build step, no server required).
+A gameplay prototype running entirely in the browser (no build step, no server required).
 Features: Witcher-style camera, full locomotion, combat, character builder, and town construction.
 
 > **3D assets (Quaternius) are not included** — see the Setup section below.
