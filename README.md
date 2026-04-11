@@ -1,21 +1,34 @@
-# Three.js Gameplay Prototype
+# Three.js Quaternius Studio
 
-A gameplay prototype running entirely in the browser (no build step, no server required).
-Features: Witcher-style camera, full locomotion, combat, character builder, and town construction.
+A collection of browser-based tools for working with **[Quaternius](https://quaternius.com)** 3D assets in Three.js.
+No build step, no server required — open directly in Chrome or Firefox.
 
 > **3D assets (Quaternius) are not included** — see the Setup section below.
 
 ---
 
-## Contents
+## Tools
 
 | File | Description |
 |------|-------------|
-| `gameplay-test.html` | Main prototype — locomotion, combat, physics, weapons |
-| `char-builder.html` | Character editor — modular outfits, zone shaders |
+| `char-builder.html` | Character editor — modular outfits, per-zone shaders |
 | `char-combined.html` | Combined char builder + preview |
-| `index.html` | Main hub |
-| `src/` | Reusable systems (camera, physics, buildings, town…) |
+| `character-preview.html` | Character preview |
+| `anim-inspect.html` | Animation clip inspector |
+| `asset-browser.html` | Asset browser |
+| `village-browser.html` | Medieval village asset browser |
+| `nature-browser.html` | Nature asset browser |
+| `soldier-test.html` | Soldier / character test |
+
+---
+
+## Source files
+
+| File | Description |
+|------|-------------|
+| `src/character.js` | CharacterController — loadRetargeted, AnimationMixer, state machine |
+| `src/char-config.js` | Character config hub — outfit, hair, body per character name |
+| `src/shaders.js` | Post-processing shaders (color grade) |
 
 ---
 
@@ -35,7 +48,7 @@ Some packs are **free**, others require a **Patreon** subscription (Source tier)
 
 > **Free** = downloadable directly on quaternius.com.  
 > **Source** = .blend files + max resolution — Patreon subscription required.  
-> The project works with the **free Standard versions** for animations.
+> The tools work with the **free Standard versions** for animations.
 
 ---
 
@@ -58,36 +71,29 @@ assets/
 │   │
 │   ├── outfits/
 │   │   └── *.gltf / *.bin          ← Modular Character Outfits - Fantasy
-│   │       (Male_Ranger, Female_Knight, Male_Barbarian, etc.)
 │   │
 │   ├── hair/
 │   │   └── *.gltf / *.bin          ← Modular Character Outfits - Fantasy
-│   │       (Hair_Long, Hair_Buns, Hair_Beard, Eyebrows_*, etc.)
 │   │
 │   └── modular/
 │       └── *.gltf / *.bin          ← Modular Character Outfits - Fantasy
-│           (separate parts by zone: Head, Arms, Legs, Body, Feet, Acc)
 │
 └── environment/
     ├── village/
     │   └── *.gltf / *.bin          ← Medieval Village MegaKit
-    │       (walls, roofs, windows, doors, balconies…)
     │
     ├── props/
     │   └── *.gltf / *.bin          ← Medieval Village MegaKit
-    │       (Axe_Bronze, Sword_Bronze, Torch_Metal, Shield_Wooden,
-    │        Pickaxe_Bronze, Table_Knife, Anvil, Chest, Bag…)
     │
     └── nature/
         └── *.gltf / *.bin          ← Medieval Village MegaKit
-            (BirchTree_*, Oak_*, Rock_*, Bush_*, Grass_*…)
 ```
 
 ---
 
-### Installation steps
+### Installation
 
-**1. Clone / download the project**
+**1. Clone the repository**
 ```bash
 git clone https://github.com/ixtrem16-netizen/RPG.git
 cd RPG
@@ -96,58 +102,17 @@ cd RPG
 **2. Download the Quaternius packs**
 
 - Go to **quaternius.com** or the **Quaternius Patreon**
-- Download:
-  - `Universal Animation Library` (UAL) — free Standard version is enough
-  - `Universal Animation Library 2` (UAL2) — free Standard version is enough
-  - `Medieval Village MegaKit` — free version available
-  - `Modular Character Outfits - Fantasy` — requires Patreon Source tier
+- Download the packs listed above and place the files in the directories above.
 
-**3. Copy the files**
+**3. Open in browser**
 
-Extract each pack and copy `.gltf` / `.bin` / `.glb` files
-into the corresponding directories according to the structure above.
+Open any `.html` file directly in Chrome or Firefox.
 
-**4. Open in browser**
-
-No server required — open `gameplay-test.html` directly in Chrome or Firefox.
-
-> **Chrome note**: if assets don't load locally (`file://`),
-> run a minimal HTTP server:
+> **Chrome note**: if assets don't load locally (`file://`), run a minimal HTTP server:
 > ```bash
 > python -m http.server 8080
-> # then open http://localhost:8080/gameplay-test.html
+> # then open http://localhost:8080
 > ```
-
----
-
-## Controls — gameplay-test.html
-
-| Key | Action |
-|-----|--------|
-| W / A / S / D | Move |
-| Shift | Sprint |
-| Space | Jump |
-| C | Crouch / Slide (while sprinting) |
-| R | Roll |
-| Shift + Q / E | Dodge left / right |
-| F | Interact / Climb |
-| K | Kick (disarms right hand) |
-| 1–4 | Combat mode (Sword / Fists / Magic / Bow) |
-| 0 | Unequip |
-| G | Emote wheel |
-| Tab | Camera lock-on |
-| V | Camera mode (3rd person / shoulder) |
-
----
-
-## Technical Architecture
-
-- **Engine**: Three.js (imported via CDN, no bundler)
-- **Physics**: custom — terrain raycast + AABB collisions
-- **Animations**: Three.js AnimationMixer — clips named via `CLIP_MAP`
-- **Camera**: Witcher 3 style — orbit + lean + lock-on
-- **Save system**: `localStorage` (position, character config)
-- **Assets**: GLTF/GLB — loaded on the fly, no build step
 
 ---
 
