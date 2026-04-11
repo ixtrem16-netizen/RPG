@@ -296,6 +296,7 @@ canvas { display:block; width:100vw; height:100vh; }
 import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { showCharCreation } from './src/char-creation.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  CONFIG — Chemins
@@ -3082,6 +3083,11 @@ buildEmoteWheel();
 
 (async () => {
     try {
+        // ── Création du personnage (premier lancement) ───────────
+        if (!localStorage.getItem('darkrpg_character_v1')) {
+            await showCharCreation();
+        }
+
         setLoadProgress(5);
         const cfg = resolveCharConfig();
         setLoadSub('Config : ' + cfg.name);
