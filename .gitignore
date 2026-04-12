@@ -32,5 +32,5 @@ screenshots_debug/
 .claude/
 
 # ── Build / distribution ─────────────────────────────────────────────────────
-DarkRPG.exe
+Studio.exe
 node_modules/
