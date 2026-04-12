@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Dark RPG Studio — Three.js Quaternius",
   "main": "server.js",
+  "bin": "server.js",
   "scripts": {
     "start": "node server.js",
     "build": "npx pkg . --target node18-win-x64 --output Studio.exe --compress GZip"
