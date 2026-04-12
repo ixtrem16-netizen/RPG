@@ -79,55 +79,78 @@ canvas { display:block; width:100vw; height:100vh; }
 /* ── Kick button (masqué — intégré à la belt) ── */
 #kick-btn { display:none; }
 
-/* ── Belt (ceinture rapide armes) ── */
+/* ── Belt (ceinture rapide — 10 slots numérotés 1→0) ── */
 #belt {
     position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
-    display:flex; align-items:flex-end; gap:3px; pointer-events:all;
+    display:flex; align-items:flex-end; gap:2px; pointer-events:all;
 }
 .belt-slot {
-    width:56px; height:64px;
+    width:60px; height:72px;
     background:rgba(6,4,2,0.9);
-    border:1px solid rgba(100,74,30,0.5);
+    border:1px solid rgba(100,74,30,0.45);
     box-shadow:inset 0 1px 3px rgba(0,0,0,0.8);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     cursor:pointer; position:relative; overflow:hidden;
     transition:border-color 0.12s, box-shadow 0.12s;
-    user-select:none;
+    user-select:none; padding-top:2px;
 }
 .belt-slot:hover {
-    border-color:rgba(200,160,50,0.55);
-    box-shadow:inset 0 1px 3px rgba(0,0,0,0.6), 0 0 8px rgba(200,160,50,0.18);
+    border-color:rgba(200,160,50,0.5);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,0.6), 0 0 8px rgba(200,160,50,0.15);
 }
 .belt-slot.active-r {
     border-color:#c8a050;
-    box-shadow:inset 0 0 10px rgba(200,160,50,0.1), 0 0 14px rgba(200,160,50,0.35);
+    box-shadow:inset 0 0 10px rgba(200,160,50,0.12), 0 0 14px rgba(200,160,50,0.38);
 }
 .belt-slot.active-l {
     border-color:#5090c8;
-    box-shadow:inset 0 0 10px rgba(80,144,200,0.1), 0 0 14px rgba(80,144,200,0.35);
+    box-shadow:inset 0 0 10px rgba(80,144,200,0.12), 0 0 14px rgba(80,144,200,0.38);
 }
-.belt-slot.belt-kick {
-    border-color:rgba(180,60,40,0.4);
-    height:56px;
+.belt-slot.empty { opacity:0.45; }
+.belt-slot canvas { display:block; width:38px; height:38px; flex-shrink:0; }
+/* Numéro de touche en haut à gauche */
+.belt-key {
+    position:absolute; top:2px; left:4px;
+    font-size:7px; letter-spacing:0px; font-family:'Georgia',serif;
+    color:rgba(200,184,154,0.28); line-height:1;
 }
-.belt-slot.belt-kick:hover  { border-color:rgba(220,80,50,0.7); }
-.belt-slot.belt-kick.cooldown { opacity:0.3; cursor:default; }
-.belt-slot canvas { display:block; width:40px; height:40px; flex-shrink:0; }
-.belt-lbl {
-    font-size:6.5px; letter-spacing:0.8px; text-transform:uppercase;
-    color:rgba(200,184,154,0.32); margin-top:3px; text-align:center;
-    line-height:1.2; max-width:52px; overflow:hidden; white-space:nowrap;
-}
-.belt-slot.active-r .belt-lbl { color:rgba(200,160,50,0.7); }
-.belt-slot.active-l .belt-lbl { color:rgba(80,144,200,0.7); }
+.belt-slot.active-r .belt-key { color:rgba(212,168,75,0.75); }
+.belt-slot.active-l .belt-key { color:rgba(80,144,200,0.75); }
+/* Main (R/L) en haut à droite */
 .belt-hand {
     position:absolute; top:2px; right:3px;
-    font-size:6px; letter-spacing:0.5px; color:rgba(200,184,154,0.25);
+    font-size:6px; letter-spacing:0.5px; color:rgba(200,184,154,0.2);
 }
-.belt-divider {
-    width:1px; height:44px; align-self:center;
-    background:rgba(200,184,154,0.1); margin:0 2px;
+.belt-lbl {
+    font-size:6.5px; letter-spacing:0.5px; text-transform:uppercase;
+    color:rgba(200,184,154,0.3); margin-top:3px; text-align:center;
+    line-height:1.2; max-width:56px; overflow:hidden; white-space:nowrap;
 }
+.belt-slot.active-r .belt-lbl { color:rgba(200,160,50,0.75); }
+.belt-slot.active-l .belt-lbl { color:rgba(80,144,200,0.75); }
+
+/* ── Belt picker (clic droit) ── */
+#belt-picker {
+    position:fixed; z-index:99998;
+    background:rgba(8,5,2,0.97); border:1px solid rgba(200,184,154,0.22);
+    padding:4px 0; min-width:130px;
+    box-shadow:0 -4px 20px rgba(0,0,0,0.8);
+    pointer-events:all;
+}
+.bp-title {
+    font-size:7px; letter-spacing:3px; text-transform:uppercase;
+    color:rgba(200,184,154,0.25); padding:5px 10px 4px;
+    border-bottom:1px solid rgba(200,184,154,0.07);
+}
+.bp-item {
+    padding:6px 10px; font-size:10px; letter-spacing:0.5px;
+    color:rgba(200,184,154,0.65); cursor:pointer;
+    transition:background 0.1s, color 0.1s;
+    display:flex; align-items:center; gap:6px;
+}
+.bp-item:hover { background:rgba(200,184,154,0.08); color:#e8d8b4; }
+.bp-item.active { color:#d4a84b; }
+.bp-item.empty-item { color:rgba(200,184,154,0.3); font-style:italic; }
 
 /* ── Emote wheel ── */
 #emote-wheel {
@@ -277,11 +300,8 @@ canvas { display:block; width:100vw; height:100vh; }
     <div class="krow"><span class="kkey">Q / E</span><span class="kdesc">Lean caméra G/D</span></div>
     <div class="krow"><span class="kkey">Shift+Q/E</span><span class="kdesc">Esquive G/D</span></div>
     <div class="ksep"></div>
-    <div class="krow"><span class="kkey">1</span><span class="kdesc">Mode épée</span></div>
-    <div class="krow"><span class="kkey">2</span><span class="kdesc">Mode poings</span></div>
-    <div class="krow"><span class="kkey">3</span><span class="kdesc">Mode magie</span></div>
-    <div class="krow"><span class="kkey">4</span><span class="kdesc">Mode arc</span></div>
-    <div class="krow"><span class="kkey">0</span><span class="kdesc">Désarmer</span></div>
+    <div class="krow"><span class="kkey">1 – 0</span><span class="kdesc">Slots belt (équiper)</span></div>
+    <div class="krow"><span class="kkey">Clic droit belt</span><span class="kdesc">Assigner item</span></div>
     <div class="krow"><span class="kkey">Clic G</span><span class="kdesc">Attaquer</span></div>
     <div class="krow"><span class="kkey">K</span><span class="kdesc">Coup de pied</span></div>
     <div class="krow"><span class="kkey">Clic D</span><span class="kdesc">Bloquer / Viser</span></div>
@@ -1049,7 +1069,7 @@ const GAME_KEYS = new Set([
     'Space','ShiftLeft','ShiftRight','ControlLeft','ControlRight',
     'KeyC','KeyE','KeyF','KeyG','KeyI','KeyK','KeyQ','KeyR','KeyV',
     'CapsLock',
-    'Digit0','Digit1','Digit2','Digit3','Digit4','Tab',
+    'Digit0','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9','Tab',
 ]);
 window.addEventListener('keydown', e => {
     if (!keys.has(e.code)) justDown.add(e.code);
@@ -1571,29 +1591,57 @@ LiveSync.on('char-updated', () => hotReloadCharacter());
 // rot    : offset de rotation local (Euler XYZ) pour orienter l'arme dans la main
 // hand   : 'R' ou 'L' (slot par défaut)
 // combat : mode combat activé en équipant cette arme (0=aucun, 1=épée, 2=poings, 3=magie, 4=arc)
+// ── WEAPON_DEFS ─────────────────────────────────────────────────
+// hand: 'R' / 'L' = arme physique à attacher sur un bone
+// hand: null       = stance virtuelle (pas de mesh, juste un mode combat)
+// combat : 0=aucun 1=épée 2=poings 3=magie 4=arc 5=hache 6=couteau 7=pioche 8=torche -1=bouclier
 const WEAPON_DEFS = {
-    sword:   { label:'Épée',    path:'assets/environment/props/Sword_Bronze.gltf',   hand:'R', len:0.75, pos:[0,0.06,0.01], rot:[Math.PI/2,0,0], combat:1 },
-    axe:     { label:'Hache',   path:'assets/environment/props/Axe_Bronze.gltf',     hand:'R', len:0.55, pos:[0,0.05,0   ], rot:[Math.PI/2,0,0], combat:5 },
-    knife:   { label:'Couteau', path:'assets/environment/props/Table_Knife.gltf',    hand:'R', len:0.22, pos:[0,0.03,0   ], rot:[Math.PI/2,0,0], combat:6 },
-    torch:   { label:'Torche',  path:'assets/environment/props/CandleStick.gltf',    hand:'L', len:0.35, pos:[0,0.04,0   ], rot:[Math.PI/2,0,0], combat:8 },
-    pickaxe: { label:'Pioche',  path:'assets/environment/props/Pickaxe_Bronze.gltf', hand:'R', len:0.60, pos:[0,0.06,0.01], rot:[Math.PI/2,0,0], combat:7 },
-    shield:  { label:'Bouclier',path:'assets/environment/props/Shield_Wooden.gltf',  hand:'L', len:0.45, pos:[0,0,0.03   ], rot:[0,0,Math.PI/2], combat:-1 },
+    // ── Armes physiques ──────────────────────────────────────────────
+    sword:   { label:'Épée',     icon:'⚔',  category:'weapon',  hand:'R',
+               path:'assets/environment/props/Sword_Bronze.gltf',
+               len:0.75, pos:[0,0.06,0.01], rot:[Math.PI/2,0,0], combat:1, hasBack:true },
+    axe:     { label:'Hache',    icon:'🪓',  category:'tool',    hand:'R',
+               path:'assets/environment/props/Axe_Bronze.gltf',
+               len:0.55, pos:[0,0.05,0   ], rot:[Math.PI/2,0,0], combat:5 },
+    knife:   { label:'Couteau',  icon:'🗡',  category:'weapon',  hand:'R',
+               path:'assets/environment/props/Table_Knife.gltf',
+               len:0.22, pos:[0,0.03,0   ], rot:[Math.PI/2,0,0], combat:6 },
+    torch:   { label:'Torche',   icon:'🔦',  category:'utility', hand:'L',
+               path:'assets/environment/props/CandleStick.gltf',
+               len:0.35, pos:[0,0.04,0   ], rot:[Math.PI/2,0,0], combat:8 },
+    pickaxe: { label:'Pioche',   icon:'⛏',  category:'tool',    hand:'R',
+               path:'assets/environment/props/Pickaxe_Bronze.gltf',
+               len:0.60, pos:[0,0.06,0.01], rot:[Math.PI/2,0,0], combat:7 },
+    shield:  { label:'Bouclier', icon:'🛡',  category:'shield',  hand:'L',
+               path:'assets/environment/props/Shield_Wooden.gltf',
+               len:0.45, pos:[0,0,0.03   ], rot:[0,0,Math.PI/2], combat:-1 },
+    // ── Stances virtuelles (hand: null — pas de mesh physique) ──────
+    fists:   { label:'Poings',   icon:'👊',  category:'weapon',  hand:null, path:null, combat:2 },
+    magic:   { label:'Magie',    icon:'✨',  category:'spell',   hand:null, path:null, combat:3 },
+    bow:     { label:'Arc',      icon:'🏹',  category:'ranged',  hand:null, path:null, combat:4 },
 };
-// combat  1 = Épée      — combo sword_a/b/combo + sword_block
-// combat  2 = Poings    — punch_jab/cross/kick (sans arme)
-// combat  3 = Magie
-// combat  4 = Arc
-// combat  5 = Hache     — chop loop (bûcheronnage) + parade
-// combat  6 = Couteau   — guard sword_idle + stabs rapides (jab/knee/hook)
-// combat  7 = Pioche    — mining loop uniquement
-// combat  8 = Torche    — idle_torch + walk_carry, aucun combat
-// combat -1 = Bouclier  — main gauche, active le block uniquement
 
-// Slots : quelles armes peuvent aller dans chaque main
+// Slots : quelles armes peuvent aller dans chaque main (pour le panel grip)
 const SLOT_WEAPONS = {
     R: ['sword','axe','knife','pickaxe'],
     L: ['shield','torch','sword','axe'],
 };
+
+// ── BELT CONFIG — 10 slots (index 0 = touche "1", index 9 = touche "0") ──
+const BELT_STORAGE_KEY = 'tge_belt_config_v1';
+const BELT_DEFAULT = ['sword','fists','magic','bow','axe','pickaxe','torch','shield', null, null];
+let BELT_CONFIG = [...BELT_DEFAULT];
+
+function _loadBeltConfig() {
+    try {
+        const s = JSON.parse(localStorage.getItem(BELT_STORAGE_KEY) || 'null');
+        if (Array.isArray(s) && s.length === 10) BELT_CONFIG = s;
+    } catch {}
+}
+function _saveBeltConfig() {
+    localStorage.setItem(BELT_STORAGE_KEY, JSON.stringify(BELT_CONFIG));
+}
+_loadBeltConfig();
 
 let equippedR    = null;   // mesh main droite
 let equippedL    = null;   // mesh main gauche
@@ -2037,12 +2085,39 @@ function _drawBeltIcon(canvas, key) {
             c.moveTo(W/2,14); c.lineTo(W/2,W-11);
             c.moveTo(15,24); c.lineTo(W-15,24); c.stroke();
             break;
-        case 'kick':
-            c.strokeStyle = '#c84030'; c.fillStyle = '#c8403038';
+        // ── Stances virtuelles ───────────────────────────────────
+        case 'fists':
+            // Deux rectangles (poings) — compatibilité maximale
+            c.lineWidth = 2;
+            [[9,13,11,11],[20,13,11,11],[9,24,11,7],[20,24,11,7]].forEach(([x,y,w,h]) => {
+                c.beginPath(); c.rect(x,y,w,h); c.fill(); c.stroke();
+            });
+            break;
+        case 'magic':
+            // Étoile / rune
+            c.strokeStyle = '#aa88ff'; c.fillStyle = '#aa88ff44';
+            const sr2 = W/2, sc2 = W/2;
             c.beginPath();
-            c.moveTo(12,24); c.lineTo(28,14); c.lineTo(38,22);
-            c.lineTo(44,36); c.stroke();
-            c.beginPath(); c.arc(38,22,5,0,Math.PI*2); c.fill(); c.stroke();
+            for (let a = 0; a < 5; a++) {
+                const r1 = 14, r2 = 6, ang = (a*4*Math.PI/5) - Math.PI/2;
+                const ang2 = ang + 2*Math.PI/5;
+                c.lineTo(sr2+r1*Math.cos(ang), sc2+r1*Math.sin(ang));
+                c.lineTo(sr2+r2*Math.cos(ang2-Math.PI/5), sc2+r2*Math.sin(ang2-Math.PI/5));
+            }
+            c.closePath(); c.fill(); c.stroke();
+            break;
+        case 'bow':
+            // Arc + corde
+            c.lineWidth = 2;
+            c.beginPath();
+            c.arc(W*0.35, W/2, W*0.35, -Math.PI*0.55, Math.PI*0.55, false);
+            c.stroke();
+            c.lineWidth = 1;
+            c.beginPath(); c.moveTo(W*0.5,W*0.18); c.lineTo(W*0.5,W*0.82); c.stroke();
+            // Flèche
+            c.lineWidth = 1.5;
+            c.beginPath(); c.moveTo(W*0.5,W/2); c.lineTo(W-8,W/2); c.stroke();
+            c.beginPath(); c.moveTo(W-8,W/2-4); c.lineTo(W-4,W/2); c.lineTo(W-8,W/2+4); c.stroke();
             break;
     }
 }
@@ -2052,87 +2127,79 @@ function _buildBelt() {
     const belt = document.getElementById('belt');
     belt.innerHTML = '';
 
-    // Slots main droite
-    const rightSlots = [
-        { key:'none',     label:'Aucune', hand:'R' },
-        { key:'sword',    label:'Épée',   hand:'R' },
-        { key:'axe',      label:'Hache',  hand:'R' },
-        { key:'knife',    label:'Couteau',hand:'R' },
-        { key:'pickaxe',  label:'Pioche', hand:'R' },
-        { key:'torch',    label:'Torche', hand:'L' },
-    ];
-    rightSlots.forEach(s => belt.appendChild(_makeBeltSlot(s.key, s.label, s.hand)));
+    const KEYS = ['1','2','3','4','5','6','7','8','9','0'];
 
-    // Séparateur
-    const div = document.createElement('div');
-    div.className = 'belt-divider';
-    belt.appendChild(div);
+    for (let i = 0; i < 10; i++) {
+        const key = BELT_CONFIG[i] || null;
+        const def = key ? WEAPON_DEFS[key] : null;
 
-    // Shield (main gauche)
-    belt.appendChild(_makeBeltSlot('shield', 'Bouclier', 'L'));
+        const slot = document.createElement('div');
+        slot.className = 'belt-slot' + (!key ? ' empty' : '');
+        slot.dataset.beltIdx = i;
 
-    // Séparateur
-    const div2 = document.createElement('div');
-    div2.className = 'belt-divider';
-    belt.appendChild(div2);
+        // Numéro de touche
+        const keyBadge = document.createElement('span');
+        keyBadge.className = 'belt-key';
+        keyBadge.textContent = KEYS[i];
+        slot.appendChild(keyBadge);
 
-    // Kick
-    belt.appendChild(_makeBeltSlot('kick', 'Kick [K]', 'kick'));
+        // Indicateur main (R/L) en haut à droite
+        if (def && def.hand) {
+            const h = document.createElement('span');
+            h.className = 'belt-hand';
+            h.textContent = def.hand;
+            slot.appendChild(h);
+        }
+
+        // Icône canvas
+        const cv = document.createElement('canvas');
+        cv.width = cv.height = 38;
+        cv.style.cssText = 'display:block;width:38px;height:38px;flex-shrink:0;';
+        _drawBeltIcon(cv, key || 'none');
+        slot.appendChild(cv);
+
+        // Étiquette
+        const lbl = document.createElement('span');
+        lbl.className = 'belt-lbl';
+        lbl.textContent = def ? def.label : '—';
+        slot.appendChild(lbl);
+
+        // Clic gauche = activer
+        slot.addEventListener('click', () => activateBeltSlot(i));
+        // Clic droit = picker d'assignation
+        slot.addEventListener('contextmenu', e => { e.preventDefault(); _showBeltPicker(i, slot); });
+
+        belt.appendChild(slot);
+    }
 
     _refreshWeaponUI();
 }
 
-function _makeBeltSlot(key, label, hand) {
-    const slot = document.createElement('div');
-    slot.className = 'belt-slot' + (hand === 'kick' ? ' belt-kick' : '');
-    slot.dataset.beltKey  = key;
-    slot.dataset.beltHand = hand;
-
-    const cv = document.createElement('canvas');
-    cv.width = cv.height = 40;
-    cv.style.cssText = 'display:block;width:40px;height:40px;flex-shrink:0;';
-    _drawBeltIcon(cv, key);
-    slot.appendChild(cv);
-
-    const lbl = document.createElement('span');
-    lbl.className = 'belt-lbl';
-    lbl.textContent = label;
-    slot.appendChild(lbl);
-
-    if (hand === 'R' || hand === 'L') {
-        const h = document.createElement('span');
-        h.className = 'belt-hand';
-        h.textContent = hand;
-        slot.appendChild(h);
-    }
-
-    slot.addEventListener('click', () => {
-        if (hand === 'kick') { doKick(); return; }
-        equipWeapon(hand, key);
-    });
-    return slot;
-}
-
 function _refreshWeaponUI() {
+    // Panel grip
     document.querySelectorAll('.wp-btn').forEach(btn => {
         btn.classList.toggle('active',
             (btn.dataset.slot === 'R' && btn.dataset.key === activeKeyR) ||
             (btn.dataset.slot === 'L' && btn.dataset.key === activeKeyL)
         );
     });
-    // Belt
-    document.querySelectorAll('.belt-slot').forEach(slot => {
-        const k = slot.dataset.beltKey;
-        const h = slot.dataset.beltHand;
-        slot.classList.toggle('active-r', h === 'R' && k === activeKeyR);
-        slot.classList.toggle('active-l', h === 'L' && k === activeKeyL);
+    // Belt — 10 slots par index
+    document.querySelectorAll('.belt-slot[data-belt-idx]').forEach(slot => {
+        const idx = +slot.dataset.beltIdx;
+        const key = BELT_CONFIG[idx];
+        const def = key ? WEAPON_DEFS[key] : null;
+        slot.classList.remove('active-r', 'active-l');
+        if (!def) return;
+        if (def.hand === 'R' && activeKeyR === key)   slot.classList.add('active-r');
+        if (def.hand === 'L' && activeKeyL === key)   slot.classList.add('active-l');
+        if (def.hand === null && STATE.combatMode === def.combat && STATE.inCombatStance)
+            slot.classList.add('active-r'); // stance virtuelle = or
     });
-    // Kick cooldown visuel géré séparément
 }
 
 // Sync cooldown du kick sur le slot belt
-function _setBeltKickCooldown(on) {
-    document.querySelector('.belt-kick')?.classList.toggle('cooldown', on);
+function _setBeltKickCooldown(_on) {
+    // Le kick n'a plus de slot dédié dans la belt — fonction conservée pour compatibilité
 }
 
 function _buildWeaponPanel() {
@@ -2149,6 +2216,95 @@ function _buildWeaponPanel() {
     addBtn('wp-btns-L', 'L', 'none');
     for (const k of SLOT_WEAPONS.L) addBtn('wp-btns-L', 'L', k);
     _refreshWeaponUI();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BELT — Activation par touche et assignation de slot
+// ═══════════════════════════════════════════════════════════════
+
+// Déclenché par Digit1-Digit0 → active l'item assigné à ce slot
+function activateBeltSlot(idx) {
+    if (STATE.oneShotLock) return;
+    const key = BELT_CONFIG[idx];
+    if (!key) return;
+    const def = WEAPON_DEFS[key];
+    if (!def) return;
+
+    if (def.hand === null) {
+        // ── Stance virtuelle (Poings / Magie / Arc) ──────────────
+        if (STATE.combatMode === def.combat && STATE.inCombatStance) {
+            // Même stance → désarmer
+            _clearSlot('R'); _clearSlot('L');
+            exitCombatStance();
+            STATE.combatMode = 0;
+            document.getElementById('dbg-combat').textContent = 'Aucun';
+            document.getElementById('combat-mode').textContent = '—';
+            showNotif('Désarmé');
+        } else {
+            // Retirer armes physiques si besoin
+            if (activeKeyR !== 'none') { _clearSlot('R'); }
+            setCombatMode(def.combat);
+        }
+    } else {
+        // ── Arme physique ─────────────────────────────────────────
+        const curKey = def.hand === 'R' ? activeKeyR : activeKeyL;
+        if (curKey === key && STATE.inCombatStance) {
+            // Même arme active → rengainer
+            if (key === 'sword') { _sheathSword(); }
+            else {
+                _clearSlot(def.hand);
+                _applyWeaponCombatMode();
+                _refreshWeaponUI();
+            }
+        } else {
+            // Équiper : sword utilise sa fonction dédiée (animation dos + sheath)
+            if (key === 'sword') { drawSword(); }
+            else                  { equipWeapon(def.hand, key); }
+        }
+    }
+    _refreshWeaponUI();
+}
+
+// Clic droit sur slot → picker d'assignation d'item
+function _showBeltPicker(idx, slotEl) {
+    document.getElementById('belt-picker')?.remove();
+
+    const picker = document.createElement('div');
+    picker.id = 'belt-picker';
+    picker.innerHTML = `<div class="bp-title">Slot ${idx < 9 ? idx + 1 : 0}</div>`;
+
+    // Vide en premier
+    const empty = document.createElement('div');
+    empty.className = 'bp-item empty-item' + (!BELT_CONFIG[idx] ? ' active' : '');
+    empty.textContent = '— Vide';
+    empty.addEventListener('click', () => {
+        BELT_CONFIG[idx] = null; _saveBeltConfig(); _buildBelt(); picker.remove();
+    });
+    picker.appendChild(empty);
+
+    // Tous les items
+    for (const [k, def] of Object.entries(WEAPON_DEFS)) {
+        const row = document.createElement('div');
+        row.className = 'bp-item' + (BELT_CONFIG[idx] === k ? ' active' : '');
+        row.innerHTML = `<span style="font-size:12px;width:18px;text-align:center;flex-shrink:0">${def.icon}</span><span>${def.label}</span>`;
+        row.addEventListener('click', () => {
+            BELT_CONFIG[idx] = k; _saveBeltConfig(); _buildBelt(); picker.remove();
+        });
+        picker.appendChild(row);
+    }
+
+    document.getElementById('hud').appendChild(picker);
+
+    // Positionner au-dessus du slot
+    const sr = slotEl.getBoundingClientRect();
+    picker.style.left = Math.max(4, sr.left - 2) + 'px';
+    picker.style.bottom = (window.innerHeight - sr.top + 6) + 'px';
+
+    // Fermer au clic extérieur
+    const close = e => {
+        if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener('click', close, true); }
+    };
+    setTimeout(() => document.addEventListener('click', close, true), 0);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2525,15 +2681,17 @@ function _updateInner(delta) {
     if (gHeld && !emoteWheelOpen) openEmoteWheel();
     else if (!gHeld && emoteWheelOpen) closeEmoteWheel();
 
-    // Mode combat
-    if (consumeKey('Digit1')) drawSword();
-    if (consumeKey('Digit2')) setCombatMode(2);
-    if (consumeKey('Digit3')) setCombatMode(3);
-    if (consumeKey('Digit4')) setCombatMode(4);
-    if (consumeKey('Digit0')) {
-        if (STATE.combatMode === 1) _sheathSword();
-        else setCombatMode(0);
-    }
+    // Belt — touches 1→9 = slots 0→8, touche 0 = slot 9
+    if (consumeKey('Digit1')) activateBeltSlot(0);
+    if (consumeKey('Digit2')) activateBeltSlot(1);
+    if (consumeKey('Digit3')) activateBeltSlot(2);
+    if (consumeKey('Digit4')) activateBeltSlot(3);
+    if (consumeKey('Digit5')) activateBeltSlot(4);
+    if (consumeKey('Digit6')) activateBeltSlot(5);
+    if (consumeKey('Digit7')) activateBeltSlot(6);
+    if (consumeKey('Digit8')) activateBeltSlot(7);
+    if (consumeKey('Digit9')) activateBeltSlot(8);
+    if (consumeKey('Digit0')) activateBeltSlot(9);
 
     // Kick
     if (consumeKey('KeyK')) doKick();
