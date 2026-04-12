@@ -341,6 +341,7 @@ import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { LiveSync } from './src/live-sync.js';
 
 // ── Chemins ───────────────────────────────────────────────────
 const P_OUTFIT = 'assets/characters/outfits/';
@@ -1494,6 +1495,8 @@ function exportConfigToGame(cfg) {
     const gameConfig = { ...cfg };
     delete gameConfig.name;
     localStorage.setItem('darkrpg_character_v1', JSON.stringify(gameConfig));
+    // Notifier tous les onglets Studio ouverts
+    LiveSync.broadcast('char-updated', { name: cfg.name || 'Joueur' });
     const toast = document.getElementById('export-toast');
     toast.style.display = 'block';
     setTimeout(() => { toast.style.display = 'none'; }, 2000);

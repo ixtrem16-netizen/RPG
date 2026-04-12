@@ -39,6 +39,18 @@ canvas { display:block; width:100vw; height:100vh; }
 #crosshair::before { width:1px; height:14px; left:0; top:-7px; }
 #crosshair::after  { width:14px; height:1px; left:-7px; top:0; }
 
+/* ── Live sync toast ── */
+#live-toast {
+    position:absolute; top:16px; left:50%; transform:translateX(-50%);
+    background:rgba(8,6,4,0.88); border:1px solid rgba(200,184,154,0.25);
+    color:#c8b89a; font-size:10px; letter-spacing:2.5px; text-transform:uppercase;
+    padding:7px 18px; white-space:nowrap;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.25s;
+}
+#live-toast.visible { opacity:1; }
+#live-toast.syncing { border-color:rgba(212,168,75,0.5); color:#d4a84b; }
+
 /* ── Key legend ── */
 #key-legend {
     position:absolute; top:12px; right:12px;
@@ -292,6 +304,7 @@ canvas { display:block; width:100vw; height:100vh; }
   </div>
 
   <div id="crosshair"></div>
+  <div id="live-toast"></div>
   <div id="climb-prompt">F / Espace — Grimper &nbsp;|&nbsp; (saut vers le mur = auto-grab)</div>
   <div id="notif"></div>
   <button id="kick-btn" onclick="doKick()"></button>
@@ -350,6 +363,7 @@ import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { showCharCreation } from './src/char-creation.js';
 import { InventorySystem }  from './src/inventory.js';
+import { LiveSync }         from './src/live-sync.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  CONFIG — Chemins
@@ -1488,6 +1502,65 @@ async function loadCharacter(cfg) {
     playAnim('idle', 0.1);
     return root;
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  LIVE SYNC — hot-reload personnage depuis char-builder
+// ═══════════════════════════════════════════════════════════════
+let _liveToastTimer = null;
+function _showLiveToast(msg, cls = '') {
+    const el = document.getElementById('live-toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'visible ' + cls;
+    clearTimeout(_liveToastTimer);
+    if (!cls.includes('syncing')) {
+        _liveToastTimer = setTimeout(() => { el.className = ''; }, 2500);
+    }
+}
+
+async function hotReloadCharacter() {
+    if (!charRoot) return;
+    _showLiveToast('Actualisation personnage…', 'syncing');
+
+    // 1. Déséquiper toutes les armes
+    _clearSlot('R');
+    _clearSlot('L');
+    _removeFromBack();
+    equippedR = null; equippedL = null; backSwordMesh = null;
+    activeKeyR = 'none'; activeKeyL = 'none';
+    STATE.combatMode = 0; STATE.inCombatStance = false; STATE.blocking = false;
+
+    // 2. Supprimer l'ancien personnage de la scène
+    if (mixer) { mixer.stopAllActions(); mixer = null; }
+    scene.remove(charRoot);
+    charRoot.traverse(n => {
+        if (n.isMesh || n.isSkinnedMesh) {
+            n.geometry?.dispose();
+            const mats = Array.isArray(n.material) ? n.material : [n.material];
+            for (const m of mats) if (m) m.dispose();
+        }
+    });
+    charRoot = null;
+    _rootMotionBone = null;
+    _prevAttackAction = null;
+    Object.keys(actions).forEach(k => delete actions[k]);
+    boneOverrides = {}; boneRestPos = {};
+
+    // 3. Recharger depuis localStorage (outfit+hair mis à jour)
+    // Les animations UAL sont dans le cache _gltfCache → rechargement quasi-instantané
+    const cfg = resolveCharConfig();
+    await loadCharacter(cfg);
+
+    // 4. Restaurer la pose au repos + remettre l'épée holstérée
+    playAnim('idle', 0.1);
+    await _attachToBack('sword');
+    _refreshWeaponUI();
+
+    _showLiveToast('Personnage mis à jour ✓');
+}
+
+// Écouter les mises à jour depuis char-builder (même session serveur)
+LiveSync.on('char-updated', () => hotReloadCharacter());
 
 // ═══════════════════════════════════════════════════════════════
 //  ARMES — attachement aux bones de main
