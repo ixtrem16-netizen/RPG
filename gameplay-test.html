@@ -68,6 +68,60 @@ canvas { display:block; width:100vw; height:100vh; }
     color:rgba(200,184,154,0.5); font-size:9px; letter-spacing:2px;
     padding:5px 10px; cursor:pointer; display:none; }
 
+/* ── Panneau sélecteur de personnage ── */
+#char-panel {
+    position:absolute; top:0; left:0; bottom:0; width:220px;
+    background:rgba(6,4,2,0.97); border-right:1px solid rgba(200,160,80,0.25);
+    display:flex; flex-direction:column; pointer-events:all;
+    transform:translateX(-100%); transition:transform 0.22s ease;
+    z-index:200;
+}
+#char-panel.open { transform:translateX(0); }
+#char-panel-hdr {
+    padding:13px 14px 10px;
+    border-bottom:1px solid rgba(200,160,80,0.18);
+    display:flex; justify-content:space-between; align-items:center;
+    flex-shrink:0;
+}
+#char-panel-hdr span {
+    font-size:9px; letter-spacing:4px; text-transform:uppercase;
+    color:rgba(200,184,154,0.4);
+}
+#char-panel-close {
+    background:none; border:none; color:rgba(200,184,154,0.4);
+    font-size:16px; cursor:pointer; padding:0; line-height:1;
+}
+#char-panel-close:hover { color:#c8b89a; }
+#char-panel-list { flex:1; overflow-y:auto; }
+.cp-item {
+    padding:9px 14px; cursor:pointer;
+    border-left:2px solid transparent;
+    border-bottom:1px solid rgba(200,184,154,0.04);
+    transition:background 0.1s, color 0.1s;
+    color:rgba(200,184,154,0.55);
+}
+.cp-item:hover { background:rgba(200,160,80,0.08); color:#d8c8a8; }
+.cp-item.active { background:rgba(200,160,80,0.12); color:#f0e0b0;
+    border-left-color:#d4a84b; }
+.cp-item.player { color:rgba(212,168,75,0.75); }
+.cp-item.player:hover { color:#f0c040; }
+.cp-name { font-size:11px; letter-spacing:0.04em; }
+.cp-sub  { font-size:8px; color:rgba(200,184,154,0.28); margin-top:2px; letter-spacing:0.5px; }
+#char-panel-hint {
+    padding:8px 14px; font-size:8px; letter-spacing:1.5px;
+    color:rgba(200,184,154,0.2); border-top:1px solid rgba(200,184,154,0.07);
+    flex-shrink:0;
+}
+#char-panel-toggle {
+    position:absolute; top:50%; left:12px; transform:translateY(-50%);
+    background:rgba(6,4,2,0.88); border:1px solid rgba(200,160,80,0.3);
+    color:rgba(200,160,80,0.6); font-size:8px; letter-spacing:2px;
+    padding:6px 8px; cursor:pointer; pointer-events:all;
+    transition:color 0.12s, border-color 0.12s; writing-mode:vertical-rl;
+    text-transform:uppercase; text-orientation:mixed;
+}
+#char-panel-toggle:hover { color:#d4a84b; border-color:rgba(200,160,80,0.6); }
+
 /* ── Mode badge ── */
 #mode-badge {
     position:absolute; bottom:28px; right:16px;
@@ -307,6 +361,7 @@ canvas { display:block; width:100vw; height:100vh; }
     <div class="krow"><span class="kkey">Clic D</span><span class="kdesc">Bloquer / Viser</span></div>
     <div class="ksep"></div>
     <div class="krow"><span class="kkey">G (tenir)</span><span class="kdesc">Roue émotes</span></div>
+    <div class="krow"><span class="kkey">P</span><span class="kdesc">Changer de perso</span></div>
     <div class="krow"><span class="kkey">Tab</span><span class="kdesc">Cursor lock</span></div>
     <div class="krow"><span class="kkey">V</span><span class="kdesc">1re / 3e personne</span></div>
     <div class="krow"><span class="kkey">Molette</span><span class="kdesc">Zoom caméra</span></div>
@@ -327,6 +382,17 @@ canvas { display:block; width:100vw; height:100vh; }
   <div id="live-toast"></div>
   <div id="climb-prompt">F / Espace — Grimper &nbsp;|&nbsp; (saut vers le mur = auto-grab)</div>
   <div id="notif"></div>
+
+  <!-- Panneau sélecteur de personnage -->
+  <div id="char-panel">
+    <div id="char-panel-hdr">
+      <span>Personnage</span>
+      <button id="char-panel-close" title="Fermer">&#x2715;</button>
+    </div>
+    <div id="char-panel-list"></div>
+    <div id="char-panel-hint">P — Ouvrir / Fermer</div>
+  </div>
+  <button id="char-panel-toggle" title="Changer de personnage (P)">Perso</button>
   <button id="kick-btn" onclick="doKick()"></button>
 
   <!-- Belt — peuplée dynamiquement par _buildBelt() -->
@@ -1075,6 +1141,8 @@ window.addEventListener('keydown', e => {
     if (!keys.has(e.code)) justDown.add(e.code);
     keys.add(e.code);
     if (GAME_KEYS.has(e.code)) e.preventDefault();
+    // Personnage — toggle sur P
+    if (e.code === 'KeyP') { toggleCharPanel(); return; }
     // Inventaire — toggle sur I
     if (e.code === 'KeyI' && inventory) {
         if (inventory.isOpen) {
@@ -1523,6 +1591,80 @@ async function loadCharacter(cfg) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  SÉLECTEUR DE PERSONNAGE
+// ═══════════════════════════════════════════════════════════════
+function resolveNamedCfg(raw) {
+    if (!raw) return null;
+    const body   = raw.body   || 'M';
+    const outfit = raw.outfit || (body === 'F' ? 'Female_Ranger' : 'Male_Ranger');
+    return {
+        meshUrl : P_OUTFIT + outfit + '.gltf',
+        baseUrl : P_BODY[body] || P_BODY['M'],
+        hairUrl : raw.hair  ? P_HAIR + raw.hair  + '.gltf' : null,
+        beardUrl: raw.beard ? P_HAIR + raw.beard + '.gltf' : null,
+        hairColor      : raw.hairColor       || null,
+        eyeColor       : raw.eyeColor        || null,
+        skinColor      : raw.skinColor       || null,
+        boneScaleBody  : raw.boneScaleBody   || {},
+        boneScaleOutfit: raw.boneScaleOutfit || {},
+        name: raw.name || outfit,
+    };
+}
+
+function getAllSavedConfigs() {
+    const result = [];
+    result.push({ label:'★ Perso sauvegardé', sub:'Personnage joueur', cfg:resolveCharConfig(), player:true });
+    try {
+        const stored = JSON.parse(localStorage.getItem('darkrpg_configs_v1') || '[]');
+        for (const raw of stored) {
+            const cfg = resolveNamedCfg(raw);
+            if (cfg) result.push({ label: raw.name || cfg.name, sub: cfg.meshUrl.split('/').pop(), cfg, player:false });
+        }
+    } catch {}
+    return result;
+}
+
+let _charPanelOpen = false;
+let _currentCharLabel = null;
+
+function buildCharPanel() {
+    const list = document.getElementById('char-panel-list');
+    list.innerHTML = '';
+    const configs = getAllSavedConfigs();
+    if (!configs.length) {
+        list.innerHTML = '<div style="padding:16px 14px;font-size:10px;color:rgba(200,184,154,0.25);font-style:italic;line-height:1.8">Aucun personnage sauvegardé.<br>Crée un perso dans le Char Builder.</div>';
+        return;
+    }
+    for (const entry of configs) {
+        const el = document.createElement('div');
+        el.className = 'cp-item' + (entry.player ? ' player' : '');
+        if (_currentCharLabel === entry.label) el.classList.add('active');
+        el.innerHTML = `<div class="cp-name">${entry.label}</div><div class="cp-sub">${entry.sub}</div>`;
+        el.addEventListener('click', () => {
+            _currentCharLabel = entry.label;
+            document.querySelectorAll('.cp-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            toggleCharPanel(false);
+            hotReloadCharacter(entry.cfg);
+        });
+        list.appendChild(el);
+    }
+}
+
+function toggleCharPanel(force) {
+    _charPanelOpen = force !== undefined ? force : !_charPanelOpen;
+    document.getElementById('char-panel').classList.toggle('open', _charPanelOpen);
+    document.getElementById('char-panel-toggle').style.display = _charPanelOpen ? 'none' : '';
+    if (_charPanelOpen) {
+        buildCharPanel();
+        document.exitPointerLock?.();
+    }
+}
+
+document.getElementById('char-panel-close').addEventListener('click', () => toggleCharPanel(false));
+document.getElementById('char-panel-toggle').addEventListener('click', () => toggleCharPanel(true));
+
+// ═══════════════════════════════════════════════════════════════
 //  LIVE SYNC — hot-reload personnage depuis char-builder
 // ═══════════════════════════════════════════════════════════════
 let _liveToastTimer = null;
@@ -1537,14 +1679,16 @@ function _showLiveToast(msg, cls = '') {
     }
 }
 
-async function hotReloadCharacter() {
+async function hotReloadCharacter(cfg = null) {
     if (!charRoot) return;
     _showLiveToast('Actualisation personnage…', 'syncing');
 
-    // 1. Déséquiper toutes les armes
+    // 1. Déséquiper toutes les armes + holsters
     _clearSlot('R');
     _clearSlot('L');
     _removeFromBack();
+    // Nettoyer tous les holsters ceinture
+    for (const key of Object.keys(_holsterMeshes)) _removeHolsterMesh(key);
     equippedR = null; equippedL = null; backSwordMesh = null;
     activeKeyR = 'none'; activeKeyL = 'none';
     STATE.combatMode = 0; STATE.inCombatStance = false; STATE.blocking = false;
@@ -1565,9 +1709,11 @@ async function hotReloadCharacter() {
     Object.keys(actions).forEach(k => delete actions[k]);
     boneOverrides = {}; boneRestPos = {};
 
-    // 3. Recharger depuis localStorage (outfit+hair mis à jour)
+    // 3. Recharger (config fournie ou depuis localStorage)
     // Les animations UAL sont dans le cache _gltfCache → rechargement quasi-instantané
-    const cfg = resolveCharConfig();
+    if (!cfg) cfg = resolveCharConfig();
+    // Synchroniser la clé de profil avec le Grip Editor
+    _currentCharKey = cfg.name || '__global__';
     await loadCharacter(cfg);
 
     // 4. Restaurer la pose au repos + remettre l'épée holstérée
@@ -1670,13 +1816,90 @@ function _clearSlot(slot) {
 }
 
 // ── Holster dos ─────────────────────────────────────────────────────────
-// Position de l'épée sur le dos (spine_02 local space).
-// Ajuste ces valeurs si la position ne semble pas bonne.
-const BACK_HOLSTER = {
-    sword: { pos:[ 0.02, 0.10, -0.07], rot:[1.55, 0.20, 0.78] },
-    //        pos: légèrement à droite, plus haut, plaqué contre le dos
-    //        rot: X≈89° (à plat sur le dos), Y≈11°, Z≈45° (diagonale manche-haut-droite)
+// ── Holster partagé — lit depuis darkrpg_holster_v1 (sauvé par Grip Editor) ─
+const HOLSTER_STORAGE_KEY = 'darkrpg_holster_v1';
+// Clé de profil actuel — synchronisée avec le Grip Editor via cfg.name
+let _currentCharKey = '__global__';
+// Fallback hardcodé si rien n'est encore sauvegardé dans le Grip Editor
+const HOLSTER_FALLBACK = {
+    sword_back:   { px: 0.02, py: 0.10, pz:-0.07, rx: 1.55, ry: 0.20, rz: 0.78, sc:1.0, ty:0, pivX:0 },
+    shield_back:  { px: 0,    py: 0,    pz:-0.05, rx: 0,    ry: 0,    rz: 1.57, sc:1.0, ty:0, pivX:0 },
+    axe_belt:     { px: 0,    py: 0,    pz: 0,    rx: 0,    ry: 0,    rz: 0,    sc:1.0, ty:0, pivX:0 },
+    pickaxe_belt: { px: 0,    py: 0,    pz: 0,    rx: 0,    ry: 0,    rz: 0,    sc:1.0, ty:0, pivX:0 },
+    torch_belt:   { px: 0,    py: 0,    pz: 0,    rx: 0,    ry: 0,    rz: 0,    sc:1.0, ty:0, pivX:0 },
+    pouch_belt:   { px: 0,    py: 0,    pz: 0,    rx: 0,    ry: 0,    rz: 0,    sc:1.0, ty:0, pivX:0 },
+    bag_belt:     { px: 0,    py: 0,    pz: 0,    rx: 0,    ry: 0,    rz: 0,    sc:1.0, ty:0, pivX:0 },
 };
+function _loadAllHolsters() {
+    try { return JSON.parse(localStorage.getItem(HOLSTER_STORAGE_KEY) || '{}'); } catch { return {}; }
+}
+function _holsterFor(holsterKey) {
+    const all   = _loadAllHolsters();
+    const saved = (all[_currentCharKey]?.[holsterKey]) || (all['__global__']?.[holsterKey]);
+    return saved ? { ty:0, pivX:0, ...saved } : (HOLSTER_FALLBACK[holsterKey] || null);
+}
+
+// Clé holster par arme/slot
+const WEAPON_HOLSTER_KEY = {
+    sword:   'sword_back',
+    shield:  'shield_back',
+    axe:     'axe_belt',
+    pickaxe: 'pickaxe_belt',
+    torch:   'torch_belt',
+};
+const HOLSTER_BONE = {
+    sword_back:   'spine_02',
+    shield_back:  'spine_02',
+    axe_belt:     'thigh_r',
+    pickaxe_belt: 'thigh_r',
+    torch_belt:   'thigh_l',
+    pouch_belt:   'thigh_l',
+    bag_belt:     'thigh_r',
+};
+
+// ── Meshes holstérés actifs (os → mesh) ─────────────────────────
+const _holsterMeshes = {}; // { holsterKey: mesh }
+
+function _attachHolsterMesh(holsterKey, gltf) {
+    _removeHolsterMesh(holsterKey);
+    const boneName = HOLSTER_BONE[holsterKey];
+    const bone     = boneName ? _findBone(boneName) : null;
+    if (!bone || !charRoot) return;
+
+    const g = _holsterFor(holsterKey);
+    if (!g) return;
+
+    const mesh = gltf.scene.clone(true);
+    mesh.traverse(n => { if (n.isMesh || n.isSkinnedMesh) n.castShadow = true; });
+
+    const wb       = new THREE.Box3().setFromObject(mesh);
+    const dims     = wb.getSize(new THREE.Vector3());
+    const baseScale = Math.max(dims.x, dims.y, dims.z) > 0.001
+        ? 1 / Math.max(dims.x, dims.y, dims.z) : 1;
+
+    const pivot = new THREE.Object3D();
+    pivot.position.set(g.px, g.py, g.pz);
+    pivot.rotation.set(0, g.ty || 0, 0);
+    mesh.position.set(-(g.pivX || 0), 0, 0);
+    mesh.rotation.set(g.rx, g.ry, g.rz);
+    mesh.scale.setScalar(baseScale * (g.sc || 1));
+
+    pivot.add(mesh);
+    bone.add(pivot);
+    mesh.userData._pivot = pivot;
+    _holsterMeshes[holsterKey] = { mesh, pivot, bone };
+}
+
+function _removeHolsterMesh(holsterKey) {
+    const entry = _holsterMeshes[holsterKey];
+    if (!entry) return;
+    if (entry.bone && entry.pivot) entry.bone.remove(entry.pivot);
+    delete _holsterMeshes[holsterKey];
+}
+
+function _removeAllHolsterMeshes() {
+    for (const key of Object.keys(_holsterMeshes)) _removeHolsterMesh(key);
+}
 
 // Attache un mesh déjà chargé (gltf) à un bone sans ouvrir le grip editor
 function _attachWeaponMesh(slot, key, gltf) {
@@ -1711,35 +1934,24 @@ function _attachWeaponMesh(slot, key, gltf) {
 
 // Retire le mesh du dos
 function _removeFromBack() {
-    if (!backSwordMesh) return;
-    const spineBone = _findBone('spine_02');
-    if (spineBone) spineBone.remove(backSwordMesh.userData._pivot || backSwordMesh);
+    _removeHolsterMesh('sword_back');
     backSwordMesh = null;
 }
 
-// Place une arme sur le dos (holster visuel)
+// Place une arme/outil en holster visuel (dos ou ceinture)
 async function _attachToBack(key) {
-    const def       = WEAPON_DEFS[key];
-    const spineBone = _findBone('spine_02');
-    const holster   = BACK_HOLSTER[key];
-    if (!def || !spineBone || !holster || !charRoot) return;
+    const def        = WEAPON_DEFS[key];
+    const holsterKey = WEAPON_HOLSTER_KEY[key];
+    if (!def || !holsterKey || !charRoot) return;
 
     let gltf;
     try { gltf = await loadGLTF(def.path); }
     catch(e) { return; }
 
-    const mesh = gltf.scene.clone(true);
-    mesh.traverse(n => { n.castShadow = true; });
+    _attachHolsterMesh(holsterKey, gltf);
 
-    const box     = new THREE.Box3().setFromObject(mesh);
-    const meshLen = box.getSize(new THREE.Vector3()).length();
-    const sc      = (def.len / charRoot.scale.x) / meshLen;
-    mesh.scale.setScalar(sc);
-    mesh.position.set(...holster.pos);
-    mesh.rotation.set(...holster.rot);
-
-    spineBone.add(mesh);
-    backSwordMesh = mesh;
+    // Référence rétrocompatible pour le code existant (_removeFromBack)
+    if (key === 'sword') backSwordMesh = _holsterMeshes[holsterKey]?.mesh || null;
 }
 
 // Dégaine l'épée depuis le dos (Digit1)
@@ -1893,23 +2105,26 @@ function _applyWeaponCombatMode() {
 // ── Grip editor (sliders temps réel) ─────────────────────────────
 // ── Persistance des grips dans localStorage ───────────────────
 const GRIP_STORAGE_KEY = 'darkrpg_weapon_grips_v2';
+// Note: HOLSTER_STORAGE_KEY déjà déclaré dans la section holster ci-dessus
 
-function _loadGrips() {
+function _loadAllGrips() {
     try { return JSON.parse(localStorage.getItem(GRIP_STORAGE_KEY) || '{}'); } catch { return {}; }
 }
-function _saveGrip(key, px, py, pz, rx, ry, rz, sc, ty=0, pivX=0, pivZ=0, rollX=0, rollZ=0) {
-    const grips = _loadGrips();
-    grips[key] = { px, py, pz, rx, ry, rz, sc, ty, pivX, pivZ, rollX, rollZ };
-    localStorage.setItem(GRIP_STORAGE_KEY, JSON.stringify(grips));
-}
 function _gripFor(key) {
-    // Retourne les offsets sauvegardés, ou les défauts de WEAPON_DEFS
-    const saved = _loadGrips()[key];
-    if (saved) return { ty:0, pivX:0, pivZ:0, rollX:0, rollZ:0, ...saved };
+    const all   = _loadAllGrips();
+    const saved = (all[_currentCharKey]?.[key]) || (all['__global__']?.[key]);
+    if (saved) return { ty:0, pivX:0, rollX:0, rollZ:0, pivZ:0, ...saved };
     const def = WEAPON_DEFS[key];
     return { px: def.pos[0], py: def.pos[1], pz: def.pos[2],
              rx: def.rot[0], ry: def.rot[1], rz: def.rot[2], sc: 1.0,
-             ty: 0, pivX: 0, pivZ: 0, rollX: 0, rollZ: 0 };
+             ty: 0, pivX: 0, rollX: 0, rollZ: 0, pivZ: 0 };
+}
+// Rétrocompat save (depuis l'ancien grip panel interne)
+function _saveGrip(key, px, py, pz, rx, ry, rz, sc, ty=0, pivX=0, pivZ=0, rollX=0, rollZ=0) {
+    const all = _loadAllGrips();
+    if (!all[_currentCharKey]) all[_currentCharKey] = {};
+    all[_currentCharKey][key] = { px, py, pz, rx, ry, rz, sc, ty, pivX };
+    localStorage.setItem(GRIP_STORAGE_KEY, JSON.stringify(all));
 }
 
 function _showGripEditor(slot, key, mesh) {
@@ -3845,6 +4060,7 @@ buildEmoteWheel();
 
         setLoadProgress(5);
         const cfg = resolveCharConfig();
+        _currentCharKey = cfg.name || '__global__';
         setLoadSub('Config : ' + cfg.name);
         await loadCharacter(cfg);
         setLoadProgress(100);
@@ -3871,7 +4087,8 @@ buildEmoteWheel();
 
         await new Promise(r => setTimeout(r, 600));
         document.getElementById('loading').style.display = 'none';
-        showNotif('Bienvenue, ' + cfg.name + ' — I pour l\'inventaire · G pour les émotes');
+        _currentCharLabel = '★ Perso sauvegardé';
+        showNotif('Bienvenue, ' + cfg.name + ' — P perso · I inventaire · G émotes');
 
         // Épée dans le dos dès le départ (holster visuel)
         _attachToBack('sword');

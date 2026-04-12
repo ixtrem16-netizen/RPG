@@ -38,22 +38,22 @@ html, body { height:100vh; overflow:hidden; background:#070503; font-family:'Geo
     display:flex; align-items:center; gap:6px;
     padding:0 14px; flex-shrink:0;
     font-size:9px; letter-spacing:1.5px; text-transform:uppercase;
-    color:rgba(200,184,154,0.48); cursor:pointer;
-    border-right:1px solid rgba(200,184,154,0.06);
+    color:rgba(200,184,154,0.72); cursor:pointer;
+    border-right:1px solid rgba(200,184,154,0.08);
     transition:color 0.12s, background 0.12s;
     position:relative; white-space:nowrap;
 }
-.s-tab:hover { color:rgba(200,184,154,0.82); background:rgba(200,184,154,0.05); }
-.s-tab.active { color:#d8c8a8; background:rgba(200,184,154,0.09); }
+.s-tab:hover { color:#e8d8b8; background:rgba(200,184,154,0.07); }
+.s-tab.active { color:#f0e0c0; background:rgba(200,184,154,0.12); }
 .s-tab.active::after {
     content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
-    background:rgba(212,168,75,0.55);
+    background:rgba(212,168,75,0.65);
 }
-.s-tab.primary { color:rgba(212,168,75,0.38); }
-.s-tab.primary:hover { color:rgba(212,168,75,0.7); }
-.s-tab.primary.active { color:#d4a84b; }
-.s-tab.primary.active::after { background:rgba(212,168,75,0.75); }
-.s-icon { font-size:10px; opacity:0.75; }
+.s-tab.primary { color:rgba(212,168,75,0.65); }
+.s-tab.primary:hover { color:rgba(212,168,75,0.9); }
+.s-tab.primary.active { color:#f0c040; }
+.s-tab.primary.active::after { background:rgba(212,168,75,0.85); }
+.s-icon { font-size:10px; opacity:0.85; }
 
 /* ══ Zone de contenu ════════════════════════════════════════════ */
 #content { position:relative; width:100%; height:calc(100vh - 36px); }
@@ -135,12 +135,11 @@ html, body { height:100vh; overflow:hidden; background:#070503; font-family:'Geo
     <div id="shell-tabs">
         <div class="s-tab primary" data-tool="gameplay-test"><span class="s-icon">⚔</span>Gameplay</div>
         <div class="s-tab" data-tool="char-builder"><span class="s-icon">◈</span>Char Builder</div>
-        <div class="s-tab" data-tool="char-combined"><span class="s-icon">◉</span>Char Combiné</div>
-        <div class="s-tab" data-tool="character-preview"><span class="s-icon">◎</span>Char Preview</div>
+<div class="s-tab" data-tool="character-preview"><span class="s-icon">◎</span>Char Preview</div>
         <div class="s-tab" data-tool="anim-inspect"><span class="s-icon">▶</span>Animations</div>
         <div class="s-tab" data-tool="asset-browser"><span class="s-icon">❖</span>Assets</div>
-        <div class="s-tab" data-tool="village-browser"><span class="s-icon">⌂</span>Village</div>
-        <div class="s-tab" data-tool="soldier-test"><span class="s-icon">◆</span>Soldier</div>
+        <div class="s-tab primary" data-tool="world-builder"><span class="s-icon">⬡</span>World Builder</div>
+        <div class="s-tab primary" data-tool="grip-editor"><span class="s-icon">✦</span>Grip Editor</div>
     </div>
 </div>
 
@@ -171,14 +170,7 @@ html, body { height:100vh; overflow:hidden; background:#070503; font-family:'Geo
                 <div class="hub-desc">Assemblage modulaire — body, outfits, hair, beard. Shaders par zone de couleur.</div>
                 <div class="hub-cta">Ouvrir →</div>
             </div>
-            <div class="hub-card" data-open="char-combined">
-                <div class="hub-icon">◉</div>
-                <div class="hub-cat">Character</div>
-                <div class="hub-name">Char Combiné</div>
-                <div class="hub-desc">Builder + aperçu plein corps côte à côte.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-            <div class="hub-card" data-open="character-preview">
+<div class="hub-card" data-open="character-preview">
                 <div class="hub-icon">◎</div>
                 <div class="hub-cat">Character</div>
                 <div class="hub-name">Char Preview</div>
@@ -201,19 +193,19 @@ html, body { height:100vh; overflow:hidden; background:#070503; font-family:'Geo
                 <div class="hub-desc">Tous les assets Quaternius — filtre par catégorie, thumbnails 3D.</div>
                 <div class="hub-cta">Ouvrir →</div>
             </div>
-            <div class="hub-card" data-open="village-browser">
-                <div class="hub-icon">⌂</div>
-                <div class="hub-cat">Environnement</div>
-                <div class="hub-name">Village Browser</div>
-                <div class="hub-desc">Browse et preview de toutes les pièces Medieval Village MegaKit.</div>
+            <div class="hub-section">Éditeur</div>
+            <div class="hub-card primary" data-open="world-builder" style="grid-column:span 2">
+                <div class="hub-icon">⬡</div>
+                <div class="hub-cat">Éditeur de monde</div>
+                <div class="hub-name">World Builder</div>
+                <div class="hub-desc">FreeCam · Placement d'assets · Snap grille · Portes animées · Undo/Redo · Export JS — tous les assets Quaternius disponibles.</div>
                 <div class="hub-cta">Ouvrir →</div>
             </div>
-<div class="hub-section">Test</div>
-            <div class="hub-card" data-open="soldier-test">
-                <div class="hub-icon">◆</div>
-                <div class="hub-cat">Test</div>
-                <div class="hub-name">Soldier Test</div>
-                <div class="hub-desc">Scène de test rapide — personnage et animations.</div>
+            <div class="hub-card primary" data-open="grip-editor">
+                <div class="hub-icon">✦</div>
+                <div class="hub-cat">Éditeur d'armes</div>
+                <div class="hub-name">Grip Editor</div>
+                <div class="hub-desc">Ajustement précis du grip de chaque arme/outil — position, rotation, échelle. Sauvegarde partagée avec Gameplay Test.</div>
                 <div class="hub-cta">Ouvrir →</div>
             </div>
         </div>
@@ -222,12 +214,11 @@ html, body { height:100vh; overflow:hidden; background:#070503; font-family:'Geo
     <!-- Iframes persistantes (lazy-loaded au premier accès) -->
     <iframe class="t-frame" id="frame-gameplay-test"     title="Gameplay Test"></iframe>
     <iframe class="t-frame" id="frame-char-builder"      title="Char Builder"></iframe>
-    <iframe class="t-frame" id="frame-char-combined"     title="Char Combiné"></iframe>
-    <iframe class="t-frame" id="frame-character-preview" title="Char Preview"></iframe>
+<iframe class="t-frame" id="frame-character-preview" title="Char Preview"></iframe>
     <iframe class="t-frame" id="frame-anim-inspect"      title="Anim Inspector"></iframe>
     <iframe class="t-frame" id="frame-asset-browser"     title="Asset Browser"></iframe>
-    <iframe class="t-frame" id="frame-village-browser"   title="Village Browser"></iframe>
-    <iframe class="t-frame" id="frame-soldier-test"      title="Soldier Test"></iframe>
+    <iframe class="t-frame" id="frame-world-builder"     title="World Builder"></iframe>
+    <iframe class="t-frame" id="frame-grip-editor"       title="Grip Editor"></iframe>
 </div>
 
 <script>

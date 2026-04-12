@@ -2,35 +2,89 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Character Preview</title>
+<title>Char Preview — TGE</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:#111418; overflow:hidden; font-family:'Georgia', serif; }
+html, body { width:100%; height:100%; overflow:hidden;
+    background:#0e1014; font-family:'Georgia', serif; color:#c8b89a;
+    display:flex; }
 
-#ui {
-    position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
-    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+/* ── Panneau gauche ─────────────────────────────────────────────── */
+#left {
+    width:200px; flex-shrink:0;
+    background:rgba(6,4,2,0.97);
+    border-right:1px solid rgba(200,184,154,0.12);
+    display:flex; flex-direction:column; overflow:hidden;
 }
-.btn {
-    background:rgba(0,0,0,0.6); border:1px solid rgba(200,184,154,0.35);
-    color:#c8b89a; padding:8px 16px; font-family:'Georgia',serif;
-    font-size:11px; letter-spacing:2px; cursor:pointer;
-    transition:all 0.15s; text-transform:uppercase;
+#left-hdr {
+    padding:14px 14px 10px;
+    border-bottom:1px solid rgba(200,184,154,0.1);
+    font-size:9px; letter-spacing:4px; text-transform:uppercase;
+    color:rgba(200,184,154,0.35);
 }
-.btn:hover  { background:rgba(200,184,154,0.12); border-color:#c8b89a; }
-.btn.active { background:rgba(200,184,154,0.2);  border-color:#c8b89a; color:#fff; }
+#char-list { flex:1; overflow-y:auto; }
+.char-item {
+    padding:9px 14px; font-size:11px; letter-spacing:0.05em;
+    cursor:pointer; border-left:2px solid transparent;
+    transition:background 0.1s, color 0.1s, border-color 0.1s;
+    color:rgba(200,184,154,0.80);
+    border-bottom:1px solid rgba(200,184,154,0.07);
+}
+.char-item:hover  { background:rgba(200,184,154,0.07); color:#d8c8a8; }
+.char-item.active { background:rgba(200,184,154,0.1); color:#f0e0c0;
+    border-left-color:rgba(200,184,154,0.5); }
+.char-item.player { color:rgba(212,168,75,0.75); }
+.char-item.player.active { color:#f0c040; border-left-color:#d4a84b; }
+.char-badge {
+    font-size:8px; letter-spacing:1px; color:rgba(200,184,154,0.28);
+    margin-top:2px;
+}
+#no-configs {
+    padding:20px 14px; font-size:10px; line-height:1.8;
+    color:rgba(200,184,154,0.25); font-style:italic;
+}
 
-#status {
-    position:fixed; top:20px; left:50%; transform:translateX(-50%);
-    color:rgba(200,184,154,0.6); font-size:11px; letter-spacing:3px;
-    text-transform:uppercase; text-align:center; line-height:1.8;
+/* Boutons animation */
+#anim-hdr {
+    padding:6px 14px 5px;
+    border-top:1px solid rgba(200,184,154,0.08);
+    border-bottom:1px solid rgba(200,184,154,0.06);
+    font-size:7.5px; letter-spacing:3px; text-transform:uppercase;
+    color:rgba(200,184,154,0.22); flex-shrink:0;
 }
-#info {
-    position:fixed; top:20px; right:20px;
-    color:rgba(200,184,154,0.35); font-size:10px;
-    letter-spacing:1px; line-height:2; text-align:right;
+#anim-btns { display:flex; flex-direction:column; flex-shrink:0; }
+.anim-btn {
+    padding:7px 14px; font-size:10px; letter-spacing:0.8px;
+    cursor:pointer; border-left:2px solid transparent;
+    transition:background 0.1s, color 0.1s;
+    color:rgba(200,184,154,0.45);
+    border-bottom:1px solid rgba(200,184,154,0.04);
+}
+.anim-btn:hover  { background:rgba(200,184,154,0.07); color:#d8c8a8; }
+.anim-btn.active { background:rgba(200,184,154,0.1); color:#f0e0c0;
+    border-left-color:rgba(200,184,154,0.4); }
+
+/* ── Viewport ────────────────────────────────────────────────────── */
+#vp { flex:1; position:relative; background:#0e1014; }
+#vp canvas { display:block; width:100% !important; height:100% !important; }
+#vp-status {
+    position:absolute; top:16px; left:50%; transform:translateX(-50%);
+    font-size:10px; letter-spacing:3px; text-transform:uppercase;
+    color:rgba(200,184,154,0.45); pointer-events:none; text-align:center;
+    white-space:nowrap;
+}
+#vp-loading {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    font-size:11px; letter-spacing:4px; text-transform:uppercase;
+    color:rgba(200,184,154,0.35); display:none; pointer-events:none;
+}
+#vp-hint {
+    position:absolute; bottom:12px; right:14px;
+    font-size:8px; letter-spacing:1px; line-height:2;
+    color:rgba(200,184,154,0.15); pointer-events:none; text-align:right;
 }
 </style>
+
 <script type="importmap">
 {
   "imports": {
@@ -42,159 +96,299 @@ body { background:#111418; overflow:hidden; font-family:'Georgia', serif; }
 </head>
 <body>
 
-<div id="status">Cliquez un personnage</div>
-<div id="info">Clic droit + drag : orbiter<br>Molette : zoom</div>
+<div id="left">
+    <div id="left-hdr">Personnages</div>
+    <div id="char-list"></div>
 
-<div id="ui">
-    <button class="btn" data-src="assets/characters/outfits/Male_Ranger.gltf">♂ Ranger</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Peasant.gltf">♂ Peasant</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Knight.gltf">♂ Knight</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Knight_Cloth.gltf">♂ Knight Cloth</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Noble.gltf">♂ Noble</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Wizard.gltf">♂ Wizard</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Ranger.gltf">♀ Ranger</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Peasant.gltf">♀ Peasant</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Knight.gltf">♀ Knight</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Knight_Cloth.gltf">♀ Knight Cloth</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Noble.gltf">♀ Noble</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Wizard.gltf">♀ Wizard</button>
+    <div id="anim-hdr">Animation</div>
+    <div id="anim-btns">
+        <div class="anim-btn active" data-anim="idle">Idle</div>
+        <div class="anim-btn" data-anim="walk">Marche</div>
+        <div class="anim-btn" data-anim="run">Course</div>
+        <div class="anim-btn" data-anim="combat">Combat</div>
+        <div class="anim-btn" data-anim="jump">Saut</div>
+    </div>
+</div>
+
+<div id="vp">
+    <div id="vp-status">Selectionne un personnage</div>
+    <div id="vp-loading">Chargement…</div>
+    <div id="vp-hint">Clic droit + drag : orbiter<br>Molette : zoom</div>
 </div>
 
 <script type="module">
-import * as THREE from 'three';
-import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import * as THREE      from 'three';
+import { GLTFLoader }  from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { resolveCharConfig, getAllCharConfigs } from './src/char-config.js';
 
 // ── Scène ────────────────────────────────────────────────────────
+const vp = document.getElementById('vp');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x111418);
-scene.fog = new THREE.Fog(0x111418, 15, 35);
+scene.background = new THREE.Color(0x0e1014);
+scene.fog = new THREE.Fog(0x0e1014, 18, 40);
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 100);
-camera.position.set(0, 1.2, 3.5);
+const camera = new THREE.PerspectiveCamera(50, vp.clientWidth / vp.clientHeight, 0.1, 100);
+camera.position.set(0, 1.2, 3.2);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
+renderer.setSize(vp.clientWidth, vp.clientHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+vp.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 1.0, 0);
-controls.enableDamping = true;
-controls.dampingFactor = 0.08;
-controls.minDistance = 1;
-controls.maxDistance = 8;
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 1; controls.maxDistance = 8;
 controls.update();
 
-// ── Lumières ─────────────────────────────────────────────────────
-scene.add(new THREE.AmbientLight(0xffd8a0, 0.5));
+// Lumières
+scene.add(new THREE.AmbientLight(0xffd8a0, 0.55));
+const sun = new THREE.DirectionalLight(0xfff4e0, 3.0);
+sun.position.set(3, 6, 4); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); scene.add(sun);
+scene.add(Object.assign(new THREE.DirectionalLight(0x8090b0, 0.8), { position: new THREE.Vector3(-3, 2, -3) }));
+scene.add(Object.assign(new THREE.DirectionalLight(0xffaa44, 1.2), { position: new THREE.Vector3(0, 3, -5) }));
 
-const dir = new THREE.DirectionalLight(0xfff4e0, 3.0);
-dir.position.set(3, 6, 4);
-dir.castShadow = true;
-dir.shadow.mapSize.set(1024, 1024);
-scene.add(dir);
-
-const fill = new THREE.DirectionalLight(0x8090b0, 0.8);
-fill.position.set(-3, 2, -3);
-scene.add(fill);
-
-const rim = new THREE.DirectionalLight(0xffaa44, 1.2);
-rim.position.set(0, 3, -5);
-scene.add(rim);
-
-// ── Sol ──────────────────────────────────────────────────────────
+// Sol
 const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(5, 48),
-    new THREE.MeshStandardMaterial({ color: 0x1e1a14, roughness: 0.9 })
+    new THREE.CircleGeometry(6, 48),
+    new THREE.MeshStandardMaterial({ color: 0x1a1510, roughness: 0.9 })
 );
-floor.rotation.x = -Math.PI / 2;
-floor.receiveShadow = true;
-scene.add(floor);
-
-// Cercle décoratif
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 const ring = new THREE.Mesh(
-    new THREE.RingGeometry(0.9, 0.95, 64),
+    new THREE.RingGeometry(0.9, 0.96, 64),
     new THREE.MeshBasicMaterial({ color: 0x3a2e1a, side: THREE.DoubleSide })
 );
-ring.rotation.x = -Math.PI / 2;
-ring.position.y = 0.001;
-scene.add(ring);
+ring.rotation.x = -Math.PI / 2; ring.position.y = 0.001; scene.add(ring);
 
-// ── Chargement ───────────────────────────────────────────────────
-let current = null;
-const loader = new GLTFLoader();
+// ── Loader / cache ───────────────────────────────────────────────
+const gltfLoader = new GLTFLoader();
+const cache = {};
+function loadGLTF(url) {
+    if (cache[url]) return Promise.resolve(cache[url]);
+    return new Promise((res, rej) => gltfLoader.load(url, g => { cache[url] = g; res(g); }, undefined, rej));
+}
 
-function loadCharacter(url, btn) {
-    document.getElementById('status').textContent = 'Chargement...';
-    document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+const HEAD_MESHES = new Set(['Eyebrows','Eyes','SuperHero_Male','SuperHero_Female']);
 
-    if (current) { scene.remove(current); current = null; }
+function attachSkinned(srcGltf, outfitRoot, meshFilter) {
+    const outfitBones = {};
+    outfitRoot.traverse(n => { if (n.isBone) outfitBones[n.name] = n; });
+    const fallback = outfitBones['Hips'] || outfitBones['Root'] || Object.values(outfitBones)[0];
+    if (!fallback) return;
+    const toAttach = [];
+    srcGltf.scene.traverse(n => {
+        if (n.isSkinnedMesh && (!meshFilter || meshFilter(n.name))) toAttach.push(n);
+    });
+    for (const node of toAttach) {
+        const newBones = node.skeleton.bones.map(b => outfitBones[b.name] || fallback);
+        if (!newBones.length) continue;
+        node.position.set(0,0,0); node.rotation.set(0,0,0); node.scale.set(1,1,1);
+        node.bind(new THREE.Skeleton(newBones, node.skeleton.boneInverses), new THREE.Matrix4());
+        (Array.isArray(node.material) ? node.material : [node.material]).forEach(m => {
+            if (m) { m.side = THREE.DoubleSide; m.depthWrite = true; }
+        });
+        node.castShadow = true; node.frustumCulled = false;
+        outfitRoot.add(node);
+    }
+}
 
-    loader.load(url, (gltf) => {
-        const model = gltf.scene;
+// ── Animations ───────────────────────────────────────────────────
+const UAL_PATHS = [
+    'assets/characters/animations/UAL1_Standard.glb',
+    'assets/characters/animations/UAL1_Source.glb',
+    'assets/characters/animations/UAL2_Standard.glb',
+    'assets/characters/animations/UAL2_Source.glb',
+];
+const ANIM_PICK = {
+    idle:   n => /idle_loop/i.test(n) || /\bidle\b/i.test(n),
+    walk:   n => /walk_loop/i.test(n) || /\bwalk\b/i.test(n),
+    run:    n => /run_loop/i.test(n)  || /\brun\b/i.test(n),
+    combat: n => /idle.*combat|combat.*idle/i.test(n) || /sword.*idle|attack/i.test(n),
+    jump:   n => /jump_loop|jump_idle|fall_idle/i.test(n) || /\bjump\b/i.test(n),
+};
 
-        // Calibrer la hauteur à 1.75m
-        model.position.set(0, 0, 0);
-        const box    = new THREE.Box3().setFromObject(model);
-        const height = box.max.y - box.min.y;
-        model.scale.setScalar(1.75 / height);
-        box.setFromObject(model);
-        model.position.y = -box.min.y;
+let allClips  = [];
+let ualLoaded = false;
 
-        model.traverse(c => {
-            if (c.isMesh) {
-                c.castShadow    = true;
-                c.receiveShadow = true;
-            }
+async function loadAnimations() {
+    const results = await Promise.allSettled(UAL_PATHS.map(p => loadGLTF(p)));
+    const clipMap = new Map();
+    for (const r of results) {
+        if (r.status === 'fulfilled')
+            for (const c of r.value.animations) clipMap.set(c.name, c);
+    }
+    allClips  = [...clipMap.values()].sort((a, b) => a.name.localeCompare(b.name));
+    ualLoaded = true;
+}
+
+// ── État ─────────────────────────────────────────────────────────
+let charRoot     = null;
+let mixer        = null;
+let activeAction = null;
+let currentAnim  = 'idle';
+
+function playAnimKey(key) {
+    if (!mixer || !allClips.length) return;
+    currentAnim = key;
+    const pick = ANIM_PICK[key];
+    const clip = allClips.find(pick) || allClips[0];
+    if (!clip) return;
+    if (activeAction) activeAction.fadeOut(0.3);
+    const action = mixer.clipAction(clip);
+    action.reset().fadeIn(0.3).play();
+    activeAction = action;
+    document.querySelectorAll('.anim-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.anim === key));
+}
+
+// ── Chargement personnage ─────────────────────────────────────────
+async function loadChar(cfg) {
+    document.getElementById('vp-loading').style.display = 'block';
+    document.getElementById('vp-status').textContent = 'Chargement…';
+
+    if (charRoot) { scene.remove(charRoot); charRoot = null; }
+    if (mixer)    { mixer.stopAllActions(); mixer = null; activeAction = null; }
+
+    try {
+        const urls = [cfg.meshUrl, cfg.baseUrl];
+        if (cfg.hairUrl)  urls.push(cfg.hairUrl);
+        if (cfg.beardUrl) urls.push(cfg.beardUrl);
+
+        const gltfs = await Promise.all(urls.map(u => loadGLTF(u)));
+        const [outfitGltf, bodyGltf] = gltfs;
+        const hairGltf  = cfg.hairUrl  ? gltfs[2] : null;
+        const beardGltf = cfg.beardUrl ? gltfs[cfg.hairUrl ? 3 : 2] : null;
+
+        charRoot = SkeletonUtils.clone(outfitGltf.scene);
+        charRoot.traverse(c => {
+            if (!c.isMesh) return;
+            c.castShadow = c.receiveShadow = true;
+            c.frustumCulled = false;
+            (Array.isArray(c.material) ? c.material : [c.material])
+                .forEach(m => { if (m) m.side = THREE.DoubleSide; });
         });
 
-        scene.add(model);
-        current = model;
+        if (bodyGltf)  attachSkinned(bodyGltf,  charRoot, n => HEAD_MESHES.has(n));
+        if (hairGltf)  attachSkinned(hairGltf,  charRoot, null);
+        if (beardGltf) attachSkinned(beardGltf, charRoot, null);
 
-        // Infos
-        const clips = gltf.animations.map(a => a.name).join(', ') || 'aucune';
-        const meshCount = [...model.children].filter(c => c.isMesh).length;
-        document.getElementById('status').textContent =
-            url.split('/').pop() + '\nAnimations : ' + clips;
+        scene.add(charRoot);
 
-        console.log('Chargé :', url);
-        console.log('Animations :', gltf.animations.map(a => a.name));
+        // Normaliser à 1.75m
+        const box0 = new THREE.Box3().setFromObject(charRoot);
+        charRoot.scale.setScalar(1.75 / (box0.max.y - box0.min.y || 1));
+        const box = new THREE.Box3().setFromObject(charRoot);
+        charRoot.position.y -= box.min.y;
 
-    }, (xhr) => {
-        const pct = xhr.total ? Math.round(xhr.loaded / xhr.total * 100) : '...';
-        document.getElementById('status').textContent = 'Chargement ' + pct + '%';
-    }, (err) => {
-        document.getElementById('status').textContent = 'Erreur : ' + err.message;
-        console.error(err);
-    });
+        mixer = new THREE.AnimationMixer(charRoot);
+
+        if (!ualLoaded) await loadAnimations();
+        playAnimKey(currentAnim);
+
+        document.getElementById('vp-status').textContent = cfg.name || cfg.meshUrl.split('/').pop();
+    } catch(e) {
+        document.getElementById('vp-status').textContent = 'Erreur: ' + e.message;
+        console.error('[CharPreview] loadChar error:', e);
+    } finally {
+        document.getElementById('vp-loading').style.display = 'none';
+    }
 }
 
-document.querySelectorAll('.btn').forEach(btn => {
-    btn.addEventListener('click', () => loadCharacter(btn.dataset.src, btn));
+// ── Construction de la liste ──────────────────────────────────────
+function buildList() {
+    const list = document.getElementById('char-list');
+    list.innerHTML = '';
+
+    console.log('[CharPreview] buildList() lancé');
+
+    // 1. Personnage joueur sauvegardé
+    const playerCfg = resolveCharConfig();
+    console.log('[CharPreview] playerCfg:', playerCfg?.name, playerCfg?.meshUrl);
+    if (playerCfg) {
+        const el = document.createElement('div');
+        el.className = 'char-item player';
+        el.innerHTML = `<div>&#9733; Perso sauvegarde</div>
+            <div class="char-badge">${playerCfg.name || playerCfg.meshUrl?.split('/').pop() || ''}</div>`;
+        el.addEventListener('click', () => {
+            document.querySelectorAll('.char-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            loadChar(playerCfg);
+        });
+        list.appendChild(el);
+    }
+
+    // 2. Configs nommées
+    const named = getAllCharConfigs();
+    if (named.length) {
+        for (const c of named) {
+            const cfg = resolveCharConfig(c.name);
+            if (!cfg) continue;
+            const el = document.createElement('div');
+            el.className = 'char-item';
+            el.innerHTML = `<div>${c.name}</div>
+                <div class="char-badge">${cfg.meshUrl?.split('/').pop() || ''}</div>`;
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.char-item').forEach(i => i.classList.remove('active'));
+                el.classList.add('active');
+                loadChar(cfg);
+            });
+            list.appendChild(el);
+        }
+    }
+
+    if (!playerCfg && !named.length) {
+        list.innerHTML = '<div id="no-configs">Aucun personnage sauvegarde.<br>Utilise le Char Builder pour en creer un.</div>';
+        return;
+    }
+
+    // Charger le premier automatiquement
+    list.querySelector('.char-item')?.click();
+}
+
+// ── Boutons animation ─────────────────────────────────────────────
+document.querySelectorAll('.anim-btn').forEach(btn => {
+    btn.addEventListener('click', () => playAnimKey(btn.dataset.anim));
 });
 
-// Charger le Male_Ranger par défaut
-document.querySelector('.btn').click();
-
-// ── Boucle ───────────────────────────────────────────────────────
+// ── Boucle ────────────────────────────────────────────────────────
 const clock = new THREE.Clock();
-function animate() {
+let _firstFrame = true;
+(function animate() {
     requestAnimationFrame(animate);
+    // Force resize au premier frame — corrige taille 0 si iframe caché à la création
+    if (_firstFrame) {
+        _firstFrame = false;
+        const w = vp.clientWidth, h = vp.clientHeight;
+        if (w > 0 && h > 0 && (renderer.domElement.width !== w * devicePixelRatio)) {
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        }
+    }
+    const delta = clock.getDelta();
+    if (mixer) mixer.update(Math.min(delta, 0.05));
     controls.update();
     renderer.render(scene, camera);
-}
-animate();
+})();
 
-window.addEventListener('resize', () => {
-    camera.aspect = innerWidth / innerHeight;
+new ResizeObserver(() => {
+    const w = vp.clientWidth, h = vp.clientHeight;
+    if (!w || !h) return;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth, innerHeight);
-});
+    renderer.setSize(w, h);
+}).observe(vp);
+
+// ── Init ──────────────────────────────────────────────────────────
+buildList();
 </script>
+
 <script src="src/asset-check.js"></script>
 <script src="src/nav.js"></script>
 </body>

@@ -31,12 +31,11 @@
         { label: 'Accueil',         id: '',                  icon: '⌂',  cat: null },
         { label: 'Gameplay Test',   id: 'gameplay-test',     icon: '⚔',  cat: 'Gameplay' },
         { label: 'Char Builder',    id: 'char-builder',      icon: '◈',  cat: 'Personnage' },
-        { label: 'Char Combiné',    id: 'char-combined',     icon: '◉',  cat: null },
-        { label: 'Char Preview',    id: 'character-preview', icon: '◎',  cat: null },
+{ label: 'Char Preview',    id: 'character-preview', icon: '◎',  cat: null },
         { label: 'Anim Inspector',  id: 'anim-inspect',      icon: '▶',  cat: null },
         { label: 'Asset Browser',   id: 'asset-browser',     icon: '❖',  cat: 'Environnement' },
-        { label: 'Village Browser', id: 'village-browser',   icon: '⌂',  cat: null },
-        { label: 'Soldier Test',    id: 'soldier-test',      icon: '◆',  cat: 'Test' },
+        { label: 'World Builder',   id: 'world-builder',     icon: '⬡',  cat: 'Éditeur' },
+        { label: 'Grip Editor',     id: 'grip-editor',       icon: '✦',  cat: null },
     ];
 
     const currentFile = window.location.pathname.split('/').pop() || 'index.html';

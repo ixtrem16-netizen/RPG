@@ -2792,7 +2792,7 @@ export class BuildMode {
         // ── Slot rapide ● (avant le 1) ────────────────────────
         const qs = document.createElement('div');
         qs.style.cssText = [
-            'position:relative', 'width:52px', 'height:68px',
+            'position:relative', 'width:clamp(44px,3.8vw,64px)', 'height:clamp(58px,6.5vh,84px)',
             'border-radius:4px', 'border:2px solid #888',
             'background:rgba(20,20,20,0.8)',
             'display:flex', 'flex-direction:column', 'align-items:center',
@@ -2827,7 +2827,7 @@ export class BuildMode {
         for (let i = 0; i < 10; i++) {
             const slot = document.createElement('div');
             slot.style.cssText = [
-                'position:relative', 'width:52px', 'height:68px',
+                'position:relative', 'width:clamp(44px,3.8vw,64px)', 'height:clamp(58px,6.5vh,84px)',
                 'border-radius:4px',
                 'border:2px solid rgba(255,255,255,0.2)',
                 'background:rgba(20,20,20,0.8)',
@@ -2955,8 +2955,9 @@ export class BuildMode {
     // Crée le renderer de prévisualisation la première fois (lazy)
     _ensurePvRenderer() {
         if (this._pvRenderer) return;
+        const pvSize = Math.max(180, Math.min(Math.round(window.innerWidth * 0.18), 340));
         this._pvRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-        this._pvRenderer.setSize(240, 240);
+        this._pvRenderer.setSize(pvSize, pvSize);
         this._pvRenderer.setClearColor(0x0c0805, 1);
         this._pvRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -2977,7 +2978,7 @@ export class BuildMode {
         // Insérer le canvas dans le panneau droit
         if (this._pvCanvasSlot) {
             const c = this._pvRenderer.domElement;
-            c.style.cssText = 'border-radius:6px;border:1px solid rgba(200,160,80,0.3);width:240px;height:240px';
+            c.style.cssText = 'border-radius:6px;width:100%;height:100%;object-fit:contain';
             this._pvCanvasSlot.appendChild(c);
         }
     }
@@ -3001,14 +3002,15 @@ export class BuildMode {
             'border:1px solid rgba(200,160,80,0.5)',
             'border-radius:10px',
             'display:flex', 'flex-direction:row',
-            'max-height:82vh', 'overflow:hidden',
+            'width:min(94vw,1600px)',
+            'height:90vh', 'max-height:90vh', 'overflow:hidden',
             'pointer-events:auto',
             'color:#e8d5a0', 'font-family:monospace',
         ].join(';');
 
         // ── Colonne gauche : header + tabs + grille ────────────
         const leftCol = document.createElement('div');
-        leftCol.style.cssText = 'width:580px;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(200,160,80,0.2)';
+        leftCol.style.cssText = 'flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid rgba(200,160,80,0.2)';
 
         const header = document.createElement('div');
         header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(200,160,80,0.3);flex-shrink:0';
@@ -3020,7 +3022,7 @@ export class BuildMode {
         this._invTabEls = [];
         for (let i = 0; i < CATALOG.length; i++) {
             const tab = document.createElement('div');
-            tab.style.cssText = 'padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.15)';
+            tab.style.cssText = 'padding:clamp(3px,0.4vh,6px) clamp(8px,0.8vw,14px);border-radius:4px;font-size:clamp(9px,0.75vw,11px);cursor:pointer;border:1px solid rgba(255,255,255,0.15)';
             tab.textContent = CATALOG[i].name;
             const ci = i;
             tab.addEventListener('click', () => { this._invCatIdx = ci; this._refreshInventory(); });
@@ -3028,17 +3030,60 @@ export class BuildMode {
             this._invTabEls.push(tab);
         }
 
+        // ── Recherche ──────────────────────────────────────────────
+        this._invSearch = '';
+        const searchWrap = document.createElement('div');
+        searchWrap.style.cssText = 'position:relative;flex-shrink:0;border-bottom:1px solid rgba(200,160,80,0.12)';
+
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Rechercher un asset…';
+        searchInput.style.cssText = [
+            'width:100%', 'background:transparent', 'border:none',
+            'color:#e8d5a0', 'padding:9px 34px 9px 14px',
+            'font-family:monospace', 'font-size:clamp(9px,0.8vw,12px)',
+            'outline:none', 'letter-spacing:0.3px',
+        ].join(';');
+        searchInput.setAttribute('placeholder', 'Rechercher…');
+        searchInput.style.setProperty('--ph-color', 'rgba(200,160,80,0.3)');
+
+        const searchClear = document.createElement('button');
+        searchClear.textContent = '✕';
+        searchClear.style.cssText = [
+            'position:absolute', 'right:10px', 'top:50%', 'transform:translateY(-50%)',
+            'background:none', 'border:none', 'color:rgba(200,160,80,0.4)',
+            'font-size:13px', 'cursor:pointer', 'display:none', 'line-height:1', 'padding:0',
+        ].join(';');
+
+        searchInput.addEventListener('input', () => {
+            this._invSearch = searchInput.value;
+            searchClear.style.display = this._invSearch ? 'block' : 'none';
+            this._refreshInventory();
+        });
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            this._invSearch   = '';
+            searchClear.style.display = 'none';
+            this._refreshInventory();
+            searchInput.focus();
+        });
+        this._invSearchInput = searchInput;
+
+        searchWrap.appendChild(searchInput);
+        searchWrap.appendChild(searchClear);
+
         const grid = document.createElement('div');
-        grid.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;overflow-y:auto;flex:1';
+        grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(110px,10vw,180px),1fr));gap:8px;padding:12px;overflow-y:auto;flex:1';
         this._invGrid = grid;
 
         leftCol.appendChild(header);
         leftCol.appendChild(tabs);
+        leftCol.appendChild(searchWrap);
         leftCol.appendChild(grid);
 
         // ── Colonne droite : aperçu 3D ─────────────────────────
         const rightCol = document.createElement('div');
-        rightCol.style.cssText = 'width:264px;display:flex;flex-direction:column;align-items:center;padding:16px 12px;gap:10px;flex-shrink:0';
+        rightCol.style.cssText = 'width:clamp(220px,22vw,380px);display:flex;flex-direction:column;align-items:center;padding:16px 12px;gap:10px;flex-shrink:0';
 
         const pvTitle = document.createElement('div');
         pvTitle.style.cssText = 'font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#f0c040';
@@ -3046,7 +3091,7 @@ export class BuildMode {
 
         // Emplacement réservé au canvas (injecté lors du lazy init)
         const pvCanvasSlot = document.createElement('div');
-        pvCanvasSlot.style.cssText = 'width:240px;height:240px;border-radius:6px;border:1px solid rgba(200,160,80,0.2);background:#0c0805;display:flex;align-items:center;justify-content:center';
+        pvCanvasSlot.style.cssText = 'width:100%;aspect-ratio:1;border-radius:6px;border:1px solid rgba(200,160,80,0.2);background:#0c0805;display:flex;align-items:center;justify-content:center;overflow:hidden';
         pvCanvasSlot.innerHTML = '<span style="font-size:9px;color:#333">Survoler un item</span>';
         this._pvCanvasSlot = pvCanvasSlot;
 
@@ -3118,8 +3163,11 @@ export class BuildMode {
     // ── Refresh inventaire ─────────────────────────────────────
 
     _refreshInventory() {
+        const term = (this._invSearch || '').toLowerCase().trim();
+
+        // Tabs : actifs seulement hors recherche
         for (let i = 0; i < this._invTabEls.length; i++) {
-            const active = i === this._invCatIdx;
+            const active = !term && i === this._invCatIdx;
             const c = CAT_COLORS[i];
             this._invTabEls[i].style.background  = active ? c + '44' : 'transparent';
             this._invTabEls[i].style.borderColor = active ? c       : 'rgba(255,255,255,0.15)';
@@ -3127,10 +3175,10 @@ export class BuildMode {
         }
 
         this._invGrid.innerHTML = '';
-        const cat   = CATALOG[this._invCatIdx];
-        const color = CAT_COLORS[this._invCatIdx];
 
-        cat.items.forEach((item, itemIdx) => {
+        const makeCard = (item, catIdx, itemIdx) => {
+            const color = CAT_COLORS[catIdx];
+            const catObj = CATALOG[catIdx];
             const card = document.createElement('div');
             card.style.cssText = [
                 'background:rgba(35,25,15,0.9)',
@@ -3138,7 +3186,7 @@ export class BuildMode {
                 'border-radius:6px',
                 'cursor:pointer', 'text-align:center',
                 'overflow:hidden', 'display:flex', 'flex-direction:column',
-                'min-height:54px',
+                'min-height:clamp(80px,11vh,140px)',
             ].join(';');
 
             const bar = document.createElement('div');
@@ -3146,31 +3194,65 @@ export class BuildMode {
             card.appendChild(bar);
 
             const name = document.createElement('div');
-            name.style.cssText = 'font-size:9px;color:#e8d5a0;padding:7px 5px;line-height:1.4;flex:1;display:flex;align-items:center;justify-content:center';
+            name.style.cssText = 'font-size:clamp(9px,0.8vw,12px);color:#e8d5a0;padding:7px 5px;line-height:1.4;flex:1;display:flex;align-items:center;justify-content:center';
             name.textContent = item.name;
             card.appendChild(name);
 
-            const ci = this._invCatIdx, ii = itemIdx;
             card.addEventListener('mouseenter', () => {
                 card.style.borderColor = color;
                 card.style.background  = 'rgba(70,50,15,0.9)';
-                this._invHoveredItem = { catIdx: ci, itemIdx: ii, name: item.name, url: item.url };
-                this._setPreview(item.url, item.name, cat.name);
+                this._invHoveredItem = { catIdx, itemIdx, name: item.name, url: item.url };
+                this._setPreview(item.url, item.name, catObj.name);
             });
             card.addEventListener('mouseleave', () => {
                 card.style.borderColor = 'rgba(200,160,80,0.15)';
                 card.style.background  = 'rgba(35,25,15,0.9)';
             });
-
-            // Clic = assigner au slot actif + fermer
-            card.addEventListener('click', () => { this._assignToHotbar(ci, ii); this._closeInventory(); });
+            card.addEventListener('click', () => { this._assignToHotbar(catIdx, itemIdx); this._closeInventory(); });
 
             this._invGrid.appendChild(card);
-        });
+            return card;
+        };
 
-        // Prévisualiser le premier item par défaut
-        if (cat.items.length) {
-            this._setPreview(cat.items[0].url, cat.items[0].name, cat.name);
+        if (term) {
+            // ── Mode recherche : toutes catégories ─────────────────
+            let total = 0;
+            for (let ci = 0; ci < CATALOG.length; ci++) {
+                const matches = CATALOG[ci].items
+                    .map((item, ii) => ({ item, ii }))
+                    .filter(({ item }) => item.name.toLowerCase().includes(term));
+                if (!matches.length) continue;
+
+                // En-tête de catégorie
+                const hdr = document.createElement('div');
+                hdr.style.cssText = [
+                    'grid-column:1/-1',
+                    'padding:6px 4px 3px',
+                    `font-size:clamp(7px,0.65vw,9px)`,
+                    'letter-spacing:3px', 'text-transform:uppercase',
+                    `color:${CAT_COLORS[ci]}`,
+                    'border-bottom:1px solid rgba(200,160,80,0.08)',
+                    'margin-top:4px',
+                ].join(';');
+                hdr.textContent = CATALOG[ci].name;
+                this._invGrid.appendChild(hdr);
+
+                matches.forEach(({ item, ii }) => { makeCard(item, ci, ii); total++; });
+            }
+            // Aperçu du premier résultat
+            if (total > 0) {
+                const first = this._invGrid.querySelector('div[style*="cursor:pointer"]');
+                if (first) first.dispatchEvent(new Event('mouseenter'));
+            }
+        } else {
+            // ── Mode catégorie normale ─────────────────────────────
+            const cat   = CATALOG[this._invCatIdx];
+            cat.items.forEach((item, itemIdx) => makeCard(item, this._invCatIdx, itemIdx));
+
+            // Prévisualiser le premier item
+            if (cat.items.length) {
+                this._setPreview(cat.items[0].url, cat.items[0].name, cat.name);
+            }
         }
     }
 
@@ -3190,6 +3272,13 @@ export class BuildMode {
     _closeInventory() {
         this._pvRunning = false;
         this._invHoveredItem = null;
+        // Réinitialiser la recherche
+        if (this._invSearchInput) {
+            this._invSearchInput.value = '';
+            this._invSearch = '';
+            const clrBtn = this._invSearchInput.nextElementSibling;
+            if (clrBtn) clrBtn.style.display = 'none';
+        }
         // Vider la prévisualisation
         if (this._pvMesh) { this._pvScene.remove(this._pvMesh); this._pvMesh = null; }
         this._invEl.style.display = 'none';
@@ -3214,8 +3303,8 @@ export class BuildMode {
             'position:fixed', 'top:50%', 'right:18px',
             'transform:translateY(-50%)',
             'display:none', 'flex-direction:column', 'gap:5px',
-            'width:420px',
-            'color:#e8d5a0', 'font:12px/1.65 monospace',
+            'width:clamp(320px,28vw,520px)',
+            'color:#e8d5a0', 'font:clamp(10px,0.85vw,13px)/1.65 monospace',
             'background:rgba(0,0,0,0.88)', 'padding:14px 16px 12px',
             'border-radius:8px',
             'border:1px solid rgba(200,160,80,0.40)',

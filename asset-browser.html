@@ -5,127 +5,214 @@
 <title>Asset Browser — Three.js Game Editor</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:#0d0f12; font-family:'Georgia', serif; color:#c8b89a;
-       display:flex; height:100vh; overflow:hidden; }
-
-/* ══ Panneau inventaire ════════════════════════════════════════ */
-#panel {
-    width:272px; flex-shrink:0; background:#080a0c;
-    border-right:1px solid rgba(200,184,154,0.08);
-    display:flex; flex-direction:column; overflow:hidden;
-    transition:width 0.2s ease, border-color 0.2s;
+html, body {
+    width:100%; height:100%; overflow:hidden;
+    background:#0a0c0f; font-family:'Georgia', serif; color:#c8b89a;
+    display:flex; flex-direction:row;
 }
-#panel.panel-closed { width:0; border-color:transparent; }
+
+/* ══ Colonne gauche — liste/grille ═══════════════════════════════ */
+#left-col {
+    flex:1; min-width:0;
+    display:flex; flex-direction:column;
+    background:rgba(10,8,4,0.97);
+    border-right:1px solid rgba(200,160,80,0.2);
+    overflow:hidden;
+}
 
 /* En-tête */
-#panel-header {
-    padding:10px 10px 0;
+#header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px;
+    border-bottom:1px solid rgba(200,160,80,0.25);
     flex-shrink:0;
 }
-#panel-title-row {
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:8px;
+#header-title {
+    font-size:clamp(11px,0.9vw,14px);
+    font-weight:bold; letter-spacing:0.12em;
+    color:#f0c040;
 }
-#panel-title {
-    font-size:8px; letter-spacing:4px; text-transform:uppercase;
-    color:rgba(200,184,154,0.3);
+#header-hint {
+    font-size:clamp(8px,0.65vw,10px);
+    color:rgba(200,184,154,0.35); letter-spacing:0.05em;
 }
-#panel-close {
-    background:none; border:none; color:rgba(200,184,154,0.28);
-    font-size:14px; line-height:1; cursor:pointer; padding:0 2px;
-    transition:color 0.12s; font-family:'Georgia',serif;
-}
-#panel-close:hover { color:rgba(200,184,154,0.75); }
 
 /* Onglets catégorie */
 #tabs {
-    display:flex; gap:2px; flex-wrap:wrap;
-    padding-bottom:8px;
-    border-bottom:1px solid rgba(200,184,154,0.07);
+    display:flex; flex-wrap:wrap; gap:4px;
+    padding:8px 12px;
+    border-bottom:1px solid rgba(200,160,80,0.15);
+    flex-shrink:0;
 }
 .tab {
-    padding:5px 8px; font-size:7.5px; letter-spacing:1px;
-    text-transform:uppercase; cursor:pointer;
-    background:rgba(200,184,154,0.04); border:1px solid rgba(200,184,154,0.1);
-    color:rgba(200,184,154,0.38); transition:all 0.12s; white-space:nowrap;
+    padding:clamp(3px,0.4vh,6px) clamp(8px,0.8vw,14px);
+    border-radius:4px;
+    font-size:clamp(9px,0.75vw,11px);
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,0.15);
+    color:rgba(200,184,154,0.55);
+    transition:background 0.12s, color 0.12s, border-color 0.12s;
+    letter-spacing:0.04em;
 }
-.tab:hover  { background:rgba(200,184,154,0.09); color:rgba(200,184,154,0.7); }
-.tab.active { background:rgba(200,184,154,0.13); color:#c8b89a;
-              border-color:rgba(200,184,154,0.3); }
+.tab:hover  { background:rgba(200,184,154,0.08); color:#d8c8a8; }
+.tab.active {
+    background:rgba(212,168,75,0.18);
+    border-color:rgba(212,168,75,0.55);
+    color:#f0c040;
+}
 
 /* Recherche */
 #search-wrap {
     position:relative; flex-shrink:0;
-    border-bottom:1px solid rgba(200,184,154,0.07);
+    border-bottom:1px solid rgba(200,160,80,0.12);
 }
 #search {
     width:100%; background:transparent; border:none;
-    color:#c8b89a; padding:9px 32px 9px 12px;
-    font-family:'Georgia',serif; font-size:10.5px; outline:none;
-    letter-spacing:0.3px;
+    color:#c8b89a; padding:9px 34px 9px 14px;
+    font-family:'Georgia',serif;
+    font-size:clamp(9px,0.8vw,12px);
+    outline:none; letter-spacing:0.3px;
 }
 #search::placeholder { color:rgba(200,184,154,0.22); font-style:italic; }
 #search:focus { background:rgba(200,184,154,0.04); }
 #search-clear {
-    position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
     background:none; border:none; color:rgba(200,184,154,0.3);
-    font-size:13px; cursor:pointer; display:none; line-height:1; padding:0;
+    font-size:14px; cursor:pointer; display:none; line-height:1; padding:0;
 }
 #search-clear.visible { display:block; }
 #search-clear:hover { color:rgba(200,184,154,0.75); }
 
-/* ── Liste d'assets ── */
-#item-list {
+/* Grille de cards */
+#item-grid {
     flex:1; overflow-y:auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(clamp(110px,10vw,180px), 1fr));
+    gap:8px; padding:12px;
+    align-content:start;
     scrollbar-width:thin; scrollbar-color:#2a2010 transparent;
 }
-#item-list::-webkit-scrollbar { width:4px; }
-#item-list::-webkit-scrollbar-thumb { background:#2a2010; border-radius:2px; }
+#item-grid::-webkit-scrollbar { width:5px; }
+#item-grid::-webkit-scrollbar-thumb { background:#2a2010; border-radius:3px; }
 
-.list-subcat {
-    padding:8px 12px 3px;
-    font-size:7.5px; letter-spacing:3px; text-transform:uppercase;
-    color:rgba(200,184,154,0.22);
-    border-bottom:1px solid rgba(200,184,154,0.05);
-    position:sticky; top:0; background:#080a0c; z-index:1;
+/* En-têtes de sous-catégorie (span full width dans la grille) */
+.grid-subcat {
+    grid-column:1 / -1;
+    padding:6px 4px 3px;
+    font-size:clamp(7px,0.65vw,9px); letter-spacing:3px; text-transform:uppercase;
+    color:rgba(200,184,154,0.28);
+    border-bottom:1px solid rgba(200,184,154,0.08);
+    margin-top:4px;
 }
-.list-item {
-    display:flex; align-items:center;
-    padding:7px 14px; cursor:pointer;
-    border-bottom:1px solid rgba(200,184,154,0.035);
-    color:rgba(200,184,154,0.58); font-size:10.5px; letter-spacing:0.3px;
-    transition:background 0.1s, color 0.1s, border-left 0.1s;
-    border-left:2px solid transparent;
+.grid-subcat:first-child { margin-top:0; }
+
+/* Cards */
+.asset-card {
+    background:rgba(35,25,15,0.9);
+    border:2px solid rgba(200,160,80,0.12);
+    border-radius:6px;
+    cursor:pointer; text-align:center;
+    overflow:hidden; display:flex; flex-direction:column;
+    min-height:clamp(80px,11vh,140px);
+    transition:border-color 0.12s, background 0.12s;
 }
-.list-item:hover { background:rgba(200,184,154,0.06); color:#d8c8a8; }
-.list-item.active {
-    background:rgba(212,168,75,0.08); color:#d4a84b;
-    border-left-color:rgba(212,168,75,0.5);
+.asset-card:hover {
+    border-color:rgba(200,160,80,0.5);
+    background:rgba(65,45,12,0.9);
+}
+.asset-card.active {
+    border-color:#d4a84b;
+    background:rgba(80,55,10,0.95);
+}
+.card-bar { width:100%; height:4px; flex-shrink:0; }
+.card-name {
+    font-size:clamp(9px,0.8vw,12px);
+    color:#e8d5a0; padding:7px 5px;
+    line-height:1.4; flex:1;
+    display:flex; align-items:center; justify-content:center;
+    font-family:monospace;
 }
 
-#model-count {
-    padding:5px 12px; font-size:8px; letter-spacing:2px;
-    color:rgba(200,184,154,0.18);
-    border-top:1px solid rgba(200,184,154,0.06);
+/* Compteur bas de liste */
+#item-count {
+    padding:5px 14px; flex-shrink:0;
+    font-size:clamp(7px,0.6vw,9px); letter-spacing:2px;
+    color:rgba(200,184,154,0.2);
+    border-top:1px solid rgba(200,160,80,0.1);
+    font-family:monospace;
+}
+
+/* ══ Colonne droite — viewport + infos ════════════════════════════ */
+#right-col {
+    width:clamp(280px,28vw,480px);
     flex-shrink:0;
+    display:flex; flex-direction:column;
+    background:#111418;
+    overflow:hidden;
 }
 
-/* ── Panel animations ── */
+/* Zone 3D */
+#viewport {
+    flex:1; position:relative; min-height:0;
+    background:#111418;
+}
+#viewport canvas { display:block; width:100% !important; height:100% !important; }
+
+#vp-label {
+    position:absolute; top:12px; left:0; right:0;
+    text-align:center;
+    color:rgba(200,184,154,0.45); font-size:clamp(9px,0.75vw,11px);
+    letter-spacing:3px; text-transform:uppercase;
+    pointer-events:none; line-height:1.8;
+    text-shadow:0 1px 4px rgba(0,0,0,0.9);
+}
+#vp-loading {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    color:rgba(200,184,154,0.4); font-size:11px; letter-spacing:4px;
+    text-transform:uppercase; display:none;
+}
+#vp-hint {
+    position:absolute; bottom:10px; left:0; right:0; text-align:center;
+    color:rgba(200,184,154,0.13); font-size:8px; letter-spacing:1px;
+    pointer-events:none;
+}
+
+/* Infos asset sélectionné */
+#asset-info {
+    flex-shrink:0;
+    padding:10px 14px 8px;
+    border-top:1px solid rgba(200,160,80,0.15);
+    background:rgba(8,6,3,0.95);
+}
+#asset-name {
+    font-size:clamp(11px,0.9vw,14px);
+    font-weight:bold; color:#e8d5a0; letter-spacing:0.04em;
+    margin-bottom:2px; font-family:monospace;
+}
+#asset-cat {
+    font-size:clamp(8px,0.65vw,10px);
+    color:rgba(200,184,154,0.35); letter-spacing:0.08em;
+}
+
+/* ── Panneau animations ──────────────────────────────────────────── */
 #anim-panel {
-    border-top:1px solid rgba(200,184,154,0.08);
-    display:none; flex-direction:column; max-height:38%;
     flex-shrink:0;
+    border-top:1px solid rgba(200,184,154,0.08);
+    display:none; flex-direction:column;
+    max-height:38%;
+    background:rgba(5,4,2,0.95);
 }
 #anim-header {
-    padding:7px 12px; font-size:8px; letter-spacing:3px;
-    text-transform:uppercase; color:rgba(200,184,154,0.28);
-    flex-shrink:0;
+    padding:6px 12px; font-size:clamp(7px,0.6vw,9px);
+    letter-spacing:3px; text-transform:uppercase;
+    color:rgba(200,184,154,0.28); flex-shrink:0;
 }
 #anim-search {
     background:rgba(200,184,154,0.04); border:none;
     border-bottom:1px solid rgba(200,184,154,0.08);
-    color:#c8b89a; padding:7px 12px; font-family:'Georgia',serif;
-    font-size:10px; outline:none; width:100%; flex-shrink:0;
+    color:#c8b89a; padding:6px 12px;
+    font-family:'Georgia',serif; font-size:clamp(9px,0.75vw,11px);
+    outline:none; width:100%; flex-shrink:0;
 }
 #anim-search::placeholder { color:rgba(200,184,154,0.2); }
 #clip-list {
@@ -133,47 +220,16 @@ body { background:#0d0f12; font-family:'Georgia', serif; color:#c8b89a;
     scrollbar-width:thin; scrollbar-color:#2a2418 transparent;
 }
 .clip-item {
-    padding:6px 12px; font-size:9px; letter-spacing:0.3px;
+    padding:5px 12px; font-size:clamp(8px,0.7vw,10px); letter-spacing:0.3px;
     cursor:pointer; border-bottom:1px solid rgba(200,184,154,0.04);
     transition:background 0.1s; display:flex; justify-content:space-between;
     color:rgba(200,184,154,0.6);
 }
 .clip-item:hover  { background:rgba(200,184,154,0.07); color:#d8c8a8; }
 .clip-item.active { background:rgba(200,184,154,0.13); color:#fff; }
-.clip-item .dur   { font-size:9px; opacity:0.3; }
-
-/* ══ Viewport ══════════════════════════════════════════════════ */
-#viewport { flex:1; position:relative; background:#111418; }
-#viewport canvas { display:block; width:100% !important; height:100% !important; }
-
-/* Bouton réouverture */
-#panel-open {
-    position:absolute; top:10px; left:10px; z-index:10;
-    background:rgba(8,6,4,0.85); border:1px solid rgba(200,184,154,0.2);
-    color:rgba(200,184,154,0.5); font-size:13px; cursor:pointer;
-    padding:5px 10px; display:none;
-    transition:color 0.12s, border-color 0.12s;
-}
-#panel-open.visible { display:block; }
-#panel-open:hover { color:#d8c8a8; border-color:rgba(200,184,154,0.45); }
-
-#vp-label {
-    position:absolute; top:14px; left:50%; transform:translateX(-50%);
-    color:rgba(200,184,154,0.45); font-size:11px; letter-spacing:3px;
-    text-transform:uppercase; pointer-events:none; text-align:center;
-    line-height:1.8; white-space:pre; text-shadow:0 1px 4px rgba(0,0,0,0.8);
-}
-#vp-hint {
-    position:absolute; bottom:14px; right:14px;
-    color:rgba(200,184,154,0.15); font-size:9px; letter-spacing:1px;
-    line-height:2; text-align:right; pointer-events:none;
-}
-#vp-loading {
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    color:rgba(200,184,154,0.4); font-size:11px; letter-spacing:4px;
-    text-transform:uppercase; display:none;
-}
+.clip-item .dur   { font-size:8px; opacity:0.3; }
 </style>
+
 <script type="importmap">
 {
   "imports": {
@@ -185,40 +241,43 @@ body { background:#0d0f12; font-family:'Georgia', serif; color:#c8b89a;
 </head>
 <body>
 
-<!-- ══ Panneau inventaire ═══════════════════════════════════════ -->
-<div id="panel">
-    <div id="panel-header">
-        <div id="panel-title-row">
-            <span id="panel-title">Asset Browser</span>
-            <button id="panel-close" title="Fermer le panneau">✕</button>
-        </div>
-        <div id="tabs">
-            <div class="tab active" data-cat="Personnages">Perso</div>
-            <div class="tab" data-cat="Cheveux">Cheveux</div>
-            <div class="tab" data-cat="Nature">Nature</div>
-            <div class="tab" data-cat="Bâtiments">Bâtim.</div>
-            <div class="tab" data-cat="Props">Props</div>
-        </div>
+<!-- ══ Colonne gauche ═══════════════════════════════════════════ -->
+<div id="left-col">
+    <div id="header">
+        <span id="header-title">✦ Asset Browser</span>
+        <span id="header-hint">Clic = prévisualiser</span>
+    </div>
+    <div id="tabs">
+        <div class="tab active" data-cat="Personnages">Personnages</div>
+        <div class="tab" data-cat="Cheveux">Cheveux</div>
+        <div class="tab" data-cat="Nature">Nature</div>
+        <div class="tab" data-cat="Village">Village</div>
+        <div class="tab" data-cat="Props">Props</div>
     </div>
     <div id="search-wrap">
-        <input id="search" type="text" placeholder="Rechercher…" autocomplete="off">
+        <input id="search" type="text" placeholder="Rechercher un asset…" autocomplete="off">
         <button id="search-clear" title="Effacer">✕</button>
     </div>
-    <div id="item-list"></div>
-    <div id="model-count">—</div>
+    <div id="item-grid"></div>
+    <div id="item-count">—</div>
+</div>
+
+<!-- ══ Colonne droite ═══════════════════════════════════════════ -->
+<div id="right-col">
+    <div id="viewport">
+        <div id="vp-label">Sélectionne un asset</div>
+        <div id="vp-loading">Chargement…</div>
+        <div id="vp-hint">Clic droit · Molette · Milieu</div>
+    </div>
+    <div id="asset-info">
+        <div id="asset-name">—</div>
+        <div id="asset-cat"></div>
+    </div>
     <div id="anim-panel">
         <div id="anim-header">Animations</div>
         <input id="anim-search" type="text" placeholder="Filtrer clips…">
         <div id="clip-list"></div>
     </div>
-</div>
-
-<!-- ══ Viewport ════════════════════════════════════════════════ -->
-<div id="viewport">
-    <button id="panel-open" title="Ouvrir le panneau">☰</button>
-    <div id="vp-label">Sélectionne un asset</div>
-    <div id="vp-loading">Chargement…</div>
-    <div id="vp-hint">Clic droit : orbiter · Molette : zoom · Clic milieu : pan</div>
 </div>
 
 <script type="module">
@@ -228,7 +287,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 // ═══════════════════════════════════════════════════════════════
-//  CATALOGUE — { catégorie: { sous-cat: [items] } }
+//  CATALOGUE
 // ═══════════════════════════════════════════════════════════════
 const BASE_OUTFIT  = 'assets/characters/outfits/';
 const BASE_HAIR    = 'assets/characters/hair/';
@@ -237,12 +296,22 @@ const BASE_VILLAGE = 'assets/environment/village/';
 const BASE_PROPS   = 'assets/environment/props/';
 const BASE_BODY_M  = 'assets/characters/bodies/Superhero_Male_FullBody.gltf';
 const BASE_BODY_F  = 'assets/characters/bodies/Superhero_Female_FullBody.gltf';
+
 const UAL_PATHS = [
     'assets/characters/animations/UAL1_Standard.glb',
     'assets/characters/animations/UAL1_Source.glb',
     'assets/characters/animations/UAL2_Standard.glb',
     'assets/characters/animations/UAL2_Source.glb',
 ];
+
+// Couleur par catégorie principale
+const CAT_COLOR = {
+    'Personnages': '#d480a0',
+    'Cheveux':     '#a080d4',
+    'Nature':      '#60c880',
+    'Village':   '#c87840',
+    'Props':       '#6090c8',
+};
 
 const CATALOG = {
     'Personnages': {
@@ -272,16 +341,9 @@ const CATALOG = {
         ].map(n => ({ name:n, src: BASE_HAIR+n+'.gltf' })),
     },
     'Nature': {
-        'Bouleaux': [
-            'BirchTree_1','BirchTree_2','BirchTree_3','BirchTree_4','BirchTree_5',
-        ].map(n => ({ name:n, src: BASE_NATURE+n+'.gltf' })),
-        'Érables': [
-            'MapleTree_1','MapleTree_2','MapleTree_3','MapleTree_4','MapleTree_5',
-        ].map(n => ({ name:n, src: BASE_NATURE+n+'.gltf' })),
-        'Arbres Morts': [
-            'DeadTree_1','DeadTree_2','DeadTree_3','DeadTree_4','DeadTree_5',
-            'DeadTree_6','DeadTree_7','DeadTree_8','DeadTree_9','DeadTree_10',
-        ].map(n => ({ name:n, src: BASE_NATURE+n+'.gltf' })),
+        'Bouleaux': [1,2,3,4,5].map(i => ({ name:`BirchTree_${i}`, src: BASE_NATURE+`BirchTree_${i}.gltf` })),
+        'Érables':  [1,2,3,4,5].map(i => ({ name:`MapleTree_${i}`, src: BASE_NATURE+`MapleTree_${i}.gltf` })),
+        'Arbres Morts': Array.from({length:10},(_,i)=>({name:`DeadTree_${i+1}`,src:BASE_NATURE+`DeadTree_${i+1}.gltf`})),
         'Buissons': [
             'Bush','Bush_Flowers','Bush_Large','Bush_Large_Flowers','Bush_Small','Bush_Small_Flowers',
         ].map(n => ({ name:n, src: BASE_NATURE+n+'.gltf' })),
@@ -289,49 +351,94 @@ const CATALOG = {
             'Flower_1','Flower_1_Clump','Flower_2','Flower_2_Clump',
             'Flower_3_Clump','Flower_4_Clump','Flower_5_Clump',
         ].map(n => ({ name:n, src: BASE_NATURE+n+'.gltf' })),
-        'Herbe': [
-            'Grass_Large','Grass_Large_Extruded','Grass_Small',
-        ].map(n => ({ name:n, src: BASE_NATURE+n+'.gltf' })),
+        'Herbe': ['Grass_Large','Grass_Large_Extruded','Grass_Small'].map(n=>({name:n,src:BASE_NATURE+n+'.gltf'})),
     },
-    'Bâtiments': {
-        'Murs Plâtre': [
-            'Wall_Plaster_Straight','Wall_Plaster_Straight_Base','Wall_Plaster_Door_Flat',
-            'Wall_Plaster_Door_Round','Wall_Plaster_Window_Wide_Flat','Wall_Plaster_Window_Wide_Round',
-            'Wall_Plaster_Window_Thin_Round','Wall_Plaster_WoodGrid',
-        ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
-        'Murs Brique': [
-            'Wall_UnevenBrick_Straight','Wall_UnevenBrick_Door_Flat','Wall_UnevenBrick_Door_Round',
-            'Wall_UnevenBrick_Window_Wide_Flat','Wall_UnevenBrick_Window_Wide_Round',
+    'Village': {
+        'Balcons': [
+            'Balcony_Cross_Corner','Balcony_Cross_Straight','Balcony_Simple_Corner','Balcony_Simple_Straight',
         ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
         'Coins': [
-            'Corner_Exterior_Wood','Corner_Exterior_Brick','Corner_ExteriorWide_Wood','Corner_ExteriorWide_Brick',
+            'Corner_ExteriorWide_Brick','Corner_ExteriorWide_Wood','Corner_Exterior_Brick',
+            'Corner_Exterior_TopDown','Corner_Exterior_TopOnly','Corner_Exterior_Wood',
             'Corner_Interior_Big','Corner_Interior_Small',
         ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
+        'Portes & Cadres': [
+            'DoorFrame_Flat_Brick','DoorFrame_Flat_WoodDark','DoorFrame_Round_Brick','DoorFrame_Round_WoodDark',
+            'Door_1_Flat','Door_1_Round','Door_2_Flat','Door_2_Round',
+            'Door_4_Flat','Door_4_Round','Door_8_Flat','Door_8_Round',
+        ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
         'Sols': [
-            'Floor_Brick','Floor_RedBrick','Floor_WoodDark','Floor_WoodLight',
+            'Floor_Brick','Floor_RedBrick','Floor_UnevenBrick','Floor_WoodDark',
+            'Floor_WoodDark_Half1','Floor_WoodDark_Half2','Floor_WoodDark_Half3',
+            'Floor_WoodDark_OverhangCorner','Floor_WoodDark_OverhangCorner2',
+            'Floor_WoodLight','Floor_WoodLight_OverhangCorner','Floor_WoodLight_OverhangCorner2',
+        ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
+        'Trous': [
+            'HoleCover_90Angle','HoleCover_90Half','HoleCover_90Stairs',
+            'HoleCover_Straight','HoleCover_StraightHalf',
+        ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
+        'Surplombs': [
+            'Overhang_Plaster_Corner','Overhang_Plaster_Corner_Front','Overhang_Plaster_Long','Overhang_Plaster_Short',
+            'Overhang_RoofIncline_Plaster','Overhang_RoofIncline_UnevenBricks',
+            'Overhang_Roof_Plaster','Overhang_Roof_UnevenBricks',
+            'Overhang_Side_Plaster_Long_L','Overhang_Side_Plaster_Long_R',
+            'Overhang_Side_Plaster_Short_L','Overhang_Side_Plaster_Short_R',
+            'Overhang_Side_UnevenBrick_Long_L','Overhang_Side_UnevenBrick_Long_R',
+            'Overhang_Side_UnevenBrick_Short_L','Overhang_Side_UnevenBrick_Short_R',
+            'Overhang_UnevenBrick_Corner','Overhang_UnevenBrick_Corner_Front',
+            'Overhang_UnevenBrick_Long','Overhang_UnevenBrick_Short',
+        ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
+        'Props Village': [
+            'Prop_Brick1','Prop_Brick2','Prop_Brick3','Prop_Brick4',
+            'Prop_Chimney','Prop_Chimney2','Prop_Crate',
+            'Prop_ExteriorBorder_Corner','Prop_ExteriorBorder_Straight1','Prop_ExteriorBorder_Straight2',
+            'Prop_MetalFence_Ornament','Prop_MetalFence_Simple','Prop_Support',
+            'Prop_Vine1','Prop_Vine2','Prop_Vine4','Prop_Vine5','Prop_Vine6','Prop_Vine9',
+            'Prop_Wagon','Prop_WoodenFence_Extension1','Prop_WoodenFence_Extension2','Prop_WoodenFence_Single',
         ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
         'Toits': [
-            'Roof_RoundTiles_4x4','Roof_RoundTiles_4x6','Roof_RoundTiles_6x6','Roof_RoundTiles_6x8',
-            'Roof_RoundTiles_8x8','Roof_2x4_RoundTile','Roof_Dormer_RoundTile','Roof_Tower_RoundTiles',
-            'Roof_Front_Brick4','Roof_Front_Brick6','Roof_Front_Brick8',
+            'Roof_2x4_RoundTile','Roof_Dormer_RoundTile','Roof_FrontSupports',
+            'Roof_Front_Brick2','Roof_Front_Brick4','Roof_Front_Brick4_Half_L','Roof_Front_Brick4_Half_R',
+            'Roof_Front_Brick6','Roof_Front_Brick6_Half_L','Roof_Front_Brick6_Half_R',
+            'Roof_Front_Brick8','Roof_Front_Brick8_Half_L','Roof_Front_Brick8_Half_R',
+            'Roof_Log','Roof_Modular_RoundTiles','Roof_RoundTile_2x1','Roof_RoundTile_2x1_Long',
+            'Roof_RoundTiles_4x4','Roof_RoundTiles_4x6','Roof_RoundTiles_4x8',
+            'Roof_RoundTiles_6x10','Roof_RoundTiles_6x12','Roof_RoundTiles_6x14',
+            'Roof_RoundTiles_6x4','Roof_RoundTiles_6x6','Roof_RoundTiles_6x8',
+            'Roof_RoundTiles_8x10','Roof_RoundTiles_8x12','Roof_RoundTiles_8x14','Roof_RoundTiles_8x8',
+            'Roof_Support2','Roof_Tower_RoundTiles',
+            'Roof_Wooden_2x1','Roof_Wooden_2x1_Center','Roof_Wooden_2x1_Center_Mirror',
+            'Roof_Wooden_2x1_Corner','Roof_Wooden_2x1_L','Roof_Wooden_2x1_Middle','Roof_Wooden_2x1_R',
         ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
-        'Portes': [
-            'Door_1_Flat','Door_1_Round','Door_2_Flat','Door_2_Round','Door_4_Flat','Door_4_Round',
+        'Escaliers': [
+            'Stair_Interior_Rails','Stair_Interior_Simple','Stair_Interior_Solid','Stair_Interior_SolidExtended',
+            'Stairs_Exterior_NoFirstStep','Stairs_Exterior_Platform',
+            'Stairs_Exterior_Platform45','Stairs_Exterior_Platform45Clean',
+            'Stairs_Exterior_PlatformU','Stairs_Exterior_SidePlatform',
+            'Stairs_Exterior_Sides','Stairs_Exterior_Sides45','Stairs_Exterior_SidesU',
+            'Stairs_Exterior_SingleSide','Stairs_Exterior_SingleSideThick',
+            'Stairs_Exterior_Straight','Stairs_Exterior_Straight_Center',
+            'Stairs_Exterior_Straight_L','Stairs_Exterior_Straight_R',
         ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
-        'Fenêtres': [
+        'Murs': [
+            'Wall_Arch','Wall_BottomCover',
+            'Wall_Plaster_Door_Flat','Wall_Plaster_Door_Round','Wall_Plaster_Door_RoundInset',
+            'Wall_Plaster_Straight','Wall_Plaster_Straight_Base',
+            'Wall_Plaster_Straight_L','Wall_Plaster_Straight_R',
+            'Wall_Plaster_Window_Thin_Round','Wall_Plaster_Window_Wide_Flat',
+            'Wall_Plaster_Window_Wide_Flat2','Wall_Plaster_Window_Wide_Round',
+            'Wall_Plaster_WoodGrid',
+            'Wall_UnevenBrick_Door_Flat','Wall_UnevenBrick_Door_Round','Wall_UnevenBrick_Straight',
+            'Wall_UnevenBrick_Window_Thin_Round','Wall_UnevenBrick_Window_Wide_Flat',
+            'Wall_UnevenBrick_Window_Wide_Round',
+        ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
+        'Fenêtres & Volets': [
+            'WindowShutters_Thin_Flat_Closed','WindowShutters_Thin_Flat_Open',
+            'WindowShutters_Thin_Round_Closed','WindowShutters_Thin_Round_Open',
+            'WindowShutters_Wide_Flat_Closed','WindowShutters_Wide_Flat_Open',
+            'WindowShutters_Wide_Round_Closed','WindowShutters_Wide_Round_Open',
+            'Window_Roof_Thin','Window_Roof_Wide',
             'Window_Thin_Flat1','Window_Thin_Round1','Window_Wide_Flat1','Window_Wide_Round1',
-            'WindowShutters_Wide_Flat_Open','WindowShutters_Wide_Round_Open',
-        ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
-        'Balcons & Escaliers': [
-            'Balcony_Simple_Straight','Balcony_Cross_Straight',
-            'Stair_Interior_Simple','Stair_Interior_Solid',
-            'Stairs_Exterior_Straight','Stairs_Exterior_Platform',
-        ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
-        'Éléments Ext.': [
-            'Prop_Chimney','Prop_Chimney2','Prop_Support','Prop_Wagon','Prop_Crate',
-            'Prop_WoodenFence_Single','Prop_MetalFence_Simple',
-            'Prop_Vine1','Prop_Vine2','Prop_Vine4',
-            'Overhang_Plaster_Long','Overhang_Plaster_Short','Overhang_UnevenBrick_Long',
         ].map(n => ({ name:n, src: BASE_VILLAGE+n+'.gltf' })),
     },
     'Props': {
@@ -354,16 +461,13 @@ const CATALOG = {
             'FarmCrate_Apple','FarmCrate_Carrot','FarmCrate_Empty',
         ].map(n => ({ name:n, src: BASE_PROPS+n+'.gltf' })),
         'Nourriture & Potions': [
-            'Cauldron','Chalice','Mug','Pot_1',
-            'Potion_1','Potion_2','Potion_4',
+            'Cauldron','Chalice','Mug','Pot_1','Potion_1','Potion_2','Potion_4',
         ].map(n => ({ name:n, src: BASE_PROPS+n+'.gltf' })),
         'Commerce': [
-            'Stall_Empty','Stall_Cart_Empty',
-            'Coin_Pile','Coin_Pile_2','Key_Gold','Key_Metal',
+            'Stall_Empty','Stall_Cart_Empty','Coin_Pile','Coin_Pile_2','Key_Gold','Key_Metal',
         ].map(n => ({ name:n, src: BASE_PROPS+n+'.gltf' })),
         'Décoration': [
-            'Banner_1','Banner_2','Cage_Small',
-            'Rope_1','Scroll_1','Scroll_2','Vase_2','Vase_4',
+            'Banner_1','Banner_2','Cage_Small','Rope_1','Scroll_1','Scroll_2','Vase_2','Vase_4',
         ].map(n => ({ name:n, src: BASE_PROPS+n+'.gltf' })),
     },
 };
@@ -425,8 +529,8 @@ const ring = new THREE.Mesh(
 );
 ring.rotation.x = -Math.PI / 2; ring.position.y = 0.002; scene.add(ring);
 
-const grid = new THREE.GridHelper(20, 20, 0x201810, 0x1a140c);
-grid.position.y = 0.001; scene.add(grid);
+const gridHelper = new THREE.GridHelper(20, 20, 0x201810, 0x1a140c);
+gridHelper.position.y = 0.001; scene.add(gridHelper);
 
 // ═══════════════════════════════════════════════════════════════
 //  LOADER / CACHE
@@ -479,13 +583,19 @@ function attachBody(baseGltf, outfitRoot) {
     outfitRoot.traverse(n => { if (n.isBone) outfitBones[n.name] = n; });
     headBone = outfitBones['head'] || outfitBones['Head'] || null;
 
+    // Os de repli : utilisé pour les os du body-skin absents de l'outfit
+    const fallbackBone = outfitBones['Hips'] || outfitBones['Root']
+        || Object.values(outfitBones)[0] || null;
+    if (!fallbackBone) return;  // rig incompatible — abandon sécurisé
+
     const toAttach = [];
     baseGltf.scene.traverse(n => {
         if (n.isSkinnedMesh && HEAD_MESHES.has(n.name)) toAttach.push(n);
     });
     for (const node of toAttach) {
-        const newBones = node.skeleton.bones.map(b => outfitBones[b.name]);
-        if (newBones.some(b => !b)) continue;
+        // Les os manquants sont remplacés par fallbackBone plutôt qu'abandonner le mesh
+        const newBones = node.skeleton.bones.map(b => outfitBones[b.name] || fallbackBone);
+        if (!newBones.length) continue;
         const newSkeleton = new THREE.Skeleton(newBones, node.skeleton.boneInverses);
         node.position.set(0,0,0); node.rotation.set(0,0,0); node.scale.set(1,1,1);
         node.bind(newSkeleton, new THREE.Matrix4());
@@ -505,7 +615,11 @@ function attachBody(baseGltf, outfitRoot) {
 // ═══════════════════════════════════════════════════════════════
 //  CHARGEMENT MODÈLE
 // ═══════════════════════════════════════════════════════════════
-function loadModel(item) {
+let _loadSeq = 0;  // guard race-condition : chaque appel a son propre id
+
+function loadModel(item, catName) {
+    const mySeq = ++_loadSeq;
+
     if (activeAction) { activeAction.stop(); activeAction = null; }
     if (mixer)        { mixer.stopAllActions(); mixer = null; }
     if (currentMdl)   { scene.remove(currentMdl._root); currentMdl = null; }
@@ -513,11 +627,15 @@ function loadModel(item) {
 
     document.getElementById('vp-loading').style.display = 'block';
     document.getElementById('vp-label').textContent = item.name;
+    document.getElementById('asset-name').textContent = item.name;
+    document.getElementById('asset-cat').textContent  = catName || '';
 
     const pOutfit = loadGLTF(item.src);
     const pBody   = item.bodyUrl ? loadGLTF(item.bodyUrl) : Promise.resolve(null);
 
     Promise.all([pOutfit, pBody]).then(([gltf, bodyGltf]) => {
+        // Un appel plus récent a déjà pris le relais — on abandonne silencieusement.
+        if (mySeq !== _loadSeq) return;
         document.getElementById('vp-loading').style.display = 'none';
 
         const root = item.animated
@@ -532,10 +650,12 @@ function loadModel(item) {
                 .forEach(m => { if (m) m.side = THREE.DoubleSide; });
         });
 
-        const box0 = new THREE.Box3().setFromObject(root);
-        root.scale.setScalar(1.75 / (box0.max.y - box0.min.y || 1));
+        // Attacher le corps d'abord (tête incluse dans le bbox) → échelle cohérente
         if (bodyGltf) attachBody(bodyGltf, root);
         scene.add(root);
+
+        const box0 = new THREE.Box3().setFromObject(root);
+        root.scale.setScalar(1.75 / (box0.max.y - box0.min.y || 1));
 
         const box  = new THREE.Box3().setFromObject(root);
         root.position.y -= box.min.y;
@@ -601,48 +721,65 @@ function playClip(clip) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  UI — LISTE D'ASSETS
+//  UI — GRILLE DE CARDS
 // ═══════════════════════════════════════════════════════════════
 let currentCat  = 'Personnages';
 let searchTerm  = '';
-let selectedItem = null;
+let selectedCard = null;  // élément DOM actif
 
-function renderList() {
-    const subs    = CATALOG[currentCat] || {};
+function renderGrid() {
+    const subs     = CATALOG[currentCat] || {};
     const allItems = flattenCat(currentCat);
     const term     = searchTerm.toLowerCase();
-    const el       = document.getElementById('item-list');
-    el.innerHTML   = '';
+    const color    = CAT_COLOR[currentCat] || '#888';
+    const grid     = document.getElementById('item-grid');
+    grid.innerHTML = '';
 
-    const makeRow = (item) => {
-        const row = document.createElement('div');
-        row.className = 'list-item' + (selectedItem === item ? ' active' : '');
-        row.textContent = item.name;
-        row.addEventListener('click', () => {
-            document.querySelectorAll('.list-item').forEach(r => r.classList.remove('active'));
-            row.classList.add('active');
-            selectedItem = item;
-            loadModel(item);
+    const makeCard = (item, subLabel) => {
+        const card = document.createElement('div');
+        card.className = 'asset-card';
+
+        const bar = document.createElement('div');
+        bar.className = 'card-bar';
+        bar.style.background = color;
+        card.appendChild(bar);
+
+        const name = document.createElement('div');
+        name.className = 'card-name';
+        name.textContent = item.name;
+        card.appendChild(name);
+
+        card.addEventListener('click', () => {
+            if (selectedCard) selectedCard.classList.remove('active');
+            card.classList.add('active');
+            selectedCard = card;
+            loadModel(item, subLabel || currentCat);
         });
-        el.appendChild(row);
+
+        grid.appendChild(card);
+        return card;
     };
 
     if (term) {
         const filtered = allItems.filter(i => i.name.toLowerCase().includes(term));
-        filtered.forEach(makeRow);
-        document.getElementById('model-count').textContent =
+        filtered.forEach(item => makeCard(item, currentCat));
+        document.getElementById('item-count').textContent =
             filtered.length + ' / ' + allItems.length + ' assets';
     } else {
         for (const [subName, items] of Object.entries(subs)) {
             if (!items.length) continue;
             const hdr = document.createElement('div');
-            hdr.className = 'list-subcat';
+            hdr.className = 'grid-subcat';
             hdr.textContent = subName;
-            el.appendChild(hdr);
-            items.forEach(makeRow);
+            grid.appendChild(hdr);
+            items.forEach(item => makeCard(item, subName));
         }
-        document.getElementById('model-count').textContent = allItems.length + ' assets';
+        document.getElementById('item-count').textContent = allItems.length + ' assets';
     }
+
+    // Auto-sélectionner le premier item
+    const firstCard = grid.querySelector('.asset-card');
+    if (firstCard) firstCard.click();
 }
 
 // ── Onglets ────────────────────────────────────────────────────
@@ -654,9 +791,10 @@ document.querySelectorAll('.tab').forEach(tab => {
         document.getElementById('search').value = '';
         document.getElementById('search-clear').classList.remove('visible');
         searchTerm = '';
+        selectedCard = null;
         if (currentCat !== 'Personnages')
             document.getElementById('anim-panel').style.display = 'none';
-        renderList();
+        renderGrid();
     });
 });
 
@@ -664,45 +802,26 @@ document.querySelectorAll('.tab').forEach(tab => {
 document.getElementById('search').addEventListener('input', e => {
     searchTerm = e.target.value;
     document.getElementById('search-clear').classList.toggle('visible', searchTerm.length > 0);
-    renderList();
+    selectedCard = null;
+    renderGrid();
 });
 document.getElementById('search-clear').addEventListener('click', () => {
     document.getElementById('search').value = '';
     document.getElementById('search-clear').classList.remove('visible');
     searchTerm = '';
-    renderList();
+    selectedCard = null;
+    renderGrid();
     document.getElementById('search').focus();
 });
 
-// ── Animations ────────────────────────────────────────────────
+// ── Animations ─────────────────────────────────────────────────
 document.getElementById('anim-search').addEventListener('input', e => {
     animFilter = e.target.value;
     renderClipList();
 });
 
-// ── Toggle panneau ────────────────────────────────────────────
-document.getElementById('panel-close').addEventListener('click', () => {
-    document.getElementById('panel').classList.add('panel-closed');
-    document.getElementById('panel-open').classList.add('visible');
-    // Resize renderer après la transition
-    setTimeout(() => {
-        renderer.setSize(vp.clientWidth, vp.clientHeight);
-        camera.aspect = vp.clientWidth / vp.clientHeight;
-        camera.updateProjectionMatrix();
-    }, 220);
-});
-document.getElementById('panel-open').addEventListener('click', () => {
-    document.getElementById('panel').classList.remove('panel-closed');
-    document.getElementById('panel-open').classList.remove('visible');
-    setTimeout(() => {
-        renderer.setSize(vp.clientWidth, vp.clientHeight);
-        camera.aspect = vp.clientWidth / vp.clientHeight;
-        camera.updateProjectionMatrix();
-    }, 220);
-});
-
 // ── Init ──────────────────────────────────────────────────────
-renderList();
+renderGrid();
 
 // ═══════════════════════════════════════════════════════════════
 //  BOUCLE
@@ -720,11 +839,15 @@ const clock = new THREE.Clock();
     renderer.render(scene, camera);
 })();
 
-window.addEventListener('resize', () => {
-    camera.aspect = vp.clientWidth / vp.clientHeight;
+// ── Resize ────────────────────────────────────────────────────
+const resizeObs = new ResizeObserver(() => {
+    const w = vp.clientWidth, h = vp.clientHeight;
+    if (!w || !h) return;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(vp.clientWidth, vp.clientHeight);
+    renderer.setSize(w, h);
 });
+resizeObs.observe(vp);
 </script>
 <script src="src/asset-check.js"></script>
 <script src="src/nav.js"></script>
