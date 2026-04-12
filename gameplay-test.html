@@ -1757,7 +1757,9 @@ async function drawSword() {
     try { gltf = await loadGLTF(WEAPON_DEFS.sword.path); }
     catch(e) { console.error('[Sword] Chargement échoué', e); return; }
 
-    // Retirer du dos si présent
+    // Retirer toute arme déjà en main droite, puis retirer du dos
+    _clearSlot('R');
+    _clearSlot('L');
     _removeFromBack();
 
     // Entrer en stance immédiatement (pour que updateCombat soit actif)
