@@ -30,22 +30,38 @@ export function isHeadRelatedMesh(node) {
 }
 
 // ── Attacher des SkinnedMesh d'un GLTF sur un squelette cible ───────────────
-// Règles :
+//
+// Deux modes selon le contexte :
+//
+// Strict (useFallback = false, défaut) — pour char-builder où les deux
+//   squelettes sont séparés et toujours complets.
+//   • Os absent → mesh ignoré + warning console.
+//
+// Fallback (useFallback = true) — pour les outils de preview (grip-editor,
+//   character-preview) où le body GLTF est attaché sur le skeleton de l'outfit.
+//   Les bones twist spécifiques au body (lowerarm_twist_01_l…) n'existent pas
+//   dans l'outfit → sans fallback le mesh corps entier serait ignoré.
+//   • Os absent → Hips utilisé à la place (légère approximation, invisible
+//     en pratique pour les preview).
+//
+// Règles communes :
 //   • Crée de nouveaux SkinnedMesh (ne mute JAMAIS le nœud source GLTF)
 //   • Clone les matériaux (évite la contamination entre chargements successifs)
-//   • Pas de bone fallback : si un os est absent du squelette cible, le mesh
-//     est ignoré et un warning est émis en console.
 //   • meshFilter(node) → boolean  (null = tout attacher)
-export function attachSkinned(srcGltf, outfitRoot, meshFilter) {
+export function attachSkinned(srcGltf, outfitRoot, meshFilter, useFallback = false) {
     const boneMap = {};
     outfitRoot.traverse(n => { if (n.isBone) boneMap[n.name] = n; });
     if (!Object.keys(boneMap).length) return;
+
+    const fallback = useFallback
+        ? (boneMap['Hips'] || boneMap['Root'] || Object.values(boneMap)[0])
+        : null;
 
     srcGltf.scene.traverse(srcNode => {
         if (!srcNode.isSkinnedMesh) return;
         if (meshFilter && !meshFilter(srcNode)) return;
 
-        const newBones = srcNode.skeleton.bones.map(b => boneMap[b.name] || null);
+        const newBones = srcNode.skeleton.bones.map(b => boneMap[b.name] || fallback || null);
         if (newBones.some(b => !b)) {
             const missing = srcNode.skeleton.bones
                 .filter(b => !boneMap[b.name]).map(b => b.name);

@@ -651,9 +651,10 @@ async function loadCharacterFromConfig(cfg) {
         });
 
         // Attacher corps (tete/yeux) AVANT le calcul d'echelle
-        if (bodyGltf)  attachSkinned(bodyGltf,  charRoot, isHeadRelatedMesh);
-        if (hairGltf)  attachSkinned(hairGltf,  charRoot, null);
-        if (beardGltf) attachSkinned(beardGltf, charRoot, null);
+        // useFallback=true : bones twist du body absents de l'outfit → Hips fallback
+        if (bodyGltf)  attachSkinned(bodyGltf,  charRoot, isHeadRelatedMesh, true);
+        if (hairGltf)  attachSkinned(hairGltf,  charRoot, null, true);
+        if (beardGltf) attachSkinned(beardGltf, charRoot, null, true);
 
         scene.add(charRoot);
 
