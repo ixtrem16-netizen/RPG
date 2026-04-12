@@ -12,6 +12,10 @@ No build step, no bundler — runs entirely in the browser.
 
 ## Quick Start
 
+### Option A — Studio.exe (recommended)
+
+A standalone launcher is available — **no Node.js or Python required** on the target machine.
+
 **1. Clone the repository**
 ```bash
 git clone https://github.com/ixtrem16-netizen/RPG.git
@@ -20,7 +24,22 @@ cd RPG
 
 **2. Download the Quaternius assets** — see [Required Assets](#setup--required-assets) below.
 
-**3. Start a local server**
+**3. Build the launcher** *(one-time, requires Node.js)*
+```bash
+npx pkg . --target node18-win-x64 --output Studio.exe --compress GZip
+```
+
+**4. Launch**
+
+Double-click `Studio.exe` — the browser opens on the hub automatically.
+
+> `Studio.exe` (~36 MB) embeds the Node.js runtime. It only needs to be rebuilt if `server.js` changes.
+> The `.exe` is excluded from the repository (`.gitignore`) — each developer builds their own copy.
+
+---
+
+### Option B — Local server (any OS)
+
 ```bash
 npx serve . -p 3000
 ```
@@ -33,7 +52,41 @@ Then open **http://localhost:3000** in Chrome or Firefox.
 
 ---
 
+## Navigation
+
+Every tool page has a **`≡` button** (bottom-right corner) that opens a quick-switch menu to jump between tools without going back to the hub.
+
+---
+
 ## Tools
+
+### `index.html` — Hub
+Central launcher — cards for every tool, grouped by category.
+
+---
+
+### `gameplay-test.html` — Gameplay Prototype
+Full gameplay prototype — locomotion, combat, physics, town.
+
+| Key | Action |
+|-----|--------|
+| W / A / S / D | Move |
+| Shift | Sprint |
+| Space | Jump |
+| C | Crouch / Slide (while sprinting) |
+| R | Roll |
+| Shift + Q / E | Dodge left / right |
+| F | Interact / Climb |
+| K | Kick |
+| 1–4 | Combat mode (Sword / Fists / Magic / Bow) |
+| 0 | Unequip |
+| G | Emote wheel |
+| Tab | Camera lock-on |
+| V | Camera mode (3rd person / shoulder) |
+| I | Inventory |
+| Escape | Pause |
+
+---
 
 ### `char-builder.html` — Character Builder
 Assemble modular characters from Quaternius outfit parts with per-zone color shaders.
@@ -95,29 +148,6 @@ Browse and preview nature assets (trees, rocks, vegetation).
 Quick character + animation test scene.
 
 - **Right-click + drag** — orbit · **Scroll** — zoom
-
----
-
-### `gameplay-test.html` — Gameplay Prototype
-Full gameplay prototype — locomotion, combat, physics, town.
-
-| Key | Action |
-|-----|--------|
-| W / A / S / D | Move |
-| Shift | Sprint |
-| Space | Jump |
-| C | Crouch / Slide (while sprinting) |
-| R | Roll |
-| Shift + Q / E | Dodge left / right |
-| F | Interact / Climb |
-| K | Kick |
-| 1–4 | Combat mode (Sword / Fists / Magic / Bow) |
-| 0 | Unequip |
-| G | Emote wheel |
-| Tab | Camera lock-on |
-| V | Camera mode (3rd person / shoulder) |
-| I | Inventory |
-| Escape | Pause |
 
 ---
 
@@ -184,6 +214,8 @@ assets/
 
 | File | Description |
 |------|-------------|
+| `server.js` | Static file server — used by Studio.exe |
+| `src/nav.js` | Floating nav widget injected in every tool page |
 | `src/character.js` | CharacterController — loadRetargeted, AnimationMixer, state machine |
 | `src/char-config.js` | Character config hub — outfit, hair, body per character name |
 | `src/shaders.js` | Post-processing shaders (color grade) |
