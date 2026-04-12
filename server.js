@@ -46,12 +46,22 @@ const server = http.createServer((req, res) => {
         res.writeHead(403); res.end('Forbidden'); return;
     }
 
-    // Dossier → index.html
-    let filePath = absPath;
-    if (!path.extname(filePath)) {
-        filePath = path.join(filePath, 'index.html');
+    // Résolution du fichier :
+    //   1. Chemin exact
+    //   2. Chemin + .html  (ex: /gameplay-test → gameplay-test.html)
+    //   3. Chemin/index.html (dossier)
+    function resolvePath(cb) {
+        fs.access(absPath, fs.constants.F_OK, err0 => {
+            if (!err0) { cb(absPath); return; }
+            const withHtml = absPath + '.html';
+            fs.access(withHtml, fs.constants.F_OK, err1 => {
+                if (!err1) { cb(withHtml); return; }
+                cb(path.join(absPath, 'index.html'));
+            });
+        });
     }
 
+    resolvePath(filePath => {
     fs.readFile(filePath, (err, data) => {
         if (err) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -66,6 +76,7 @@ const server = http.createServer((req, res) => {
         });
         res.end(data);
     });
+    }); // resolvePath
 });
 
 server.listen(PORT, '127.0.0.1', () => {
