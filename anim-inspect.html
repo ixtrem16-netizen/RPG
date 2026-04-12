@@ -33,12 +33,8 @@ canvas { border:1px solid rgba(200,184,154,0.1); }
 </script>
 </head>
 <body>
-<h1>Universal Animation Library — Clips disponibles</h1>
-<div style="display:flex;gap:8px;margin-bottom:16px">
-    <button class="clip" id="btn-ual1" onclick="switchLib(1)">UAL 1</button>
-    <button class="clip active" id="btn-ual2" onclick="switchLib(2)">UAL 2</button>
-</div>
-<div id="status">Chargement du GLB...</div>
+<h1>Animation Library — Clips disponibles</h1>
+<div id="status">Chargement des animations...</div>
 <div id="count"></div>
 <div id="list"></div>
 <div id="preview"></div>
@@ -80,76 +76,78 @@ const floor = new THREE.Mesh(
 floor.rotation.x = -Math.PI / 2;
 scene.add(floor);
 
-// ── Chargement UAL ───────────────────────────────────────────────
-let mixer = null, actions = {}, active = null, currentModel = null;
+// ── Chargement animations (toutes libs fusionnées) ───────────────
+let mixer = null, active = null, currentModel = null;
 
-const LIBS = {
-    1: 'assets/characters/animations/UAL1_Standard.glb',
-    2: 'assets/characters/animations/UAL2_Standard.glb',
-};
+const ANIM_PATHS = [
+    'assets/characters/animations/UAL1_Standard.glb',
+    'assets/characters/animations/UAL1_Source.glb',
+    'assets/characters/animations/UAL2_Standard.glb',
+    'assets/characters/animations/UAL2_Source.glb',
+];
 
 const loader = new GLTFLoader();
 
-function loadLib(n) {
-    document.getElementById('status').textContent = 'Chargement UAL' + n + '...';
+async function loadAllAnims() {
+    document.getElementById('status').textContent = 'Chargement des animations...';
     document.getElementById('list').innerHTML = '';
     document.getElementById('count').textContent = '';
     if (active) { active.stop(); active = null; }
-    if (mixer)  { mixer.stopAllAction(); mixer = null; }
+    if (mixer)  { mixer.stopAllActions(); mixer = null; }
     if (currentModel) { scene.remove(currentModel); currentModel = null; }
 
-    loader.load(LIBS[n], (gltf) => {
-        const model = gltf.scene;
-        model.position.set(0, 0, 0);
-        const box = new THREE.Box3().setFromObject(model);
-        const h   = box.max.y - box.min.y;
-        model.scale.setScalar(1.75 / h);
-        box.setFromObject(model);
-        model.position.y = -box.min.y;
-        scene.add(model);
-        currentModel = model;
-        mixer = new THREE.AnimationMixer(model);
-        actions = {};
+    // Charger le modèle depuis le premier GLB disponible
+    let baseGltf = null;
+    for (const p of ANIM_PATHS) {
+        try { baseGltf = await new Promise((res, rej) => loader.load(p, res, undefined, rej)); break; }
+        catch {}
+    }
+    if (!baseGltf) { document.getElementById('status').textContent = '⚠ Aucun fichier animation trouvé.'; return; }
 
-        const clips = [...gltf.animations].sort((a, b) => a.name.localeCompare(b.name));
-        document.getElementById('status').textContent = 'UAL' + n + ' chargé ✓';
-        document.getElementById('count').textContent  = clips.length + ' animations';
+    const model = baseGltf.scene;
+    const box = new THREE.Box3().setFromObject(model);
+    const h = box.max.y - box.min.y;
+    model.scale.setScalar(1.75 / h);
+    box.setFromObject(model);
+    model.position.y = -box.min.y;
+    scene.add(model);
+    currentModel = model;
+    mixer = new THREE.AnimationMixer(model);
 
-        const listEl = document.getElementById('list');
-        for (const clip of clips) {
-            const action = mixer.clipAction(clip);
-            actions[clip.name] = action;
-            const btn = document.createElement('div');
-            btn.className = 'clip';
-            btn.innerHTML = clip.name + '<span class="dur">' + clip.duration.toFixed(2) + 's</span>';
-            btn.addEventListener('click', () => {
-                if (active) active.fadeOut(0.2);
-                action.reset().fadeIn(0.2).play();
-                active = action;
-                document.querySelectorAll('#list .clip').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-            listEl.appendChild(btn);
+    // Fusionner tous les clips (priorité croissante : UAL1 Std → UAL1 Src → UAL2 Std → UAL2 Src)
+    const clipMap = new Map();
+    const results = await Promise.allSettled(
+        ANIM_PATHS.map(p => new Promise((res, rej) => loader.load(p, res, undefined, rej)))
+    );
+    for (const r of results) {
+        if (r.status === 'fulfilled') {
+            for (const clip of r.value.animations) clipMap.set(clip.name, clip);
         }
-        if (clips.length > 0) listEl.children[0].click();
-    },
-    (xhr) => {
-        const pct = xhr.total ? Math.round(xhr.loaded / xhr.total * 100) : '...';
-        document.getElementById('status').textContent = 'Chargement ' + pct + '%';
-    },
-    (err) => {
-        document.getElementById('status').textContent = '⚠ Erreur : ' + err.message;
-        console.error(err);
-    });
+    }
+    const clips = [...clipMap.values()].sort((a, b) => a.name.localeCompare(b.name));
+
+    document.getElementById('status').textContent = clips.length + ' animations chargées';
+    document.getElementById('count').textContent  = '';
+
+    const listEl = document.getElementById('list');
+    for (const clip of clips) {
+        const action = mixer.clipAction(clip);
+        const btn = document.createElement('div');
+        btn.className = 'clip';
+        btn.innerHTML = clip.name + '<span class="dur">' + clip.duration.toFixed(2) + 's</span>';
+        btn.addEventListener('click', () => {
+            if (active) active.fadeOut(0.2);
+            action.reset().fadeIn(0.2).play();
+            active = action;
+            document.querySelectorAll('#list .clip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+        listEl.appendChild(btn);
+    }
+    if (clips.length > 0) listEl.children[0].click();
 }
 
-window.switchLib = function(n) {
-    document.getElementById('btn-ual1').classList.toggle('active', n === 1);
-    document.getElementById('btn-ual2').classList.toggle('active', n === 2);
-    loadLib(n);
-};
-
-loadLib(2); // UAL2 par défaut
+loadAllAnims();
 
 const clock = new THREE.Clock();
 (function animate() {

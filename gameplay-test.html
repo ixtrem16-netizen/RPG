@@ -368,9 +368,12 @@ import { LiveSync }         from './src/live-sync.js';
 // ═══════════════════════════════════════════════════════════════
 //  CONFIG — Chemins
 // ═══════════════════════════════════════════════════════════════
+// Priorité croissante : Standard < Source. Les fichiers Source (Patreon)
+// sont optionnels — s'ils manquent, les Standard sont utilisés en fallback.
 const ANIM_SOURCES = [
-    'assets/characters/animations/UAL1_Source.glb',
+    'assets/characters/animations/UAL1_Standard.glb',
     'assets/characters/animations/UAL2_Standard.glb',
+    'assets/characters/animations/UAL1_Source.glb',
     'assets/characters/animations/UAL2_Source.glb',
 ];
 const P_OUTFIT = 'assets/characters/outfits/';
@@ -1405,14 +1408,8 @@ async function loadCharacter(cfg) {
     setLoadSub('Chargement outfit…');
     const meshGltf  = await loadGLTF(cfg.meshUrl);
     setLoadProgress(15);
-    setLoadSub('Chargement animations UAL1 Source…');
-    const animGltf1 = await loadGLTF(ANIM_SOURCES[0]);
-    setLoadProgress(40);
-    setLoadSub('Chargement animations UAL2 Standard…');
-    const animGltf2 = await loadGLTF(ANIM_SOURCES[1]);
-    setLoadProgress(55);
-    setLoadSub('Chargement animations UAL2 Source…');
-    const animGltf3 = await loadGLTF(ANIM_SOURCES[2]);
+    setLoadSub('Chargement animations…');
+    const animResults = await Promise.allSettled(ANIM_SOURCES.map(p => loadGLTF(p)));
     setLoadProgress(70);
     setLoadSub('Chargement corps de base…');
     const baseGltf  = await loadGLTF(cfg.baseUrl);
@@ -1456,11 +1453,13 @@ async function loadCharacter(cfg) {
     boneRestPos   = {};
     root.traverse(n => { if (n.isBone) boneRestPos[n.name] = n.position.clone(); });
 
-    // Index clips — UAL1 → UAL2 Standard → UAL2 Source (dernier = priorité)
+    // Index clips — priorité croissante (Std < Source), fichiers manquants ignorés
     const available = {};
-    for (const clip of animGltf1.animations) available[clip.name] = clip;
-    for (const clip of animGltf2.animations) available[clip.name] = clip;
-    for (const clip of animGltf3.animations) available[clip.name] = clip;
+    for (const r of animResults) {
+        if (r.status === 'fulfilled') {
+            for (const clip of r.value.animations) available[clip.name] = clip;
+        }
+    }
     console.log(`[GT] ${Object.keys(available).length} clips disponibles`);
 
     // Enregistrer les actions

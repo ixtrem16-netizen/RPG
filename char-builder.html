@@ -324,12 +324,6 @@ input[type=range]::-moz-range-thumb {
 
     <div class="section" style="flex:1;display:flex;flex-direction:column;">
         <div class="section-title">Animations</div>
-        <div id="ual-row">
-            <div class="ual-btn" data-ual="1">UAL 1</div>
-            <div class="ual-btn" data-ual="3">UAL 1 Src</div>
-            <div class="ual-btn active" data-ual="2">UAL 2</div>
-            <div class="ual-btn" data-ual="4">UAL 2 Src</div>
-        </div>
         <input id="clip-search" type="text" placeholder="Filtrer clips...">
         <div id="clip-list" style="overflow-y:auto;flex:1;"></div>
     </div>
@@ -348,10 +342,12 @@ const P_OUTFIT = 'assets/characters/outfits/';
 const P_HAIR   = 'assets/characters/hair/';
 const P_BODY   = { M:'assets/characters/bodies/Superhero_Male_FullBody.gltf',
                    F:'assets/characters/bodies/Superhero_Female_FullBody.gltf' };
-const P_UAL    = { 1:'assets/characters/animations/UAL1_Standard.glb',
-                   2:'assets/characters/animations/UAL2_Standard.glb',
-                   3:'assets/characters/animations/UAL1_Source.glb',
-                   4:'assets/characters/animations/UAL2_Source.glb' };
+const P_UAL = [
+    'assets/characters/animations/UAL1_Standard.glb',
+    'assets/characters/animations/UAL1_Source.glb',
+    'assets/characters/animations/UAL2_Standard.glb',
+    'assets/characters/animations/UAL2_Source.glb',
+];
 
 // ── Scène ─────────────────────────────────────────────────────
 const vp = document.getElementById('viewport');
@@ -403,7 +399,7 @@ const state = { body:'M', outfit:'Male_Ranger', hair:'', beard:'', texVariant:1 
 let outfitRoot = null, bodyRoot = null;
 let mixerOutfit = null, mixerBody = null;
 let activeActionOutfit = null, activeActionBody = null;
-let ualGltf = null, currentUAL = 2, allClips = [], clipFilter = '';
+let ualGltf = null, allClips = [], clipFilter = '';
 let headBone = null;
 const headWP = new THREE.Vector3();
 
@@ -866,7 +862,7 @@ async function rebuild() {
         applySkinColor();
 
         // Animations sur les deux mixers
-        if (ualGltf) buildClips(); else loadUAL(currentUAL);
+        if (ualGltf) buildClips(); else loadUAL();
 
         // Appliquer les scales chargés depuis une config (avant buildMeshSliders)
         if (_pendingBoneScales) {
@@ -900,13 +896,20 @@ async function swapSlot(slot, gltfName) {
     updateStatus();
 }
 
-// ── Animations ────────────────────────────────────────────────
-function loadUAL(n) {
-    currentUAL = n;
-    ualGltf = null;
+// ── Animations (toutes libs fusionnées) ──────────────────────
+async function loadUAL() {
     document.getElementById('clip-list').innerHTML =
-        '<div style="padding:6px 8px;font-size:9px;opacity:.3;letter-spacing:2px">Chargement UAL'+n+'...</div>';
-    loadCached(P_UAL[n]).then(gltf => { ualGltf=gltf; if(mixerOutfit) buildClips(); }).catch(console.error);
+        '<div style="padding:6px 8px;font-size:9px;opacity:.3;letter-spacing:2px">Chargement animations...</div>';
+    const results = await Promise.allSettled(P_UAL.map(p => loadCached(p)));
+    const clipMap = new Map();
+    for (const r of results) {
+        if (r.status === 'fulfilled') {
+            for (const clip of r.value.animations) clipMap.set(clip.name, clip);
+        }
+    }
+    // Créer un faux ualGltf pour compatibilité avec buildClips
+    ualGltf = { animations: [...clipMap.values()] };
+    if (mixerOutfit) buildClips();
 }
 
 function buildClips() {
@@ -992,11 +995,6 @@ document.querySelectorAll('#beard-btns .opt-btn').forEach(btn => btn.addEventLis
     swapSlot('beard', state.beard);
 }));
 
-document.querySelectorAll('.ual-btn').forEach(btn => btn.addEventListener('click', () => {
-    document.querySelectorAll('.ual-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    loadUAL(parseInt(btn.dataset.ual));
-}));
 
 document.getElementById('clip-search').addEventListener('input', e => {
     clipFilter = e.target.value; renderClips();
@@ -1574,7 +1572,7 @@ document.getElementById('config-save-btn').addEventListener('click', () => {
 
 // ── Init ──────────────────────────────────────────────────────
 rebuild();
-loadUAL(2);
+loadUAL();
 renderConfigList();
 
 // ── Boucle ────────────────────────────────────────────────────
