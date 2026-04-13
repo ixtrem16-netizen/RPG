@@ -263,59 +263,45 @@ canvas { display:block; width:100vw; height:100vh; }
     display:none; text-align:center;
 }
 
-/* ── Weapon panel (grip editor uniquement — masqué par défaut) ── */
-#weapon-panel {
-    position:absolute; bottom:80px; left:12px;
-    background:rgba(0,0,0,0.82); border:1px solid rgba(200,184,154,0.15);
-    padding:8px 10px; width:210px; pointer-events:all;
-    display:none;
+/* ── Animation Scrubber (debug frame-by-frame) ── */
+#anim-scrubber {
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+    background:rgba(12,8,4,0.93); border:1px solid rgba(200,184,154,0.28);
+    border-radius:7px; padding:9px 14px; color:#c8b89a;
+    font:12px/1.5 monospace; gap:7px; min-width:295px;
+    z-index:900; user-select:none; pointer-events:all;
+    display:none; flex-direction:column;
+    box-shadow:0 4px 20px rgba(0,0,0,0.6);
 }
-#weapon-panel .wp-title {
-    font-size:8px; letter-spacing:3px; text-transform:uppercase;
-    color:rgba(200,184,154,0.3); margin-bottom:7px;
+#anim-scrubber.visible { display:flex; }
+#anim-scrubber-title {
+    font-size:9px; opacity:0.5; text-align:center;
+    letter-spacing:2px; text-transform:uppercase;
 }
-#weapon-panel .wp-slot { margin-bottom:8px; }
-#weapon-panel .wp-slot-label {
-    font-size:8px; letter-spacing:2px; text-transform:uppercase;
-    color:rgba(200,184,154,0.45); margin-bottom:4px;
+#anim-scrubber-info {
+    text-align:center; font-size:11px; color:#e8d8b4;
+    min-height:1.5em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-#weapon-panel .wp-btns { display:flex; flex-wrap:wrap; gap:3px; }
-#weapon-panel .wp-btn {
-    font-size:8px; letter-spacing:0.5px; text-transform:uppercase;
-    background:rgba(255,255,255,0.04); border:1px solid rgba(200,184,154,0.18);
-    color:rgba(200,184,154,0.5); padding:3px 6px; cursor:pointer;
-    border-radius:2px; transition:all 0.1s;
+#anim-scrubber-btns { display:flex; gap:5px; justify-content:center; align-items:center; }
+#anim-scrubber-btns button {
+    background:rgba(200,184,154,0.08); border:1px solid rgba(200,184,154,0.2);
+    color:#c8b89a; border-radius:4px; padding:5px 10px; cursor:pointer;
+    font-size:14px; line-height:1; pointer-events:all; transition:background 0.1s;
 }
-#weapon-panel .wp-btn:hover { background:rgba(200,184,154,0.1); color:#d4a84b; }
-#weapon-panel .wp-btn.active {
-    background:rgba(212,168,75,0.18); border-color:rgba(212,168,75,0.5); color:#d4a84b;
+#anim-scrubber-btns button:hover { background:rgba(200,184,154,0.22); }
+#anim-scrubber-btns .scr-pause.paused {
+    background:rgba(200,100,50,0.28); border-color:rgba(200,100,50,0.55);
 }
-/* Grip tuning */
-#wp-grip {
-    border-top:1px solid rgba(200,184,154,0.08); margin-top:6px; padding-top:6px;
-    display:none;
+#anim-scrubber-fps {
+    display:flex; gap:6px; align-items:center; font-size:10px;
+    justify-content:center; color:rgba(200,184,154,0.5);
 }
-#wp-grip .wg-title {
-    font-size:7px; letter-spacing:2px; text-transform:uppercase;
-    color:rgba(200,184,154,0.3); margin-bottom:5px; display:flex;
-    justify-content:space-between; align-items:center;
+#scr-fps {
+    width:40px; background:rgba(0,0,0,0.5); border:1px solid rgba(200,184,154,0.2);
+    color:#c8b89a; border-radius:3px; padding:2px 4px;
+    font:11px monospace; text-align:center;
 }
-#wp-grip .wg-log {
-    font-size:7px; cursor:pointer; color:rgba(212,168,75,0.6);
-    background:none; border:none; padding:0; letter-spacing:1px; text-transform:uppercase;
-}
-#wp-grip .wg-row {
-    display:flex; align-items:center; gap:4px; margin-bottom:3px;
-}
-#wp-grip .wg-lbl {
-    font-size:8px; color:rgba(200,184,154,0.4); min-width:36px;
-}
-#wp-grip .wg-val {
-    font-size:8px; color:#d4a84b; min-width:38px; text-align:right;
-}
-#wp-grip input[type=range] {
-    flex:1; height:2px; accent-color:#c8a050; cursor:pointer;
-}
+
 </style>
 <script type="importmap">
 {
@@ -331,45 +317,45 @@ canvas { display:block; width:100vw; height:100vh; }
 
 <div id="hud">
   <div id="state-dbg">
-    <div class="lbl">État</div>
+    <div class="lbl" data-i18n="gt.debug.state">État</div>
     <div class="anim-name" id="dbg-anim">—</div>
-    <div class="lbl" style="margin-top:4px">Mode combat</div>
-    <div class="val" id="dbg-combat">Aucun</div>
-    <div class="lbl" style="margin-top:4px">Vitesse / Sol</div>
+    <div class="lbl" style="margin-top:4px" data-i18n="gt.debug.combat">Mode combat</div>
+    <div class="val" id="dbg-combat" data-i18n="gt.combat.none">Aucun</div>
+    <div class="lbl" style="margin-top:4px" data-i18n="gt.debug.speed">Vitesse / Sol</div>
     <div class="val" id="dbg-phys">—</div>
-    <div class="lbl" style="margin-top:4px">Position</div>
+    <div class="lbl" style="margin-top:4px" data-i18n="gt.debug.pos">Position</div>
     <div class="val" id="dbg-pos">—</div>
   </div>
 
   <div id="key-legend">
-    <div class="ktitle">Contrôles</div>
-    <div class="krow"><span class="kkey">W A S D</span><span class="kdesc">Déplacer</span></div>
-    <div class="krow"><span class="kkey">Shift</span><span class="kdesc">Sprint</span></div>
-    <div class="krow"><span class="kkey">Espace</span><span class="kdesc">Sauter</span></div>
-    <div class="krow"><span class="kkey">C</span><span class="kdesc">Accroupir</span></div>
-    <div class="krow"><span class="kkey">Caps Lock</span><span class="kdesc">Marche / Course</span></div>
-    <div class="krow"><span class="kkey">Ctrl</span><span class="kdesc">Ramper</span></div>
-    <div class="krow"><span class="kkey">F</span><span class="kdesc">Interagir / Grimper</span></div>
-    <div class="krow"><span class="kkey">R</span><span class="kdesc">Roulade</span></div>
-    <div class="krow"><span class="kkey">Q / E</span><span class="kdesc">Lean caméra G/D</span></div>
-    <div class="krow"><span class="kkey">Shift+Q/E</span><span class="kdesc">Esquive G/D</span></div>
+    <div class="ktitle" data-i18n="gt.controls.title">Contrôles</div>
+    <div class="krow"><span class="kkey">W A S D</span><span class="kdesc" data-i18n="gt.ctrl.move">Déplacer</span></div>
+    <div class="krow"><span class="kkey">Shift</span><span class="kdesc" data-i18n="gt.ctrl.sprint">Sprint</span></div>
+    <div class="krow"><span class="kkey">Espace</span><span class="kdesc" data-i18n="gt.ctrl.jump">Sauter</span></div>
+    <div class="krow"><span class="kkey">C</span><span class="kdesc" data-i18n="gt.ctrl.crouch">Accroupir</span></div>
+    <div class="krow"><span class="kkey">Caps Lock</span><span class="kdesc" data-i18n="gt.ctrl.walk">Marche / Course</span></div>
+    <div class="krow"><span class="kkey">Ctrl</span><span class="kdesc" data-i18n="gt.ctrl.crawl">Ramper</span></div>
+    <div class="krow"><span class="kkey">F</span><span class="kdesc" data-i18n="gt.ctrl.interact">Interagir / Grimper</span></div>
+    <div class="krow"><span class="kkey">R</span><span class="kdesc" data-i18n="gt.ctrl.roll">Roulade</span></div>
+    <div class="krow"><span class="kkey">Q / E</span><span class="kdesc" data-i18n="gt.ctrl.lean">Lean caméra G/D</span></div>
+    <div class="krow"><span class="kkey">Shift+Q/E</span><span class="kdesc" data-i18n="gt.ctrl.dodge">Esquive G/D</span></div>
     <div class="ksep"></div>
-    <div class="krow"><span class="kkey">1 – 0</span><span class="kdesc">Slots belt (équiper)</span></div>
-    <div class="krow"><span class="kkey">Clic droit belt</span><span class="kdesc">Assigner item</span></div>
-    <div class="krow"><span class="kkey">Clic G</span><span class="kdesc">Attaquer</span></div>
-    <div class="krow"><span class="kkey">K</span><span class="kdesc">Coup de pied</span></div>
-    <div class="krow"><span class="kkey">Clic D</span><span class="kdesc">Bloquer / Viser</span></div>
+    <div class="krow"><span class="kkey">1 – 0</span><span class="kdesc" data-i18n="gt.ctrl.belt">Slots belt (équiper)</span></div>
+    <div class="krow"><span class="kkey">Clic droit belt</span><span class="kdesc" data-i18n="gt.ctrl.assign">Assigner item</span></div>
+    <div class="krow"><span class="kkey">Clic G</span><span class="kdesc" data-i18n="gt.ctrl.attack">Attaquer</span></div>
+    <div class="krow"><span class="kkey">K</span><span class="kdesc" data-i18n="gt.ctrl.kick">Coup de pied</span></div>
+    <div class="krow"><span class="kkey">Clic D</span><span class="kdesc" data-i18n="gt.ctrl.block">Bloquer / Viser</span></div>
     <div class="ksep"></div>
-    <div class="krow"><span class="kkey">G (tenir)</span><span class="kdesc">Roue émotes</span></div>
-    <div class="krow"><span class="kkey">P</span><span class="kdesc">Changer de perso</span></div>
-    <div class="krow"><span class="kkey">Tab</span><span class="kdesc">Cursor lock</span></div>
-    <div class="krow"><span class="kkey">V</span><span class="kdesc">1re / 3e personne</span></div>
-    <div class="krow"><span class="kkey">Molette</span><span class="kdesc">Zoom caméra</span></div>
-    <div class="krow"><span class="kkey">Clic D drag</span><span class="kdesc">Orbite caméra</span></div>
+    <div class="krow"><span class="kkey">G (tenir)</span><span class="kdesc" data-i18n="gt.ctrl.emote">Roue émotes</span></div>
+    <div class="krow"><span class="kkey">P</span><span class="kdesc" data-i18n="gt.ctrl.char">Changer de perso</span></div>
+    <div class="krow"><span class="kkey">Tab</span><span class="kdesc" data-i18n="gt.ctrl.lock">Cursor lock</span></div>
+    <div class="krow"><span class="kkey">V</span><span class="kdesc" data-i18n="gt.ctrl.cam">1re / 3e personne</span></div>
+    <div class="krow"><span class="kkey">Molette</span><span class="kdesc" data-i18n="gt.ctrl.zoom">Zoom caméra</span></div>
+    <div class="krow"><span class="kkey">Clic D drag</span><span class="kdesc" data-i18n="gt.ctrl.orbit">Orbite caméra</span></div>
   </div>
 
   <div id="stamina-wrap">
-    <div id="stamina-label">Endurance</div>
+    <div id="stamina-label" data-i18n="gt.stamina">Endurance</div>
     <div id="stamina-bar-bg"><div id="stamina-bar"></div></div>
   </div>
 
@@ -380,54 +366,24 @@ canvas { display:block; width:100vw; height:100vh; }
 
   <div id="crosshair"></div>
   <div id="live-toast"></div>
-  <div id="climb-prompt">F / Espace — Grimper &nbsp;|&nbsp; (saut vers le mur = auto-grab)</div>
+  <div id="climb-prompt" data-i18n="gt.climb.prompt">F / Espace — Grimper &nbsp;|&nbsp; (saut vers le mur = auto-grab)</div>
   <div id="notif"></div>
 
   <!-- Panneau sélecteur de personnage -->
   <div id="char-panel">
     <div id="char-panel-hdr">
-      <span>Personnage</span>
-      <button id="char-panel-close" title="Fermer">&#x2715;</button>
+      <span data-i18n="gt.char.panel">Personnage</span>
+      <button id="char-panel-close" title="Fermer" data-i18n-title="gt.char.close.title">&#x2715;</button>
     </div>
     <div id="char-panel-list"></div>
-    <div id="char-panel-hint">P — Ouvrir / Fermer</div>
+    <div id="char-panel-hint" data-i18n="gt.char.hint">P — Ouvrir / Fermer</div>
   </div>
-  <button id="char-panel-toggle" title="Changer de personnage (P)">Perso</button>
+  <button id="char-panel-toggle" title="Changer de personnage (P)" data-i18n="gt.char.toggle.btn" data-i18n-title="gt.char.toggle.title">Perso</button>
   <button id="kick-btn" onclick="doKick()"></button>
 
   <!-- Belt — peuplée dynamiquement par _buildBelt() -->
   <div id="belt"></div>
 
-  <div id="weapon-panel">
-    <div class="wp-title">Armes</div>
-    <div class="wp-slot">
-      <div class="wp-slot-label">Main droite</div>
-      <div class="wp-btns" id="wp-btns-R"></div>
-    </div>
-    <div class="wp-slot">
-      <div class="wp-slot-label">Main gauche</div>
-      <div class="wp-btns" id="wp-btns-L"></div>
-    </div>
-    <div id="wp-grip">
-      <div class="wg-title">
-        <span>Réglage grip</span>
-        <button class="wg-log" onclick="logGripOffsets()">💾 Sauvegarder</button>
-      </div>
-      <div class="wg-row"><span class="wg-lbl">Pos X</span><input type="range" id="wg-px" min="-0.3" max="0.3" step="0.005"><span class="wg-val" id="wg-px-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Pos Y</span><input type="range" id="wg-py" min="-0.3" max="0.3" step="0.005"><span class="wg-val" id="wg-py-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Pos Z</span><input type="range" id="wg-pz" min="-0.3" max="0.3" step="0.005"><span class="wg-val" id="wg-pz-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Rot X</span><input type="range" id="wg-rx" min="-3.15" max="3.15" step="0.05"><span class="wg-val" id="wg-rx-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Rot Y</span><input type="range" id="wg-ry" min="-3.15" max="3.15" step="0.05"><span class="wg-val" id="wg-ry-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Rot Z</span><input type="range" id="wg-rz" min="-3.15" max="3.15" step="0.05"><span class="wg-val" id="wg-rz-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Scale</span><input type="range" id="wg-sc" min="0.3" max="3.0" step="0.05"><span class="wg-val" id="wg-sc-v">1</span></div>
-      <div style="border-top:1px solid rgba(200,184,154,0.08);margin:4px 0 3px;font-size:7px;letter-spacing:1.5px;color:rgba(200,184,154,0.25);">― PIVOT (rotation au centre) ―</div>
-      <div class="wg-row"><span class="wg-lbl">Roll X</span><input type="range" id="wg-rlx" min="-3.15" max="3.15" step="0.02"><span class="wg-val" id="wg-rlx-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Roll Y</span><input type="range" id="wg-ty"  min="-3.15" max="3.15" step="0.02"><span class="wg-val" id="wg-ty-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Roll Z</span><input type="range" id="wg-rlz" min="-3.15" max="3.15" step="0.02"><span class="wg-val" id="wg-rlz-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Piv X</span><input type="range" id="wg-pvx" min="-0.4" max="0.4" step="0.005"><span class="wg-val" id="wg-pvx-v">0</span></div>
-      <div class="wg-row"><span class="wg-lbl">Piv Z</span><input type="range" id="wg-pvz" min="-0.4" max="0.4" step="0.005"><span class="wg-val" id="wg-pvz-v">0</span></div>
-    </div>
-  </div>
 </div>
 
 <!-- Emote wheel (outside hud for z-index) -->
@@ -440,7 +396,25 @@ canvas { display:block; width:100vw; height:100vh; }
 <div id="loading">
   <h1>Gameplay Test</h1>
   <div id="loading-bar-bg"><div id="loading-bar"></div></div>
-  <div id="loading-sub">Chargement personnage…</div>
+  <div id="loading-sub" data-i18n="gt.loading">Chargement personnage…</div>
+</div>
+
+<!-- Animation Scrubber (debug frame-by-frame) — toggle F2 -->
+<div id="anim-scrubber">
+  <div id="anim-scrubber-title">⏱ Frame Scrubber — F2</div>
+  <div id="anim-scrubber-info">— aucune animation —</div>
+  <div id="anim-scrubber-btns">
+    <button id="scr-tostart" title="Aller au début">⏮</button>
+    <button id="scr-back"    title="- 1 frame  [ , ]">◀</button>
+    <button id="scr-playpause" class="scr-pause" title="Pause  [ clic ]">⏸</button>
+    <button id="scr-fwd"    title="+ 1 frame  [ . ]">▶</button>
+    <button id="scr-toend"  title="Aller à la fin">⏭</button>
+  </div>
+  <div id="anim-scrubber-fps">
+    <span>FPS :</span>
+    <input type="number" id="scr-fps" value="30" min="1" max="120">
+    <span>| , / . pour frame step (quand pausé)</span>
+  </div>
 </div>
 
 <script type="module">
@@ -601,6 +575,7 @@ const CLIP_MAP = {
     melee_uppercut:'Melee_Uppercut', melee_knee:'Melee_Knee',
     // Idles / Emotes
     surprise:'Surprise', idle_shield:'Idle_Shield_Loop',
+    sprint_shield:'Sprint_Shield_Loop',
     idle_rail:'Idle_Rail_Loop',
     // Actions monde
     fish_cast:'Fish_Cast', fish_cast_idle:'Fish_Cast_Idle_Loop', fish_reel:'Fish_Reel',
@@ -1143,6 +1118,11 @@ window.addEventListener('keydown', e => {
     if (GAME_KEYS.has(e.code)) e.preventDefault();
     // Personnage — toggle sur P
     if (e.code === 'KeyP') { toggleCharPanel(); return; }
+    // Frame Scrubber — F2 toggle
+    if (e.key === 'F2') { e.preventDefault(); toggleAnimScrubber(); return; }
+    // Frame stepping (seulement quand scrubber pausé)
+    if (animPaused && e.code === 'Comma')  { e.preventDefault(); _scrubStep(-1); return; }
+    if (animPaused && e.code === 'Period') { e.preventDefault(); _scrubStep(1);  return; }
     // Inventaire — toggle sur I
     if (e.code === 'KeyI' && inventory) {
         if (inventory.isOpen) {
@@ -1382,6 +1362,8 @@ let inventory  = null;
 const actions  = {};       // nom clip → AnimationAction
 let activeAct  = null;
 let activeClip = '';
+let animPaused = false;          // frame scrubber : gèle le mixer quand true
+let _shieldLayerAction = null;   // couche additive haut-du-corps bouclier (réinitialisée au hot-reload)
 let yOffset    = 0;
 let boneOverrides = {};
 let boneRestPos   = {};
@@ -1583,7 +1565,6 @@ async function loadCharacter(cfg) {
     }
 
     buildGeoList();
-    _buildWeaponPanel();
     _buildBelt();
     setLoadProgress(100);
     playAnim('idle', 0.1);
@@ -1613,7 +1594,7 @@ function resolveNamedCfg(raw) {
 
 function getAllSavedConfigs() {
     const result = [];
-    result.push({ label:'★ Perso sauvegardé', sub:'Personnage joueur', cfg:resolveCharConfig(), player:true });
+    result.push({ label:window.i18nT('gt.char.saved'), sub:window.i18nT('gt.char.player'), cfg:resolveCharConfig(), player:true });
     try {
         const stored = JSON.parse(localStorage.getItem('darkrpg_configs_v1') || '[]');
         for (const raw of stored) {
@@ -1632,7 +1613,7 @@ function buildCharPanel() {
     list.innerHTML = '';
     const configs = getAllSavedConfigs();
     if (!configs.length) {
-        list.innerHTML = '<div style="padding:16px 14px;font-size:10px;color:rgba(200,184,154,0.25);font-style:italic;line-height:1.8">Aucun personnage sauvegardé.<br>Crée un perso dans le Char Builder.</div>';
+        list.innerHTML = `<div style="padding:16px 14px;font-size:10px;color:rgba(200,184,154,0.25);font-style:italic;line-height:1.8">${window.i18nT('gt.char.empty')}</div>`;
         return;
     }
     for (const entry of configs) {
@@ -1694,6 +1675,7 @@ async function hotReloadCharacter(cfg = null) {
     STATE.combatMode = 0; STATE.inCombatStance = false; STATE.blocking = false;
 
     // 2. Supprimer l'ancien personnage de la scène
+    _shieldLayerAction = null; // le mixer va être détruit — invalider le cache
     if (mixer) { try { mixer.stopAllActions(); } catch(e) {} mixer = null; }
     scene.remove(charRoot);
     charRoot.traverse(n => {
@@ -1743,31 +1725,30 @@ LiveSync.on('char-updated', () => hotReloadCharacter());
 // combat : 0=aucun 1=épée 2=poings 3=magie 4=arc 5=hache 6=couteau 7=pioche 8=torche -1=bouclier
 const WEAPON_DEFS = {
     // ── Armes physiques ──────────────────────────────────────────────
-    sword:   { label:'Épée',     icon:'⚔',  category:'weapon',  hand:'R',
+    sword:   { label:window.i18nT('gt.weapon.sword'),   icon:'⚔',  category:'weapon',  hand:'R',
                path:'assets/environment/props/Sword_Bronze.gltf',
                len:0.75, pos:[0,0.06,0.01], rot:[Math.PI/2,0,0], combat:1, hasBack:true },
-    axe:     { label:'Hache',    icon:'🪓',  category:'tool',    hand:'R',
+    axe:     { label:window.i18nT('gt.weapon.axe'),     icon:'🪓',  category:'tool',    hand:'R',
                path:'assets/environment/props/Axe_Bronze.gltf',
                len:0.55, pos:[0,0.05,0   ], rot:[Math.PI/2,0,0], combat:5 },
-    knife:   { label:'Couteau',  icon:'🗡',  category:'weapon',  hand:'R',
+    knife:   { label:window.i18nT('gt.weapon.knife'),   icon:'🗡',  category:'weapon',  hand:'R',
                path:'assets/environment/props/Table_Knife.gltf',
                len:0.22, pos:[0,0.03,0   ], rot:[Math.PI/2,0,0], combat:6 },
-    torch:   { label:'Torche',   icon:'🔦',  category:'utility', hand:'L',
+    torch:   { label:window.i18nT('gt.weapon.torch'),   icon:'🔦',  category:'utility', hand:'L',
                path:'assets/environment/props/CandleStick.gltf',
                len:0.35, pos:[0,0.04,0   ], rot:[Math.PI/2,0,0], combat:8 },
-    pickaxe: { label:'Pioche',   icon:'⛏',  category:'tool',    hand:'R',
+    pickaxe: { label:window.i18nT('gt.weapon.pickaxe'), icon:'⛏',  category:'tool',    hand:'R',
                path:'assets/environment/props/Pickaxe_Bronze.gltf',
                len:0.60, pos:[0,0.06,0.01], rot:[Math.PI/2,0,0], combat:7 },
-    shield:  { label:'Bouclier', icon:'🛡',  category:'shield',  hand:'L',
+    shield:  { label:window.i18nT('gt.weapon.shield'),  icon:'🛡',  category:'shield',  hand:'L',
                path:'assets/environment/props/Shield_Wooden.gltf',
                len:0.45, pos:[0,0,0.03   ], rot:[0,0,Math.PI/2], combat:-1 },
     // ── Stances virtuelles (hand: null — pas de mesh physique) ──────
-    fists:   { label:'Poings',   icon:'👊',  category:'weapon',  hand:null, path:null, combat:2 },
-    magic:   { label:'Magie',    icon:'✨',  category:'spell',   hand:null, path:null, combat:3 },
-    bow:     { label:'Arc',      icon:'🏹',  category:'ranged',  hand:null, path:null, combat:4 },
+    fists:   { label:window.i18nT('gt.weapon.fists'),   icon:'👊',  category:'weapon',  hand:null, path:null, combat:2 },
+    magic:   { label:window.i18nT('gt.weapon.magic'),   icon:'✨',  category:'spell',   hand:null, path:null, combat:3 },
+    bow:     { label:window.i18nT('gt.weapon.bow'),     icon:'🏹',  category:'ranged',  hand:null, path:null, combat:4 },
 };
 
-// Slots : quelles armes peuvent aller dans chaque main (pour le panel grip)
 const SLOT_WEAPONS = {
     R: ['sword','axe','knife','pickaxe'],
     L: ['shield','torch','sword','axe'],
@@ -1794,7 +1775,6 @@ let equippedL    = null;   // mesh main gauche
 let backSwordMesh = null;  // mesh épée holstérée dans le dos (spine_02)
 let activeKeyR   = 'none';
 let activeKeyL   = 'none';
-let gripEditSlot = null;   // slot en cours d'édition dans le panel grip
 
 function _findBone(name) {
     if (!charRoot) return null;
@@ -1907,12 +1887,17 @@ function _attachWeaponMesh(slot, key, gltf) {
     const bone = _findBone(slot === 'R' ? 'hand_r' : 'hand_l');
     if (!bone || !def || !gltf || !charRoot) return null;
 
+    // Éviter doublon main+holster : retirer le holster de cette arme si présent
+    const hKey = WEAPON_HOLSTER_KEY[key];
+    if (hKey && _holsterMeshes[hKey]) _removeHolsterMesh(hKey);
+
     const mesh = gltf.scene.clone(true);
     mesh.traverse(n => { n.castShadow = true; });
 
-    const box     = new THREE.Box3().setFromObject(mesh);
-    const meshLen = box.getSize(new THREE.Vector3()).length();
-    const sc      = (def.len / charRoot.scale.x) / meshLen;
+    const box  = new THREE.Box3().setFromObject(mesh);
+    const dims = box.getSize(new THREE.Vector3());
+    const baseScale = Math.max(dims.x, dims.y, dims.z) > 0.001
+        ? 1 / Math.max(dims.x, dims.y, dims.z) : 1;
 
     const g = _gripFor(key);
     const pivotGroup = new THREE.Group();
@@ -1920,12 +1905,12 @@ function _attachWeaponMesh(slot, key, gltf) {
     pivotGroup.rotation.set(g.rollX || 0, g.ty || 0, g.rollZ || 0);
     mesh.position.set(-(g.pivX || 0), 0, -(g.pivZ || 0));
     mesh.rotation.set(g.rx, g.ry, g.rz);
-    mesh.scale.setScalar(sc);
+    mesh.scale.setScalar(baseScale * (g.sc || 1));
 
     pivotGroup.add(mesh);
     bone.add(pivotGroup);
     mesh.userData._pivot     = pivotGroup;
-    mesh.userData._baseScale = sc;
+    mesh.userData._baseScale = baseScale;
 
     if (slot === 'R') { equippedR = mesh; activeKeyR = key; }
     else              { equippedL = mesh; activeKeyL = key; }
@@ -1978,8 +1963,8 @@ async function drawSword() {
     STATE.combatMode    = 1;
     STATE.inCombatStance = true;
     comboStep = 0; comboTimer = 0; attackCooldown = 0;
-    document.getElementById('dbg-combat').textContent  = 'Épée';
-    document.getElementById('combat-mode').textContent = '⚔ Épée';
+    document.getElementById('dbg-combat').textContent  = COMBAT_NAMES[1];
+    document.getElementById('combat-mode').textContent = COMBAT_ICONS[1] + ' ' + COMBAT_NAMES[1];
 
     // Jouer sword_enter, puis attacher l'épée à la fin de l'anim
     playAnim('sword_enter', 0.1, () => {
@@ -1992,29 +1977,34 @@ async function drawSword() {
         playAnim('sword_idle', 0.2);
     });
     STATE.oneShotLock = true;
-    showNotif('⚔ Épée');
+    showNotif(COMBAT_ICONS[1] + ' ' + COMBAT_NAMES[1]);
 }
 
-// Rengaine l'épée (joue sword_exit puis met au dos)
-function _sheathSword() {
+// Rengaine l'épée (joue sword_exit puis met au dos de façon synchrone)
+async function _sheathSword() {
     if (STATE.oneShotLock) return;
-    STATE.inCombatStance = false;
+    STATE.oneShotLock     = true;   // verrouiller AVANT le await (pas de re-entrée)
+    STATE.inCombatStance  = false;
     STATE.blocking        = false;
     attackBuffer          = false;
 
+    // Pré-charger le GLTF (quasi-instantané depuis le cache)
+    let swordGltf;
+    try { swordGltf = await loadGLTF(WEAPON_DEFS.sword.path); }
+    catch(e) { STATE.oneShotLock = false; return; }
+
     playAnim('sword_exit', 0.1, () => {
-        STATE.oneShotLock = false;
-        _clearSlot('R');
+        _clearSlot('R');                                      // retirer de la main
+        _attachHolsterMesh('sword_back', swordGltf);         // holster synchrone — plus de race condition
+        backSwordMesh = _holsterMeshes['sword_back']?.mesh || null;
         _applyWeaponCombatMode();
         _refreshWeaponUI();
-        _hideGripEditor();
         STATE.combatMode = 0;
         document.getElementById('dbg-combat').textContent  = '';
         document.getElementById('combat-mode').textContent = '—';
         playAnim('idle', 0.25);
-        _attachToBack('sword'); // async, fire-and-forget
+        STATE.oneShotLock = false;
     });
-    STATE.oneShotLock = true;
 }
 
 async function equipWeapon(slot, key) {
@@ -2026,12 +2016,15 @@ async function equipWeapon(slot, key) {
         _clearSlot(slot);
         _applyWeaponCombatMode();
         _refreshWeaponUI();
-        _hideGripEditor();
         return;
     }
 
     _clearSlot(slot);
-    if (key === 'none') { _applyWeaponCombatMode(); _refreshWeaponUI(); _hideGripEditor(); return; }
+    if (key === 'none') { _applyWeaponCombatMode(); _refreshWeaponUI(); return; }
+
+    // Éviter doublon main+holster : retirer le holster de cette arme si présent
+    const hKeyEquip = WEAPON_HOLSTER_KEY[key];
+    if (hKeyEquip && _holsterMeshes[hKeyEquip]) _removeHolsterMesh(hKeyEquip);
 
     const def = WEAPON_DEFS[key];
     if (!def) return;
@@ -2046,14 +2039,15 @@ async function equipWeapon(slot, key) {
     const mesh = gltf.scene.clone(true);
     mesh.traverse(n => { n.castShadow = true; });
 
-    // Normaliser à la longueur cible en espace monde
-    const box     = new THREE.Box3().setFromObject(mesh);
-    const meshLen = box.getSize(new THREE.Vector3()).length();
-    const sc      = (def.len / charRoot.scale.x) / meshLen;
-    mesh.scale.setScalar(sc);
+    // Même normalisation que le Grip Editor : 1 / maxDimension
+    const box  = new THREE.Box3().setFromObject(mesh);
+    const dims = box.getSize(new THREE.Vector3());
+    const baseScale = Math.max(dims.x, dims.y, dims.z) > 0.001
+        ? 1 / Math.max(dims.x, dims.y, dims.z) : 1;
 
     // Charger grip sauvegardé (ou défauts)
     const g = _gripFor(key);
+    mesh.scale.setScalar(baseScale * (g.sc || 1));
 
     // Groupe pivot — positionné au grip, rotations autour du centre
     const pivotGroup = new THREE.Group();
@@ -2067,14 +2061,13 @@ async function equipWeapon(slot, key) {
     pivotGroup.add(mesh);
     bone.add(pivotGroup);
     mesh.userData._pivot     = pivotGroup;
-    mesh.userData._baseScale = sc;
+    mesh.userData._baseScale = baseScale;
 
     if (slot === 'R') { equippedR = mesh; activeKeyR = key; }
     else              { equippedL = mesh; activeKeyL = key; }
 
     _applyWeaponCombatMode();
     _refreshWeaponUI();
-    _showGripEditor(slot, key, mesh);
     showNotif(def.label + (slot === 'R' ? ' ▶ main droite' : ' ▶ main gauche'));
 }
 
@@ -2102,8 +2095,7 @@ function _applyWeaponCombatMode() {
         : STATE.hasShield ? '🛡 Bouclier' : '—';
 }
 
-// ── Grip editor (sliders temps réel) ─────────────────────────────
-// ── Persistance des grips dans localStorage ───────────────────
+// ── Persistance des grips dans localStorage (lecture seule — sauvegarde via Grip Editor)
 const GRIP_STORAGE_KEY = 'darkrpg_weapon_grips_v2';
 // Note: HOLSTER_STORAGE_KEY déjà déclaré dans la section holster ci-dessus
 
@@ -2118,124 +2110,6 @@ function _gripFor(key) {
     return { px: def.pos[0], py: def.pos[1], pz: def.pos[2],
              rx: def.rot[0], ry: def.rot[1], rz: def.rot[2], sc: 1.0,
              ty: 0, pivX: 0, rollX: 0, rollZ: 0, pivZ: 0 };
-}
-// Rétrocompat save (depuis l'ancien grip panel interne)
-function _saveGrip(key, px, py, pz, rx, ry, rz, sc, ty=0, pivX=0, pivZ=0, rollX=0, rollZ=0) {
-    const all = _loadAllGrips();
-    if (!all[_currentCharKey]) all[_currentCharKey] = {};
-    all[_currentCharKey][key] = { px, py, pz, rx, ry, rz, sc, ty, pivX };
-    localStorage.setItem(GRIP_STORAGE_KEY, JSON.stringify(all));
-}
-
-function _showGripEditor(slot, key, mesh) {
-    gripEditSlot = slot;
-    document.getElementById('weapon-panel').style.display = 'block';
-    const grip = document.getElementById('wp-grip');
-    grip.style.display = 'block';
-
-    // Mémoriser le scale normalisé de base (avant multiplicateur)
-    if (!mesh.userData._baseScale) mesh.userData._baseScale = mesh.scale.x;
-
-    // Charger les offsets sauvegardés (ou défauts)
-    const g = _gripFor(key);
-
-    const setSlider = (id, val) => {
-        document.getElementById(id).value = val;
-        document.getElementById(id + '-v').textContent = (+val).toFixed(id === 'wg-sc' ? 2 : 3);
-    };
-    setSlider('wg-px', g.px); setSlider('wg-py', g.py); setSlider('wg-pz', g.pz);
-    setSlider('wg-rx', g.rx); setSlider('wg-ry', g.ry); setSlider('wg-rz', g.rz);
-    setSlider('wg-sc', g.sc);
-    setSlider('wg-ty',  g.ty);
-    setSlider('wg-rlx', g.rollX);
-    setSlider('wg-rlz', g.rollZ);
-    setSlider('wg-pvx', g.pivX);
-    setSlider('wg-pvz', g.pivZ);
-
-    // Appliquer immédiatement les offsets chargés
-    const pivot = mesh.userData._pivot;
-    if (pivot) { pivot.position.set(g.px, g.py, g.pz); pivot.rotation.set(g.rollX, g.ty, g.rollZ); }
-    mesh.position.set(-g.pivX, 0, -g.pivZ);
-    mesh.rotation.set(g.rx, g.ry, g.rz);
-    mesh.scale.setScalar(mesh.userData._baseScale * g.sc);
-
-    const update = () => {
-        const px   = +document.getElementById('wg-px').value;
-        const py   = +document.getElementById('wg-py').value;
-        const pz   = +document.getElementById('wg-pz').value;
-        const rx   = +document.getElementById('wg-rx').value;
-        const ry   = +document.getElementById('wg-ry').value;
-        const rz   = +document.getElementById('wg-rz').value;
-        const sc   = +document.getElementById('wg-sc').value;
-        const ty   = +document.getElementById('wg-ty').value;
-        const rollX= +document.getElementById('wg-rlx').value;
-        const rollZ= +document.getElementById('wg-rlz').value;
-        const pivX = +document.getElementById('wg-pvx').value;
-        const pivZ = +document.getElementById('wg-pvz').value;
-        document.getElementById('wg-px-v').textContent  = px.toFixed(3);
-        document.getElementById('wg-py-v').textContent  = py.toFixed(3);
-        document.getElementById('wg-pz-v').textContent  = pz.toFixed(3);
-        document.getElementById('wg-rx-v').textContent  = rx.toFixed(3);
-        document.getElementById('wg-ry-v').textContent  = ry.toFixed(3);
-        document.getElementById('wg-rz-v').textContent  = rz.toFixed(3);
-        document.getElementById('wg-sc-v').textContent  = sc.toFixed(2);
-        document.getElementById('wg-ty-v').textContent  = ty.toFixed(3);
-        document.getElementById('wg-rlx-v').textContent = rollX.toFixed(3);
-        document.getElementById('wg-rlz-v').textContent = rollZ.toFixed(3);
-        document.getElementById('wg-pvx-v').textContent = pivX.toFixed(3);
-        document.getElementById('wg-pvz-v').textContent = pivZ.toFixed(3);
-        // Pivot (groupe) = grip position + rotations au centre
-        const pivot = mesh.userData._pivot;
-        if (pivot) { pivot.position.set(px, py, pz); pivot.rotation.set(rollX, ty, rollZ); }
-        // Mesh dans le pivot = offset de centrage + orientation fine
-        mesh.position.set(-pivX, 0, -pivZ);
-        mesh.rotation.set(rx, ry, rz);
-        mesh.scale.setScalar(mesh.userData._baseScale * sc);
-        // Auto-sauvegarde à chaque changement
-        _saveGrip(key, px, py, pz, rx, ry, rz, sc, ty, pivX, pivZ, rollX, rollZ);
-    };
-
-    // Nettoyer les anciens listeners (re-attachement à chaque équipement)
-    const sliderIds = ['wg-px','wg-py','wg-pz','wg-rx','wg-ry','wg-rz','wg-sc','wg-ty','wg-rlx','wg-rlz','wg-pvx','wg-pvz'];
-    sliderIds.forEach(id => {
-        const el = document.getElementById(id);
-        const fresh = el.cloneNode(true);
-        el.parentNode.replaceChild(fresh, el);
-        document.getElementById(id).addEventListener('input', update);
-    });
-    // Re-attacher la valeur après clone
-    setSlider('wg-px', g.px); setSlider('wg-py', g.py); setSlider('wg-pz', g.pz);
-    setSlider('wg-rx', g.rx); setSlider('wg-ry', g.ry); setSlider('wg-rz', g.rz);
-    setSlider('wg-sc', g.sc);
-    setSlider('wg-ty',  g.ty);
-    setSlider('wg-rlx', g.rollX);
-    setSlider('wg-rlz', g.rollZ);
-    setSlider('wg-pvx', g.pivX);
-    setSlider('wg-pvz', g.pivZ);
-}
-
-function _hideGripEditor() {
-    document.getElementById('wp-grip').style.display = 'none';
-    document.getElementById('weapon-panel').style.display = 'none';
-    gripEditSlot = null;
-}
-
-function logGripOffsets() {
-    const key  = gripEditSlot === 'R' ? activeKeyR : activeKeyL;
-    const mesh = gripEditSlot === 'R' ? equippedR   : equippedL;
-    if (!mesh) return;
-    const pivot = mesh.userData._pivot;
-    const p     = pivot ? pivot.position : mesh.position;
-    const rollX = pivot ? pivot.rotation.x : 0;
-    const ty    = pivot ? pivot.rotation.y : 0;
-    const rollZ = pivot ? pivot.rotation.z : 0;
-    const r     = mesh.rotation;
-    const pivX  = -(mesh.position.x);
-    const pivZ  = -(mesh.position.z);
-    const sc    = mesh.scale.x / (mesh.userData._baseScale || mesh.scale.x);
-    _saveGrip(key, p.x, p.y, p.z, r.x, r.y, r.z, sc, ty, pivX, pivZ, rollX, rollZ);
-    console.log('[Grip]', `${key}: pos:[${p.x.toFixed(4)},${p.y.toFixed(4)},${p.z.toFixed(4)}] rot:[${r.x.toFixed(4)},${r.y.toFixed(4)},${r.z.toFixed(4)}] sc:${sc.toFixed(3)} pivot.rot:[${rollX.toFixed(4)},${ty.toFixed(4)},${rollZ.toFixed(4)}] piv:[${pivX.toFixed(4)},${pivZ.toFixed(4)}]`);
-    showNotif('✓ Grip sauvegardé — ' + key);
 }
 
 // ─── Icônes belt ────────────────────────────────────────────
@@ -2393,13 +2267,6 @@ function _buildBelt() {
 }
 
 function _refreshWeaponUI() {
-    // Panel grip
-    document.querySelectorAll('.wp-btn').forEach(btn => {
-        btn.classList.toggle('active',
-            (btn.dataset.slot === 'R' && btn.dataset.key === activeKeyR) ||
-            (btn.dataset.slot === 'L' && btn.dataset.key === activeKeyL)
-        );
-    });
     // Belt — 10 slots par index
     document.querySelectorAll('.belt-slot[data-belt-idx]').forEach(slot => {
         const idx = +slot.dataset.beltIdx;
@@ -2419,21 +2286,6 @@ function _setBeltKickCooldown(_on) {
     // Le kick n'a plus de slot dédié dans la belt — fonction conservée pour compatibilité
 }
 
-function _buildWeaponPanel() {
-    const addBtn = (containerId, slot, key) => {
-        const lbl = key === 'none' ? 'Aucune' : (WEAPON_DEFS[key]?.label ?? key);
-        const btn = document.createElement('button');
-        btn.className = 'wp-btn'; btn.dataset.slot = slot; btn.dataset.key = key;
-        btn.textContent = lbl;
-        btn.addEventListener('click', () => equipWeapon(slot, key));
-        document.getElementById(containerId).appendChild(btn);
-    };
-    addBtn('wp-btns-R', 'R', 'none');
-    for (const k of SLOT_WEAPONS.R) addBtn('wp-btns-R', 'R', k);
-    addBtn('wp-btns-L', 'L', 'none');
-    for (const k of SLOT_WEAPONS.L) addBtn('wp-btns-L', 'L', k);
-    _refreshWeaponUI();
-}
 
 // ═══════════════════════════════════════════════════════════════
 //  BELT — Activation par touche et assignation de slot
@@ -2454,9 +2306,9 @@ function activateBeltSlot(idx) {
             _clearSlot('R'); _clearSlot('L');
             exitCombatStance();
             STATE.combatMode = 0;
-            document.getElementById('dbg-combat').textContent = 'Aucun';
+            document.getElementById('dbg-combat').textContent = COMBAT_NAMES[0];
             document.getElementById('combat-mode').textContent = '—';
-            showNotif('Désarmé');
+            showNotif(window.i18nT('gt.notif.disarmed'));
         } else {
             // Retirer armes physiques si besoin
             if (activeKeyR !== 'none') { _clearSlot('R'); }
@@ -2493,7 +2345,7 @@ function _showBeltPicker(idx, slotEl) {
     // Vide en premier
     const empty = document.createElement('div');
     empty.className = 'bp-item empty-item' + (!BELT_CONFIG[idx] ? ' active' : '');
-    empty.textContent = '— Vide';
+    empty.textContent = window.i18nT('gt.belt.empty');
     empty.addEventListener('click', () => {
         BELT_CONFIG[idx] = null; _saveBeltConfig(); _buildBelt(); picker.remove();
     });
@@ -2574,7 +2426,7 @@ const LOOP_ANIMS = new Set([
     'slide_loop','swim_fwd','swim_idle',
     'wall_run_l','wall_run_r','sword_air_idle',
     'lift_air_idle','lift_air_fall',
-    'fish_cast_idle','mining','chop','idle_shield','idle_rail',
+    'fish_cast_idle','mining','chop','idle_shield','sprint_shield','idle_rail',
     'walk_fwd','walk_bwd','walk_l','walk_r','walk_carry',
     'sword_idle','sword_block','sword_dash','shield_dash',
     'spell_idle','spell2_idle','spell2_shoot',
@@ -2650,14 +2502,14 @@ function playAnim(name, crossfade=0.15, onEnd=null) {
 //  ROUE D'ÉMOTES
 // ═══════════════════════════════════════════════════════════════
 const EMOTES = [
-    { icon:'💃', name:'Dance',     anim:'dance',       loop:true  },
-    { icon:'🎉', name:'Célébrer', anim:'celebrate',   loop:false },
-    { icon:'😢', name:'Pleurer',  anim:'cry',         loop:false },
-    { icon:'🔄', name:'Backflip', anim:'backflip',    loop:false },
-    { icon:'🍺', name:'Boire',    anim:'drink',       loop:false },
-    { icon:'🪑', name:'S\'asseoir',anim:'sit_enter',  loop:true  },
-    { icon:'🧘', name:'Sol',      anim:'gnd_enter',   loop:true  },
-    { icon:'👋', name:'Saluer',   anim:'wave',        loop:true  },
+    { icon:'💃', name:window.i18nT('gt.emote.dance'),     anim:'dance',       loop:true  },
+    { icon:'🎉', name:window.i18nT('gt.emote.celebrate'), anim:'celebrate',   loop:false },
+    { icon:'😢', name:window.i18nT('gt.emote.cry'),       anim:'cry',         loop:false },
+    { icon:'🔄', name:window.i18nT('gt.emote.backflip'),  anim:'backflip',    loop:false },
+    { icon:'🍺', name:window.i18nT('gt.emote.drink'),     anim:'drink',       loop:false },
+    { icon:'🪑', name:window.i18nT('gt.emote.sit'),       anim:'sit_enter',   loop:true  },
+    { icon:'🧘', name:window.i18nT('gt.emote.floor'),     anim:'gnd_enter',   loop:true  },
+    { icon:'👋', name:window.i18nT('gt.emote.wave'),      anim:'wave',        loop:true  },
 ];
 
 let emoteWheelOpen = false;
@@ -2889,8 +2741,8 @@ function _updateInner(delta) {
     const rJust     = consumeKey('KeyR');
     const qJust     = consumeKey('KeyQ') && shift;          // Shift+Q = esquive gauche
     const eJust     = consumeKey('KeyE') && shift;          // Shift+E = esquive droite
-    const blockHeld = keys.has('KeyQ') && !shift;           // Q (sans Shift) = garde / block
-    const blockJust = consumeKey('KeyQ') && !shift;         // Q press = viser (magie/arc)
+    const blockHeld = mouseR;                                // Clic droit tenu = garde / block
+    const blockJust = mouseRJust;                            // Clic droit press = entrer en garde / viser
     const gHeld = keys.has('KeyG');
     const moving = fwd || bck || lft || rgt;
 
@@ -2917,8 +2769,8 @@ function _updateInner(delta) {
     if (consumeKey('Tab')) toggleCamLock();
     if (consumeKey('KeyV')) toggleCamMode();
 
-    // Lean (Q/E sans Shift) — Q sert aussi de touche de garde en combat
-    CAM.leanTarget = blockHeld ? -1 : (!shift && keys.has('KeyE')) ? 1 : 0;
+    // Lean (Q/E sans Shift) — indépendant du block (block = clic droit)
+    CAM.leanTarget = (keys.has('KeyQ') && !shift) ? -1 : (!shift && keys.has('KeyE')) ? 1 : 0;
 
     // ── Si emote en cours, gestion limitée ────────────────────
     if (STATE.sitting || STATE.groundSitting) {
@@ -2977,13 +2829,14 @@ function _updateInner(delta) {
         );
         if (isMoving && STATE.traversal !== 'slide' && !landingLocked) {
             // En attaque : vitesse réduite (footwork) sans changer d'orientation
-            // En block  : vitesse réduite (30%), pas de sprint, pivotement limité
+            // En block  : vitesse réduite (30%) — sauf sprint+bouclier : vitesse pleine
             const atkMult   = STATE.attackLock ? 0.25 : 1.0;
-            const blockMult = STATE.blocking   ? 0.30 : 1.0;
+            const shieldSprint = STATE.blocking && STATE.hasShield && isSprinting;
+            const blockMult = STATE.blocking ? (shieldSprint ? 1.0 : 0.30) : 1.0;
             const spd = getMoveSpeed(false) * atkMult * blockMult;
             STATE.pos.x += _moveDir.x * spd * delta;
             STATE.pos.z += _moveDir.z * spd * delta;
-            if (!STATE.attackLock && !STATE.blocking) {
+            if (!STATE.attackLock && (!STATE.blocking || shieldSprint)) {
                 STATE.yawTarget = Math.atan2(_moveDir.x, _moveDir.z);
                 if (isSprinting) STATE.stamina = Math.max(0, STATE.stamina - 15 * delta);
             }
@@ -3133,8 +2986,8 @@ function _updateInner(delta) {
         showNotif(STATE.walkToggle ? 'Marche' : 'Course');
     }
 
-    // Sprint / saut annule le block
-    if (STATE.blocking && (isSprinting || spaceJust)) {
+    // Saut annule toujours le block ; sprint l'annule sauf si bouclier (→ sprint_shield)
+    if (STATE.blocking && (spaceJust || (isSprinting && !STATE.hasShield))) {
         STATE.blocking = false;
         playAnim(getCombatIdleAnim(), 0.15);
     }
@@ -3206,6 +3059,55 @@ function _updateInner(delta) {
 } // fin _updateInner
 
 // ═══════════════════════════════════════════════════════════════
+//  SHIELD LAYER — couche additive haut-du-corps (déplacement + garde)
+//
+//  Principe : quand le joueur se déplace (non-sprint) avec le bouclier
+//  tenu (clic droit), on joue la locomotion normale pour les jambes
+//  ET on superpose idle_shield en mode ADDITIF filtré aux os du haut
+//  du corps. Résultat : jambes qui marchent/jogguent + bras en garde.
+// ═══════════════════════════════════════════════════════════════
+
+// Os du haut du corps (tout ce qui est au-dessus du pelvis)
+const _UPPER_RE = /^(spine_|neck_|Head|clavicle_|upperarm_|lowerarm_|hand_|index_|middle_|ring_|pinky_|thumb_)/i;
+
+function _ensureShieldLayer() {
+    if (_shieldLayerAction) return _shieldLayerAction;
+    const baseAct  = actions['idle_shield'];
+    const tposeAct = actions['tpose'];
+    if (!baseAct || !mixer) return null;
+
+    // Cloner pour ne pas altérer le clip original
+    const clip = baseAct.getClip().clone();
+    clip.name  = '_shield_upper_additive';
+
+    // Rendre additif — delta par rapport à la T-pose (ou frame 0 si pas de tpose)
+    THREE.AnimationUtils.makeClipAdditive(clip, 0, tposeAct?.getClip() ?? clip);
+
+    // Filtrer : garder seulement les tracks du haut du corps
+    clip.tracks = clip.tracks.filter(t => _UPPER_RE.test(t.name));
+    if (!clip.tracks.length) return null;
+
+    const act = mixer.clipAction(clip);
+    act.blendMode = THREE.AdditiveAnimationBlendMode;
+    act.setLoop(THREE.LoopRepeat, Infinity);
+    act.weight = 1;
+    _shieldLayerAction = act;
+    return act;
+}
+
+function _startShieldLayer(fade = 0.22) {
+    const act = _ensureShieldLayer();
+    if (!act) return;
+    if (act.isRunning() && act.getEffectiveWeight() > 0.9) return;
+    act.reset().fadeIn(fade).play();
+}
+
+function _stopShieldLayer(fade = 0.22) {
+    if (!_shieldLayerAction?.isRunning()) return;
+    _shieldLayerAction.fadeOut(fade);
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  RESOLVE ANIM — machine à états animation (cascade de priorité)
 //
 //  Priorité (haute → basse) :
@@ -3216,6 +3118,12 @@ function _updateInner(delta) {
 const IDLE_ANIMS = new Set(['idle','idle_look','idle_tired','idle_torch','idle_fold']);
 
 function resolveAnim(isMoving, fwd, bck, lft, rgt, sprinting) {
+    // ── Layer shield : actif seulement si en déplacement non-sprint + garde bouclier ──
+    // Géré ici (avant tout return) pour que le stop s'exécute même quand immobile.
+    const wantShieldLayer = STATE.blocking && STATE.hasShield && isMoving && !sprinting;
+    if (wantShieldLayer) _startShieldLayer();
+    else                 _stopShieldLayer();
+
     // ── 1. Aérien ────────────────────────────────────────────────
     if (!STATE.grounded && STATE.traversal === '') {
         if (STATE.jumpPhase === 'start') return; // jump_start en cours, ne pas interrompre
@@ -3258,7 +3166,9 @@ function resolveAnim(isMoving, fwd, bck, lft, rgt, sprinting) {
     }
     // Stand : sprint → walk → jog
     if (sprinting || STATE.sprintState === 'on') {
-        if (activeClip !== 'sprint') playAnim('sprint', 0.15);
+        // Sprint + bouclier tenu → sprint_shield (animation full-body dédiée)
+        const sprintAnim = (STATE.blocking && STATE.hasShield) ? 'sprint_shield' : 'sprint';
+        if (activeClip !== sprintAnim) playAnim(sprintAnim, 0.15);
         return;
     }
     if (STATE.walkToggle) {
@@ -3638,7 +3548,17 @@ function doInteract() {
 // ═══════════════════════════════════════════════════════════════
 //  MODE COMBAT
 // ═══════════════════════════════════════════════════════════════
-const COMBAT_NAMES = ['Aucun','Épée','Poings','Magie','Arc','Hache','Couteau','Pioche','Torche'];
+const COMBAT_NAMES = [
+    window.i18nT('gt.combat.none'),
+    window.i18nT('gt.weapon.sword'),
+    window.i18nT('gt.weapon.fists'),
+    window.i18nT('gt.weapon.magic'),
+    window.i18nT('gt.weapon.bow'),
+    window.i18nT('gt.weapon.axe'),
+    window.i18nT('gt.weapon.knife'),
+    window.i18nT('gt.weapon.pickaxe'),
+    window.i18nT('gt.weapon.torch'),
+];
 const COMBAT_ICONS = ['—','⚔','👊','✨','🏹','🪓','🗡','⛏','🔦'];
 let attackCooldown = 0;
 let comboStep = 0;
@@ -3652,12 +3572,11 @@ function setCombatMode(mode) {
         _clearSlot('L');
         STATE.hasShield = false;
         _refreshWeaponUI();
-        _hideGripEditor();
         exitCombatStance();
         STATE.combatMode = 0;
-        document.getElementById('dbg-combat').textContent = 'Aucun';
+        document.getElementById('dbg-combat').textContent = COMBAT_NAMES[0];
         document.getElementById('combat-mode').textContent = '—';
-        showNotif('Désarmé');
+        showNotif(window.i18nT('gt.notif.disarmed'));
         return;
     }
 
@@ -3758,20 +3677,34 @@ function updateCombat(delta, atkJust, blockJust, blockHeld) {
         attackBuffer = false; // reset buffer avec le combo
     }
 
-    // ── Block hold (mouseR tenu) ────────────────────────────────
+    // ── Block (clic droit tenu) ──────────────────────────────────
     const canBlock = STATE.combatMode === 1 || STATE.hasShield ||
                      STATE.combatMode === 5 || STATE.combatMode === 6;
 
     if (canBlock) {
-        if (blockHeld && !STATE.blocking && !STATE.oneShotLock) {
-            // Entrer en garde — sword_block est un LOOP, tenu tant que mouseR est pressé
-            playAnim('sword_block', 0.12);
-            STATE.blocking = true;
-        } else if (!blockHeld && STATE.blocking) {
-            // Relâcher : retour à la stance de combat
+        if (!blockHeld && STATE.blocking) {
+            // ① Relâcher clic droit — priorité maximale
             STATE.blocking = false;
-            playAnim(getCombatIdleAnim(), 0.2);
+            if (!STATE.oneShotLock) playAnim(getCombatIdleAnim(), 0.2);
+
+        } else if (blockHeld && !STATE.blocking && !STATE.oneShotLock) {
+            // ② Entrer en guard
+            STATE.blocking = true;
+            if (STATE.hasShield) {
+                // Bouclier : oneshot d'entrée, puis loop détectée frame-par-frame
+                playAnim('shield_one', 0.1, () => { STATE.oneShotLock = false; });
+                STATE.oneShotLock = true;
+            } else {
+                // Épée seule : sword_block loop directement
+                playAnim('sword_block', 0.12);
+            }
+
+        } else if (blockHeld && STATE.blocking && STATE.hasShield
+                   && !STATE.oneShotLock && activeClip !== 'idle_shield') {
+            // ③ shield_one terminé ET clic toujours tenu → démarrer idle_shield en continu
+            playAnim('idle_shield', 0.15);
         }
+
         if (STATE.blocking) return; // aucune attaque pendant le block
     }
 
@@ -3894,7 +3827,7 @@ function updateCharMesh(delta) {
     charRoot.quaternion.slerp(_yawQ, Math.min(1, 12 * delta));
 
     // 3. Animer + bone scaling
-    mixer.update(delta);
+    if (!animPaused) mixer.update(delta);
 
     // ── Root bone zeroing ──────────────────────────────────────────────────
     // Pendant attackLock ET pendant le crossfade qui suit (getEffectiveWeight),
@@ -4028,6 +3961,66 @@ function updateHUD(delta) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  ANIMATION SCRUBBER (debug frame-by-frame)
+//  Raccourci : F2 = toggle  |  , = -1 frame  |  . = +1 frame (quand pausé)
+// ═══════════════════════════════════════════════════════════════
+
+function toggleAnimScrubber() {
+    const el = document.getElementById('anim-scrubber');
+    const visible = el.classList.toggle('visible');
+    if (!visible && animPaused) _scrubSetPause(false);
+}
+
+function _scrubSetPause(pause) {
+    animPaused = pause;
+    const btn = document.getElementById('scr-playpause');
+    if (!btn) return;
+    btn.textContent = pause ? '▶' : '⏸';
+    btn.title       = pause ? 'Play  [ clic ]' : 'Pause  [ clic ]';
+    btn.classList.toggle('paused', pause);
+}
+
+function _scrubUpdateInfo() {
+    const el = document.getElementById('anim-scrubber-info');
+    if (!el) return;
+    if (!mixer || !activeAct) { el.textContent = '— aucune animation —'; return; }
+    const fps   = Math.max(1, Number(document.getElementById('scr-fps').value) || 30);
+    const t     = activeAct.time;
+    const dur   = activeAct.getClip().duration;
+    const frame = Math.round(t * fps);
+    const total = Math.round(dur * fps);
+    el.textContent = `${activeClip || '?'}  |  ${t.toFixed(3)}s  |  frame ${frame} / ${total}`;
+}
+
+function _scrubStep(frames) {
+    if (!mixer || !activeAct) return;
+    const fps     = Math.max(1, Number(document.getElementById('scr-fps').value) || 30);
+    const step    = frames / fps;
+    const dur     = activeAct.getClip().duration;
+    const newTime = Math.max(0, Math.min(dur, activeAct.time + step));
+    activeAct.time = newTime;
+    mixer.update(0);      // force réévaluation de la pose sans avancer le temps
+    _scrubUpdateInfo();
+}
+
+document.getElementById('scr-tostart').addEventListener('click', () => {
+    if (!activeAct) return;
+    activeAct.time = 0;
+    mixer.update(0);
+    _scrubUpdateInfo();
+});
+document.getElementById('scr-back').addEventListener('click', () => _scrubStep(-1));
+document.getElementById('scr-playpause').addEventListener('click', () => _scrubSetPause(!animPaused));
+document.getElementById('scr-fwd').addEventListener('click',  () => _scrubStep(1));
+document.getElementById('scr-toend').addEventListener('click', () => {
+    if (!activeAct) return;
+    const dur = activeAct.getClip().duration;
+    activeAct.time = Math.max(0, dur - 0.001);
+    mixer.update(0);
+    _scrubUpdateInfo();
+});
+
+// ═══════════════════════════════════════════════════════════════
 //  BOUCLE PRINCIPALE
 // ═══════════════════════════════════════════════════════════════
 const clock = new THREE.Clock();
@@ -4043,6 +4036,7 @@ function animate() {
     inventory?.tick(delta);
     updateCamera(delta);
     updateHUD(delta);
+    if (document.getElementById('anim-scrubber').classList.contains('visible')) _scrubUpdateInfo();
     renderer.render(scene, camera);
 }
 
@@ -4099,6 +4093,7 @@ buildEmoteWheel();
     animate();
 })();
 </script>
+<script src="src/lang.js"></script>
 <script src="src/asset-check.js"></script>
 <script src="src/nav.js"></script>
 </body>

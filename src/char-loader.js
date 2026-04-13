@@ -345,6 +345,11 @@ export class CharacterRenderer {
         this.mixerBody     = null;
         this._actionOutfit = null;
         this._actionBody   = null;
+        // Proportions os — réappliquées chaque frame après le mixer
+        this._boneScaleOutfit = {};
+        this._boneScaleBody   = {};
+        this._boneRestOutfit  = {};
+        this._boneRestBody    = {};
     }
 
     get outfitRoot() { return this._outfitRoot; }
@@ -391,6 +396,17 @@ export class CharacterRenderer {
         this._scene.add(bodyRoot);
         this._bodyRoot = bodyRoot;
         this.mixerBody = new THREE.AnimationMixer(bodyRoot);
+
+        // ── Positions de repos (T-Pose) — avant tout mixer.update() ─
+        // Indispensable pour que applyIsolatedScales contre-ajuste correctement.
+        const boneRestOutfit = {};
+        const boneRestBody   = {};
+        outfitRoot.traverse(n => { if (n.isBone) boneRestOutfit[n.name] = n.position.clone(); });
+        bodyRoot.traverse(n =>   { if (n.isBone) boneRestBody[n.name]   = n.position.clone(); });
+        this._boneRestOutfit  = boneRestOutfit;
+        this._boneRestBody    = boneRestBody;
+        this._boneScaleOutfit = cfg.boneScaleOutfit || {};
+        this._boneScaleBody   = cfg.boneScaleBody   || {};
 
         // Bone map du bodyRoot (rig identique → 100 % des os présents)
         const boneMapBody = {};
@@ -454,6 +470,40 @@ export class CharacterRenderer {
         }
     }
 
+    // ── Proportions os — identique char-builder (applyIsolatedScales) ─
+    // Réappliquer après chaque mixer.update() pour que les scales survivent à l'animation.
+    // Passe 1 : reset à la T-Pose. Passe 2 : scales custom + contre-ajustement enfants.
+    _applyIsolatedScales(root, overrides, restPos) {
+        if (!root || !Object.keys(overrides).length) return;
+        // Passe 1 — reset
+        root.traverse(n => {
+            if (!n.isBone) return;
+            n.scale.set(1, 1, 1);
+            const rp = restPos[n.name];
+            if (rp) n.position.copy(rp);
+        });
+        // Passe 2 — appliquer + contre-scaler les os enfants pour annuler l'héritage
+        const wsMap = {};
+        root.traverse(node => {
+            if (!node.isBone) return;
+            const pWS = (node.parent?.isBone) ? (wsMap[node.parent.name] ?? 1) : 1;
+            const s   = overrides[node.name];
+            if (pWS !== 1) {
+                const rp = restPos[node.name];
+                if (rp) node.position.copy(rp).multiplyScalar(1 / pWS);
+            }
+            if (s !== undefined) {
+                node.scale.setScalar(s);
+                wsMap[node.name] = (s < 0.01) ? 1 : pWS * s;
+            } else if (pWS !== 1) {
+                node.scale.setScalar(1 / pWS);
+                wsMap[node.name] = 1;
+            } else {
+                wsMap[node.name] = 1;
+            }
+        });
+    }
+
     // ── Jouer un clip sur les deux mixers ─────────────────────────
     play(clip) {
         if (this._actionOutfit) { try { this._actionOutfit.stop(); } catch {} }
@@ -472,6 +522,8 @@ export class CharacterRenderer {
     update(delta) {
         this.mixerOutfit?.update(delta);
         this.mixerBody?.update(delta);
+        this._applyIsolatedScales(this._outfitRoot, this._boneScaleOutfit, this._boneRestOutfit);
+        this._applyIsolatedScales(this._bodyRoot,   this._boneScaleBody,   this._boneRestBody);
     }
 
     // ── Nettoyage complet ──────────────────────────────────────────
@@ -482,7 +534,11 @@ export class CharacterRenderer {
         if (this.mixerBody)     { try { this.mixerBody.stopAllActions();   } catch {} this.mixerBody   = null; }
         if (this._outfitRoot)   { this._scene.remove(this._outfitRoot); this._outfitRoot = null; }
         if (this._bodyRoot)     { this._scene.remove(this._bodyRoot);   this._bodyRoot   = null; }
-        this._actionOutfit = null;
-        this._actionBody   = null;
+        this._actionOutfit    = null;
+        this._actionBody      = null;
+        this._boneScaleOutfit = {};
+        this._boneScaleBody   = {};
+        this._boneRestOutfit  = {};
+        this._boneRestBody    = {};
     }
 }
