@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getHeight } from './world.js';
 import { addDynamicWall, removeDynamicWall } from './collision.js';
+import { t } from './i18n.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  FREECAM — Caméra volante pour le mode édition
@@ -135,7 +136,7 @@ const PROPS  = 'assets/environment/props/';
 const NATURE = 'assets/environment/nature/';
 
 // ── Catalogue complet — tous les assets des 3 packs ───────────
-const CATALOG = [
+const RAW_CATALOG = [
     {
         name: 'Murs Brique',
         items: [
@@ -550,6 +551,77 @@ const CATALOG = [
     },
 ];
 
+const BUILD_CATEGORY_IDS = [
+    'brick-walls',
+    'plaster-walls',
+    'corners-exterior',
+    'floors',
+    'roofs',
+    'overhangs',
+    'doors-frames',
+    'windows-shutters',
+    'stairs',
+    'balconies-hatches',
+    'village-accessories',
+    'furniture',
+    'storage',
+    'lights-decor',
+    'books-writing',
+    'tools-weapons',
+    'objects-provisions',
+    'vegetation',
+    'assemblies',
+];
+
+function _catalogItemId(url) {
+    return url
+        .replace(/^__asm__:/, '')
+        .split('/').pop()
+        .replace(/\.(gltf|glb)$/i, '')
+        .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+        .replace(/[^a-zA-Z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .toLowerCase();
+}
+
+const CATALOG = RAW_CATALOG.map((cat, catIdx) => {
+    const catId = BUILD_CATEGORY_IDS[catIdx];
+    return {
+        ...cat,
+        id: catId,
+        labelKey: `build-mode.catalog.categories.${catId}`,
+        items: cat.items.map((item) => {
+            const id = _catalogItemId(item.url);
+            return {
+                ...item,
+                id,
+                labelKey: `build-mode.catalog.items.${id}`,
+            };
+        }),
+    };
+});
+
+const CATALOG_ITEM_INDEX = new Map();
+CATALOG.forEach((cat, catIdx) => {
+    cat.items.forEach((item, itemIdx) => {
+        CATALOG_ITEM_INDEX.set(item.url, { catIdx, itemIdx, cat, item });
+    });
+});
+
+function _getCatalogItemMetaByUrl(url) {
+    return CATALOG_ITEM_INDEX.get(url) ?? null;
+}
+
+function _getCatalogCategoryLabel(cat) {
+    return cat?.labelKey ? t(cat.labelKey) : '—';
+}
+
+function _getCatalogItemLabel(item) {
+    if (!item) return '—';
+    if (item.labelKey) return t(item.labelKey);
+    return item.name ?? item.id ?? item.url ?? '—';
+}
+
 // ── Assemblages : groupes de pièces posées en une seule action ──
 // URL préfixe '__asm__:' → pris en charge par _fetchAssembly()
 // Offset porte calculé : cadre centré en X=0, ouverture intérieure = largeur porte,
@@ -877,8 +949,16 @@ export class BuildMode {
 
     // ── Ghost ──────────────────────────────────────────────────
 
+    _resolveCatalogItem(entry) {
+        if (!entry) return null;
+        const cat = CATALOG[entry.catIdx];
+        const item = cat?.items[entry.itemIdx] ?? null;
+        if (item && item.url === entry.url) return item;
+        return _getCatalogItemMetaByUrl(entry.url)?.item ?? item;
+    }
+
     _currentItem() {
-        if (this._quickActive && this._quickSlot) return this._quickSlot;
+        if (this._quickActive && this._quickSlot) return this._resolveCatalogItem(this._quickSlot);
         const cat = CATALOG[this._catIdx];
         return cat?.items[this._itemIdx] ?? null;
     }
@@ -1372,7 +1452,6 @@ export class BuildMode {
         const p = this._ghost.position;
         const entry = {
             url:  item.url,
-            name: item.name,
             x: p.x, y: p.y, z: p.z,
             rx: this._rotX, ry: this._rotY, rz: this._rotZ,
         };
@@ -1499,11 +1578,9 @@ export class BuildMode {
         // Objet placé par BuildMode → on a l'URL exacte
         const entry = this._placed.find(e => e._obj === obj);
         if (entry) {
-            for (let ci = 0; ci < CATALOG.length; ci++) {
-                const ii = CATALOG[ci].items.findIndex(it => it.url === entry.url);
-                if (ii !== -1) return { catIdx: ci, itemIdx: ii, name: entry.name, url: entry.url };
-            }
-            return { catIdx: 0, itemIdx: 0, name: entry.name, url: entry.url };
+            const meta = _getCatalogItemMetaByUrl(entry.url);
+            if (meta) return { catIdx: meta.catIdx, itemIdx: meta.itemIdx, url: entry.url };
+            return { catIdx: 0, itemIdx: 0, url: entry.url };
         }
         // Objet du monde → tentative par nom (ex: "placed__Wall_UnevenBrick_Straight")
         const nameKey = obj.name.replace(/^placed__/, '');
@@ -1511,7 +1588,7 @@ export class BuildMode {
             const cat = CATALOG[ci];
             for (let ii = 0; ii < cat.items.length; ii++) {
                 if (_urlKey(cat.items[ii].url) === nameKey) {
-                    return { catIdx: ci, itemIdx: ii, name: cat.items[ii].name, url: cat.items[ii].url };
+                    return { catIdx: ci, itemIdx: ii, url: cat.items[ii].url };
                 }
             }
         }
@@ -1525,7 +1602,7 @@ export class BuildMode {
         this._loadGhostCurrent();
         this._refreshHUD();
         this._refreshHotbar();
-        this._flashHUD(`● ${item.name}  →  slot rapide actif`);
+        this._flashHUD(`● ${_getCatalogItemLabel(this._resolveCatalogItem(item))}  →  slot rapide actif`);
     }
 
     // ── Résolution URL depuis un objet scène ──────────────────
@@ -1835,7 +1912,7 @@ export class BuildMode {
             const p = s.obj.position.clone();
             p.x += 0.5; p.z += 0.5; // décalage léger
             const entry = {
-                url: item.url, name: item.name,
+                url: item.url,
                 x: p.x, y: p.y, z: p.z,
                 rx: s.obj.rotation.x, ry: s.obj.rotation.y, rz: s.obj.rotation.z,
             };
@@ -2135,7 +2212,7 @@ export class BuildMode {
                 // Assemblage → décomposer en pièces individuelles
                 const def = ASSEMBLY_DEFS[e.url];
                 if (def) {
-                    lines.push(`// ── ${e.name} ──`);
+                    lines.push(`// ── ${_getCatalogItemLabel(_getCatalogItemMetaByUrl(e.url)?.item)} ──`);
                     const cos = Math.cos(e.ry), sin = Math.sin(e.ry);
                     for (const piece of def.pieces) {
                         // Rotation des offsets locaux par le yaw de l'assemblage
@@ -2160,7 +2237,7 @@ export class BuildMode {
             const rot = (e.rx !== 0 || e.rz !== 0)
                 ? `, ${ry}, 1, 1, 1 /* rx:${rx} rz:${rz} */`
                 : `, ${ry}`;
-            lines.push(`_p(scene, m.${key}, ${x}, ${y}, ${z}${rot});   // ${e.name}`);
+            lines.push(`_p(scene, m.${key}, ${x}, ${y}, ${z}${rot});   // ${_getCatalogItemLabel(_getCatalogItemMetaByUrl(e.url)?.item)}`);
             lineCount++;
         }
         lines.push('');
@@ -2171,8 +2248,8 @@ export class BuildMode {
     // ── Persistance ────────────────────────────────────────────
 
     _save() {
-        const data = this._placed.map(({ url, name, x, y, z, rx, ry, rz, doorId, doorOpen }) =>
-            ({ url, name, x, y, z, rx, ry, rz,
+        const data = this._placed.map(({ url, x, y, z, rx, ry, rz, doorId, doorOpen }) =>
+            ({ url, x, y, z, rx, ry, rz,
                ...(doorId !== undefined ? { doorId, doorOpen } : {}) })
         );
         localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -2197,6 +2274,10 @@ export class BuildMode {
             for (const e of data) {
                 const migrated = this._migrateUrl(e.url);
                 if (migrated !== e.url) { e.url = migrated; needsSave = true; }
+                if ('name' in e) {
+                    delete e.name;
+                    needsSave = true;
+                }
             }
             if (needsSave) localStorage.setItem(SAVE_KEY, JSON.stringify(data));
             for (const e of data) {
@@ -2251,7 +2332,7 @@ export class BuildMode {
                     this._hotbar[n] = { ...this._invHoveredItem };
                     this._saveHotbar();
                     this._refreshHotbar();
-                    this._flashHUD(`Slot ${n === 9 ? 0 : n + 1} ← ${this._invHoveredItem.name}`);
+                    this._flashHUD(`Slot ${n === 9 ? 0 : n + 1} ← ${_getCatalogItemLabel(this._resolveCatalogItem(this._invHoveredItem))}`);
                 }
                 return;
             }
@@ -2281,7 +2362,7 @@ export class BuildMode {
                     e.preventDefault();
                     if (this._quickSlot) {
                         this._quickActive = !this._quickActive;
-                        if (this._quickActive) { this._loadGhostCurrent(); this._flashHUD(`● ${this._quickSlot.name}  actif`); }
+                        if (this._quickActive) { this._loadGhostCurrent(); this._flashHUD(`● ${_getCatalogItemLabel(this._resolveCatalogItem(this._quickSlot))}  actif`); }
                         else { this._loadGhostCurrent(); this._flashHUD('Slot rapide désactivé'); }
                         this._refreshHotbar(); this._refreshHUD();
                     } else {
@@ -2810,7 +2891,7 @@ export class BuildMode {
         qs.addEventListener('click', () => {
             if (this._quickSlot) {
                 this._quickActive = !this._quickActive;
-                if (this._quickActive) { this._loadGhostCurrent(); this._flashHUD(`● ${this._quickSlot.name}  actif`); }
+                if (this._quickActive) { this._loadGhostCurrent(); this._flashHUD(`● ${_getCatalogItemLabel(this._resolveCatalogItem(this._quickSlot))}  actif`); }
                 else { this._loadGhostCurrent(); this._flashHUD('Slot rapide désactivé'); }
                 this._refreshHotbar(); this._refreshHUD();
             }
@@ -2874,7 +2955,7 @@ export class BuildMode {
             root.style.background  = active ? 'rgba(60,30,5,0.95)' : 'rgba(20,20,20,0.8)';
             if (this._quickSlot) {
                 colorBar.style.background = CAT_COLORS[this._quickSlot.catIdx] ?? '#888';
-                label.textContent = this._quickSlot.name;
+                label.textContent = _getCatalogItemLabel(this._resolveCatalogItem(this._quickSlot));
                 label.style.color = '#e8d5a0';
             } else {
                 colorBar.style.background = 'transparent';
@@ -2894,7 +2975,7 @@ export class BuildMode {
             const entry = this._hotbar[i];
             if (entry) {
                 colorBar.style.background = CAT_COLORS[entry.catIdx] ?? '#888';
-                label.textContent = entry.name;
+                label.textContent = _getCatalogItemLabel(this._resolveCatalogItem(entry));
                 label.style.color = '#e8d5a0';
             } else {
                 colorBar.style.background = 'transparent';
@@ -2920,10 +3001,10 @@ export class BuildMode {
     _assignToHotbar(catIdx, itemIdx) {
         const item = CATALOG[catIdx]?.items[itemIdx];
         if (!item) return;
-        this._hotbar[this._hotbarSlot] = { catIdx, itemIdx, name: item.name, url: item.url };
+        this._hotbar[this._hotbarSlot] = { catIdx, itemIdx, url: item.url };
         this._saveHotbar();
         this._selectHotbarSlot(this._hotbarSlot);
-        this._flashHUD(`Slot ${this._hotbarSlot === 9 ? 0 : this._hotbarSlot + 1} ← ${item.name}`);
+        this._flashHUD(`Slot ${this._hotbarSlot === 9 ? 0 : this._hotbarSlot + 1} ← ${_getCatalogItemLabel(item)}`);
     }
 
     _saveHotbar() {
@@ -2942,7 +3023,7 @@ export class BuildMode {
                 const cat = CATALOG[e.catIdx];
                 if (!cat || !cat.items[e.itemIdx]) return null;
                 const item = cat.items[e.itemIdx];
-                return { catIdx: e.catIdx, itemIdx: e.itemIdx, name: item.name, url: item.url };
+                return { catIdx: e.catIdx, itemIdx: e.itemIdx, url: item.url };
             });
             this._refreshHotbar();
         } catch (err) {
@@ -3021,7 +3102,7 @@ export class BuildMode {
         for (let i = 0; i < CATALOG.length; i++) {
             const tab = document.createElement('div');
             tab.style.cssText = 'padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.15)';
-            tab.textContent = CATALOG[i].name;
+            tab.textContent = _getCatalogCategoryLabel(CATALOG[i]);
             const ci = i;
             tab.addEventListener('click', () => { this._invCatIdx = ci; this._refreshInventory(); });
             tabs.appendChild(tab);
@@ -3147,15 +3228,15 @@ export class BuildMode {
 
             const name = document.createElement('div');
             name.style.cssText = 'font-size:9px;color:#e8d5a0;padding:7px 5px;line-height:1.4;flex:1;display:flex;align-items:center;justify-content:center';
-            name.textContent = item.name;
+            name.textContent = _getCatalogItemLabel(item);
             card.appendChild(name);
 
             const ci = this._invCatIdx, ii = itemIdx;
             card.addEventListener('mouseenter', () => {
                 card.style.borderColor = color;
                 card.style.background  = 'rgba(70,50,15,0.9)';
-                this._invHoveredItem = { catIdx: ci, itemIdx: ii, name: item.name, url: item.url };
-                this._setPreview(item.url, item.name, cat.name);
+                this._invHoveredItem = { catIdx: ci, itemIdx: ii, url: item.url };
+                this._setPreview(item.url, _getCatalogItemLabel(item), _getCatalogCategoryLabel(cat));
             });
             card.addEventListener('mouseleave', () => {
                 card.style.borderColor = 'rgba(200,160,80,0.15)';
@@ -3170,7 +3251,7 @@ export class BuildMode {
 
         // Prévisualiser le premier item par défaut
         if (cat.items.length) {
-            this._setPreview(cat.items[0].url, cat.items[0].name, cat.name);
+            this._setPreview(cat.items[0].url, _getCatalogItemLabel(cat.items[0]), _getCatalogCategoryLabel(cat));
         }
     }
 
@@ -3313,9 +3394,9 @@ export class BuildMode {
         }
         const cat  = CATALOG[this._catIdx];
         const item = this._currentItem();
-        this._hud.catEl.textContent  = `${cat?.name ?? '—'}   (${this._catIdx + 1} / ${CATALOG.length})`;
+        this._hud.catEl.textContent  = `${_getCatalogCategoryLabel(cat)}   (${this._catIdx + 1} / ${CATALOG.length})`;
         this._hud.itemEl.textContent = item
-            ? `▸ ${item.name}   [${this._itemIdx + 1}/${cat.items.length}]`
+            ? `▸ ${_getCatalogItemLabel(item)}   [${this._itemIdx + 1}/${cat.items.length}]`
             : '—';
         const s = SNAP_SIZES[this._snapIdx];
         const hSign = this._heightOffset >= 0 ? '+' : '';

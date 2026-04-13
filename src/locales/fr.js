@@ -1,3 +1,5 @@
+import { buildModeCatalogFr } from './build-mode-catalog-fr.js';
+
 export const fr = {
     app: {
         title: 'Three.js Game Editor',
@@ -682,6 +684,9 @@ export const fr = {
                 none: 'aucune',
             },
         },
+    },
+    'build-mode': {
+        catalog: buildModeCatalogFr,
     },
     inventory: {
         ui: {

@@ -16,13 +16,29 @@ function relative(filePath) {
     return path.relative(ROOT_DIR, filePath).replace(/\\/g, '/');
 }
 
-function parseLocaleObject(filePath, source) {
-    const match = source.match(/export const \w+\s*=\s*(\{[\s\S]*?\n\});\s*export default/m);
+async function parseExportedObject(filePath, source, cache) {
+    if (cache.has(filePath)) return cache.get(filePath);
+
+    const context = {};
+    const importMatches = [...source.matchAll(/^import\s+\{\s*(\w+)\s*\}\s+from\s+'(.+?)';$/gm)];
+    for (const [, importName, importPath] of importMatches) {
+        const resolvedPath = path.resolve(path.dirname(filePath), importPath);
+        const importedSource = await readFile(resolvedPath, 'utf8');
+        context[importName] = await parseExportedObject(resolvedPath, importedSource, cache);
+    }
+
+    const match = source.match(/export const \w+\s*=\s*(\{[\s\S]*?\n\});(?:\s*export default\b[\s\S]*)?$/m);
     if (!match) {
         throw new Error(`Could not parse locale object from ${relative(filePath)}.`);
     }
 
-    return vm.runInNewContext(`(${match[1]})`, {}, { filename: filePath });
+    const object = vm.runInNewContext(`(${match[1]})`, context, { filename: filePath });
+    cache.set(filePath, object);
+    return object;
+}
+
+async function parseLocaleObject(filePath, source) {
+    return parseExportedObject(filePath, source, new Map());
 }
 
 function flattenKeys(node, prefix = '') {
@@ -48,7 +64,7 @@ function printList(label, items) {
 
 async function readLocaleKeys(locale, filePath) {
     const source = await readFile(filePath, 'utf8');
-    const localeObject = parseLocaleObject(filePath, source);
+    const localeObject = await parseLocaleObject(filePath, source);
     const keys = flattenKeys(localeObject).sort();
     const invalidKeys = keys.filter(key => !KEY_PATTERN.test(key));
     return { locale, keys, invalidKeys };
