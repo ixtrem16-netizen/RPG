@@ -1,7 +1,7 @@
 /**
  * src/char-loader.js — Mécanique partagée de chargement de personnage Quaternius
  *
- * Utilisé par : char-builder · grip-editor · character-preview · anim-inspect · asset-browser
+ * Utilisé par : char-builder · grip-editor · character-preview · anim-inspect · asset-browser · world-builder
  *
  * Exports simples :
  *   UAL_PATHS           — chemins des 4 fichiers d'animation

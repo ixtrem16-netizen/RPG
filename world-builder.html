@@ -46,6 +46,14 @@ canvas { display:block; }
     opacity:0; transition:opacity 0.4s;
 }
 #hint-b.show { opacity:1; }
+
+/* ── Statut personnage ────────────────────────────────────────── */
+#char-status {
+    position:fixed; bottom:14px; left:14px; z-index:500;
+    font-family:'Georgia',serif; font-size:8px; letter-spacing:2px;
+    text-transform:uppercase; color:rgba(200,184,154,0.22);
+    pointer-events:none; line-height:1.8;
+}
 </style>
 
 <script type="importmap">
@@ -67,10 +75,15 @@ canvas { display:block; }
 </div>
 
 <div id="hint-b">[ B ] — Basculer mode édition</div>
+<div id="char-status"></div>
 
 <script type="module">
 import * as THREE from 'three';
-import { BuildMode } from './src/build_mode.js';
+import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { BuildMode }     from './src/build_mode.js';
+import { resolveCharConfig } from './src/char-config.js';
+import { UAL_PATHS, CharacterRenderer } from './src/char-loader.js';
 
 // ── Scène ────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -155,12 +168,53 @@ const keys = new Set();
 window.addEventListener('keydown', e => keys.add(e.code));
 window.addEventListener('keyup',   e => keys.delete(e.code));
 
+// ── Personnage joueur (CharacterRenderer — dual-skeleton) ────────
+const _gLoader = new GLTFLoader();
+const _gCache  = {};
+function _loadGLTF(url) {
+    if (_gCache[url]) return Promise.resolve(_gCache[url]);
+    return new Promise((res, rej) =>
+        _gLoader.load(url, g => { _gCache[url] = g; res(g); }, undefined, rej));
+}
+
+const charRenderer = new CharacterRenderer(scene, SkeletonUtils);
+const charStatus   = document.getElementById('char-status');
+
+async function loadPlayer() {
+    const cfg = resolveCharConfig();
+    if (!cfg) return;
+    charStatus.textContent = 'Chargement personnage…';
+    try {
+        await charRenderer.load(cfg, _loadGLTF);
+        // Charger la bibliothèque d'animations et jouer idle
+        const results = await Promise.allSettled(UAL_PATHS.map(p => _loadGLTF(p)));
+        const clipMap = new Map();
+        for (const r of results) {
+            if (r.status === 'fulfilled')
+                for (const c of r.value.animations) clipMap.set(c.name, c);
+        }
+        const clips = [...clipMap.values()];
+        const idle  = clips.find(c => /^idle_loop$/i.test(c.name))
+                   || clips.find(c => /^idle$/i.test(c.name))
+                   || clips.find(c => /^idle/i.test(c.name))
+                   || clips.find(c => /idle/i.test(c.name));
+        if (idle) charRenderer.play(idle);
+        charStatus.textContent = '★ ' + (cfg.name || 'Joueur');
+    } catch(e) {
+        charStatus.textContent = 'Perso: erreur';
+        console.warn('[WorldBuilder] Chargement personnage échoué:', e);
+    }
+}
+
+loadPlayer();
+
 // ── Boucle de rendu ──────────────────────────────────────────────
 const clock = new THREE.Clock();
 
 function animate() {
     requestAnimationFrame(animate);
     const delta = Math.min(clock.getDelta(), 0.1);
+    charRenderer.update(delta);
     buildMode.update(delta, keys);
     renderer.render(scene, camera);
 }
