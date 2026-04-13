@@ -281,44 +281,44 @@ initI18n();
 
 <div id="hud">
   <div id="state-dbg">
-    <div class="lbl">État</div>
+    <div class="lbl" data-i18n="pages.gameplay-test.debug.state">State</div>
     <div class="anim-name" id="dbg-anim">—</div>
-    <div class="lbl" style="margin-top:4px">Mode combat</div>
-    <div class="val" id="dbg-combat">Aucun</div>
-    <div class="lbl" style="margin-top:4px">Vitesse / Sol</div>
+    <div class="lbl" style="margin-top:4px" data-i18n="pages.gameplay-test.debug.combat-mode">Combat mode</div>
+    <div class="val" id="dbg-combat" data-i18n="pages.gameplay-test.debug.none">None</div>
+    <div class="lbl" style="margin-top:4px" data-i18n="pages.gameplay-test.debug.speed-ground">Speed / Ground</div>
     <div class="val" id="dbg-phys">—</div>
-    <div class="lbl" style="margin-top:4px">Position</div>
+    <div class="lbl" style="margin-top:4px" data-i18n="pages.gameplay-test.debug.position">Position</div>
     <div class="val" id="dbg-pos">—</div>
   </div>
 
   <div id="key-legend">
-    <div class="ktitle">Contrôles</div>
-    <div class="krow"><span class="kkey">W A S D</span><span class="kdesc">Déplacer</span></div>
-    <div class="krow"><span class="kkey">Shift</span><span class="kdesc">Sprint</span></div>
-    <div class="krow"><span class="kkey">Espace</span><span class="kdesc">Sauter</span></div>
-    <div class="krow"><span class="kkey">C</span><span class="kdesc">Accroupir</span></div>
-    <div class="krow"><span class="kkey">Caps Lock</span><span class="kdesc">Marche / Course</span></div>
-    <div class="krow"><span class="kkey">Ctrl</span><span class="kdesc">Ramper</span></div>
-    <div class="krow"><span class="kkey">F</span><span class="kdesc">Interagir / Grimper</span></div>
-    <div class="krow"><span class="kkey">R</span><span class="kdesc">Roulade</span></div>
-    <div class="krow"><span class="kkey">Q / E</span><span class="kdesc">Lean caméra G/D</span></div>
-    <div class="krow"><span class="kkey">Shift+Q/E</span><span class="kdesc">Esquive G/D</span></div>
+    <div class="ktitle" data-i18n="pages.gameplay-test.legend.title">Controls</div>
+    <div class="krow"><span class="kkey">W A S D</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.move.desc">Move</span></div>
+    <div class="krow"><span class="kkey">Shift</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.sprint.desc">Sprint</span></div>
+    <div class="krow"><span class="kkey" data-i18n="pages.gameplay-test.legend.rows.jump.key">Space</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.jump.desc">Jump</span></div>
+    <div class="krow"><span class="kkey">C</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.crouch.desc">Crouch</span></div>
+    <div class="krow"><span class="kkey">Caps Lock</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.walk-toggle.desc">Walk / Run</span></div>
+    <div class="krow"><span class="kkey">Ctrl</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.crawl.desc">Crawl</span></div>
+    <div class="krow"><span class="kkey">F</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.interact.desc">Interact / Climb</span></div>
+    <div class="krow"><span class="kkey">R</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.roll.desc">Roll</span></div>
+    <div class="krow"><span class="kkey">Q / E</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.camera-lean.desc">Camera lean L/R</span></div>
+    <div class="krow"><span class="kkey">Shift+Q/E</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.dodge.desc">Dodge L/R</span></div>
     <div class="ksep"></div>
-    <div class="krow"><span class="kkey">1 – 0</span><span class="kdesc">Slots belt (équiper)</span></div>
-    <div class="krow"><span class="kkey">Clic droit belt</span><span class="kdesc">Assigner item</span></div>
-    <div class="krow"><span class="kkey">Clic G</span><span class="kdesc">Attaquer</span></div>
-    <div class="krow"><span class="kkey">K</span><span class="kdesc">Coup de pied</span></div>
-    <div class="krow"><span class="kkey">Clic D</span><span class="kdesc">Bloquer / Viser</span></div>
+    <div class="krow"><span class="kkey">1 – 0</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.belt-slots.desc">Belt slots (equip)</span></div>
+    <div class="krow"><span class="kkey" data-i18n="pages.gameplay-test.legend.rows.belt-assign.key">Right-click belt</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.belt-assign.desc">Assign item</span></div>
+    <div class="krow"><span class="kkey" data-i18n="pages.gameplay-test.legend.rows.attack.key">LMB</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.attack.desc">Attack</span></div>
+    <div class="krow"><span class="kkey">K</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.kick.desc">Kick</span></div>
+    <div class="krow"><span class="kkey" data-i18n="pages.gameplay-test.legend.rows.block.key">RMB</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.block.desc">Block / Aim</span></div>
     <div class="ksep"></div>
-    <div class="krow"><span class="kkey">G (tenir)</span><span class="kdesc">Roue émotes</span></div>
-    <div class="krow"><span class="kkey">Tab</span><span class="kdesc">Cursor lock</span></div>
-    <div class="krow"><span class="kkey">V</span><span class="kdesc">1re / 3e personne</span></div>
-    <div class="krow"><span class="kkey">Molette</span><span class="kdesc">Zoom caméra</span></div>
-    <div class="krow"><span class="kkey">Clic D drag</span><span class="kdesc">Orbite caméra</span></div>
+    <div class="krow"><span class="kkey" data-i18n="pages.gameplay-test.legend.rows.emotes.key">G (hold)</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.emotes.desc">Emote wheel</span></div>
+    <div class="krow"><span class="kkey">Tab</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.cursor-lock.desc">Cursor lock</span></div>
+    <div class="krow"><span class="kkey">V</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.camera-mode.desc">1st / 3rd person</span></div>
+    <div class="krow"><span class="kkey" data-i18n="pages.gameplay-test.legend.rows.zoom.key">Wheel</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.zoom.desc">Camera zoom</span></div>
+    <div class="krow"><span class="kkey" data-i18n="pages.gameplay-test.legend.rows.orbit.key">RMB drag</span><span class="kdesc" data-i18n="pages.gameplay-test.legend.rows.orbit.desc">Camera orbit</span></div>
   </div>
 
   <div id="stamina-wrap">
-    <div id="stamina-label">Endurance</div>
+    <div id="stamina-label" data-i18n="pages.gameplay-test.stamina.label">Stamina</div>
     <div id="stamina-bar-bg"><div id="stamina-bar"></div></div>
   </div>
 
@@ -329,7 +329,7 @@ initI18n();
 
   <div id="crosshair"></div>
   <div id="live-toast"></div>
-  <div id="climb-prompt">F / Espace — Grimper &nbsp;|&nbsp; (saut vers le mur = auto-grab)</div>
+  <div id="climb-prompt" data-i18n="pages.gameplay-test.climb.prompt">F / Space — Climb | (jump toward wall = auto-grab)</div>
   <div id="notif"></div>
   <button id="kick-btn" onclick="doKick()"></button>
 
@@ -337,19 +337,19 @@ initI18n();
   <div id="belt"></div>
 
   <div id="weapon-panel">
-    <div class="wp-title">Armes</div>
+    <div class="wp-title" data-i18n="pages.gameplay-test.weapon-panel.title">Weapons</div>
     <div class="wp-slot">
-      <div class="wp-slot-label">Main droite</div>
+      <div class="wp-slot-label" data-i18n="pages.gameplay-test.weapon-panel.right-hand">Right hand</div>
       <div class="wp-btns" id="wp-btns-R"></div>
     </div>
     <div class="wp-slot">
-      <div class="wp-slot-label">Main gauche</div>
+      <div class="wp-slot-label" data-i18n="pages.gameplay-test.weapon-panel.left-hand">Left hand</div>
       <div class="wp-btns" id="wp-btns-L"></div>
     </div>
     <div id="wp-grip">
       <div class="wg-title">
-        <span>Réglage grip</span>
-        <button class="wg-log" onclick="logGripOffsets()">💾 Sauvegarder</button>
+        <span data-i18n="pages.gameplay-test.weapon-panel.grip.title">Grip tuning</span>
+        <button class="wg-log" onclick="logGripOffsets()" data-i18n="pages.gameplay-test.weapon-panel.grip.save">💾 Save</button>
       </div>
       <div class="wg-row"><span class="wg-lbl">Pos X</span><input type="range" id="wg-px" min="-0.3" max="0.3" step="0.005"><span class="wg-val" id="wg-px-v">0</span></div>
       <div class="wg-row"><span class="wg-lbl">Pos Y</span><input type="range" id="wg-py" min="-0.3" max="0.3" step="0.005"><span class="wg-val" id="wg-py-v">0</span></div>
@@ -358,7 +358,7 @@ initI18n();
       <div class="wg-row"><span class="wg-lbl">Rot Y</span><input type="range" id="wg-ry" min="-3.15" max="3.15" step="0.05"><span class="wg-val" id="wg-ry-v">0</span></div>
       <div class="wg-row"><span class="wg-lbl">Rot Z</span><input type="range" id="wg-rz" min="-3.15" max="3.15" step="0.05"><span class="wg-val" id="wg-rz-v">0</span></div>
       <div class="wg-row"><span class="wg-lbl">Scale</span><input type="range" id="wg-sc" min="0.3" max="3.0" step="0.05"><span class="wg-val" id="wg-sc-v">1</span></div>
-      <div style="border-top:1px solid rgba(200,184,154,0.08);margin:4px 0 3px;font-size:7px;letter-spacing:1.5px;color:rgba(200,184,154,0.25);">― PIVOT (rotation au centre) ―</div>
+      <div style="border-top:1px solid rgba(200,184,154,0.08);margin:4px 0 3px;font-size:7px;letter-spacing:1.5px;color:rgba(200,184,154,0.25);" data-i18n="pages.gameplay-test.weapon-panel.grip.pivot">— Pivot (rotation around center) —</div>
       <div class="wg-row"><span class="wg-lbl">Roll X</span><input type="range" id="wg-rlx" min="-3.15" max="3.15" step="0.02"><span class="wg-val" id="wg-rlx-v">0</span></div>
       <div class="wg-row"><span class="wg-lbl">Roll Y</span><input type="range" id="wg-ty"  min="-3.15" max="3.15" step="0.02"><span class="wg-val" id="wg-ty-v">0</span></div>
       <div class="wg-row"><span class="wg-lbl">Roll Z</span><input type="range" id="wg-rlz" min="-3.15" max="3.15" step="0.02"><span class="wg-val" id="wg-rlz-v">0</span></div>
@@ -376,9 +376,9 @@ initI18n();
 </div>
 
 <div id="loading">
-  <h1>Gameplay Test</h1>
+  <h1 data-i18n="pages.gameplay-test.loading.title">Gameplay Test</h1>
   <div id="loading-bar-bg"><div id="loading-bar"></div></div>
-  <div id="loading-sub">Chargement personnage…</div>
+  <div id="loading-sub" data-i18n="pages.gameplay-test.loading.character">Loading character...</div>
 </div>
 
 <script type="module">
@@ -388,6 +388,26 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { showCharCreation } from './src/char-creation.js';
 import { InventorySystem }  from './src/inventory.js';
 import { LiveSync }         from './src/live-sync.js';
+import { onLocaleChange, t, translateDOM } from './src/i18n.js';
+
+let localeReloadPending = false;
+
+function renderGameplayStaticUI() {
+    document.title = t('pages.gameplay-test.title');
+    translateDOM(document.body);
+}
+
+function reloadForLocaleChange() {
+    if (localeReloadPending) return;
+    localeReloadPending = true;
+    const loadingEl = document.getElementById('loading');
+    if (loadingEl) loadingEl.style.display = 'flex';
+    setLoadSub(t('pages.gameplay-test.loading.reloading'));
+    setTimeout(() => window.location.reload(), 60);
+}
+
+renderGameplayStaticUI();
+onLocaleChange(() => reloadForLocaleChange());
 
 // ═══════════════════════════════════════════════════════════════
 //  CONFIG — Chemins
@@ -414,7 +434,7 @@ function resolveCharConfig() {
     const body   = c?.body   || 'M';
     const outfit = (c?.outfit != null && c.outfit !== '') ? c.outfit : 'Male_Ranger';
     return {
-        name        : c?.name || 'Joueur',
+        name        : c?.name || t('pages.char-builder.configs.fallback-name'),
         meshUrl     : P_OUTFIT + outfit + '.gltf',
         baseUrl     : P_BODY[body] || P_BODY['M'],
         hairUrl     : c?.hair  ? P_HAIR + c.hair  + '.gltf' : null,
@@ -1429,13 +1449,13 @@ function _attachHair(hairScene) {
 }
 
 async function loadCharacter(cfg) {
-    setLoadSub('Chargement outfit…');
+    setLoadSub(t('pages.gameplay-test.loading.outfit'));
     const meshGltf  = await loadGLTF(cfg.meshUrl);
     setLoadProgress(15);
-    setLoadSub('Chargement animations…');
+    setLoadSub(t('pages.gameplay-test.loading.animations'));
     const animResults = await Promise.allSettled(ANIM_SOURCES.map(p => loadGLTF(p)));
     setLoadProgress(70);
-    setLoadSub('Chargement corps de base…');
+    setLoadSub(t('pages.gameplay-test.loading.base-body'));
     const baseGltf  = await loadGLTF(cfg.baseUrl);
     setLoadProgress(80);
 
@@ -1443,7 +1463,7 @@ async function loadCharacter(cfg) {
     const hairGltf  = cfg.hairUrl  ? await loadGLTF(cfg.hairUrl)  : null;
     const beardGltf = cfg.beardUrl ? await loadGLTF(cfg.beardUrl) : null;
     setLoadProgress(90);
-    setLoadSub('Construction du personnage…');
+    setLoadSub(t('pages.gameplay-test.loading.building-character'));
 
     const root = meshGltf.scene;
     root.traverse(c => {
@@ -3849,10 +3869,10 @@ buildEmoteWheel();
 
         setLoadProgress(5);
         const cfg = resolveCharConfig();
-        setLoadSub('Config : ' + cfg.name);
+        setLoadSub(t('pages.gameplay-test.loading.config', { name: cfg.name }));
         await loadCharacter(cfg);
         setLoadProgress(100);
-        setLoadSub('Prêt !');
+        setLoadSub(t('pages.gameplay-test.loading.ready'));
 
         // ── Inventaire ───────────────────────────────────────────
         // Correspondance model Quaternius → clé WEAPON_DEFS
@@ -3881,7 +3901,7 @@ buildEmoteWheel();
         _attachToBack('sword');
     } catch(e) {
         console.error(e);
-        setLoadSub('Erreur chargement : ' + e.message);
+        setLoadSub(t('pages.gameplay-test.loading.error', { message: e.message }));
     }
     animate();
 })();
