@@ -203,6 +203,240 @@ export const en = {
             },
         },
     },
+    inventory: {
+        ui: {
+            title: 'Inventory',
+            subtitle: '— Exiled Warrior —',
+            close: 'Close',
+            skills: 'Skills',
+            backpack: 'Backpack',
+            equipment: 'Equipment',
+            'paperdoll-name': '— Warrior —',
+            character: 'Character',
+            'character-name': 'Exile',
+            'character-class': 'Level 1 · Warrior',
+            stats: 'Stats',
+            'quick-belt': 'Quick Belt',
+            'quick-hint': 'Keys 1 - 4',
+        },
+        slots: {
+            head: 'Head',
+            neck: 'Neck',
+            chest: 'Armor',
+            weapon: 'Weapon',
+            back: 'Back',
+            shield: 'Shield',
+            gloves: 'Gloves',
+            'ring-left': 'Ring L.',
+            legs: 'Legs',
+            'ring-right': 'Ring R.',
+            feet: 'Boots',
+            belt: 'Belt',
+        },
+        rarity: {
+            common: 'Common',
+            uncommon: 'Uncommon',
+            rare: 'Rare',
+            epic: 'Epic',
+            legendary: 'Legendary',
+        },
+        summary: {
+            health: 'Health',
+            stamina: 'Stamina',
+            armor: 'Armor',
+            damage: 'Damage',
+        },
+        hints: {
+            use: 'Double-click: Use',
+            equip: 'Double-click: Equip',
+        },
+        toast: {
+            health: '{amount} Health',
+            stamina: '{amount} Stamina',
+            use: '{item} - {effects}',
+        },
+        'item-stats': {
+            damage: 'Damage',
+            speed: 'Speed',
+            armor: 'Armor',
+            block: 'Block',
+            heals: 'Heals',
+            restores: 'Restores',
+            light: 'Light',
+            opens: 'Opens',
+            length: 'Length',
+            type: 'Type',
+            gold: 'Gold',
+            weight: 'Weight',
+            'cold-res': 'Cold Res',
+            pocket: 'Pocket',
+            magic: 'Magic',
+            skill: 'Skill',
+            parry: 'Parry',
+            stamina: 'Stamina',
+            hp: 'HP',
+        },
+        values: {
+            normal: 'Normal',
+            slow: 'Slow',
+            fast: 'Fast',
+            medium: 'Medium',
+            unknown: 'Unknown',
+            'iron-locks': 'Iron locks',
+            'weapon-edge': 'Weapon edge',
+            text: 'Text',
+            map: 'Map',
+            light: 'Light',
+            'full-stamina': 'Full Stamina',
+            quick: 'quick',
+        },
+        units: {
+            hp: 'HP',
+            stamina: 'Stamina',
+        },
+        items: {
+            'sword-bronze': {
+                name: 'Bronze Sword',
+                desc: 'Forged from early bronze. Still holds an edge.',
+            },
+            'axe-bronze': {
+                name: 'Bronze Axe',
+                desc: 'Brutal and reliable. Favoured by soldiers.',
+            },
+            'pickaxe-bronze': {
+                name: 'Bronze Pickaxe',
+                desc: 'A miner\'s tool, repurposed for war.',
+            },
+            knife: {
+                name: 'Table Knife',
+                desc: 'Not made for killing. Works anyway.',
+            },
+            'shield-wooden': {
+                name: 'Wooden Shield',
+                desc: 'Oak planks bound with iron. Heavy but solid.',
+            },
+            'potion-health': {
+                name: 'Health Potion',
+                desc: 'A warm red draught. Smells of iron and herbs.',
+            },
+            'potion-health-lg': {
+                name: 'Greater Health Pot',
+                desc: 'Concentrated. Bitter. Burns on the way down.',
+            },
+            'potion-stamina': {
+                name: 'Stamina Tonic',
+                desc: 'A green tonic. Gives you that second wind.',
+            },
+            'potion-minor': {
+                name: 'Minor Vial',
+                desc: 'A small vial. Better than nothing.',
+            },
+            chalice: {
+                name: 'Blessed Chalice',
+                desc: 'A goblet touched by something old.',
+            },
+            antidote: {
+                name: 'Antidote',
+                desc: 'Clears the body of all poison.',
+            },
+            carrot: {
+                name: 'Carrot',
+                desc: 'Fresh from the field. Crunchy.',
+            },
+            apple: {
+                name: 'Apple',
+                desc: 'Red and firm. A traveller\'s staple.',
+            },
+            ale: {
+                name: 'Mug of Ale',
+                desc: 'Strong brew. You\'ll feel it in your legs.',
+            },
+            torch: {
+                name: 'Torch',
+                desc: 'Burns for an hour. Keep it away from the powder.',
+            },
+            'key-gold': {
+                name: 'Gold Key',
+                desc: 'An ornate key. You don\'t know what it opens.',
+            },
+            'key-iron': {
+                name: 'Iron Key',
+                desc: 'A plain key. Heavy.',
+            },
+            rope: {
+                name: 'Rope',
+                desc: 'Useful for climbing. Or other things.',
+            },
+            whetstone: {
+                name: 'Whetstone',
+                desc: 'A grey river stone. Keeps blades sharp.',
+            },
+            'scroll-1': {
+                name: 'Old Scroll',
+                desc: 'The ink has faded. A few words remain.',
+            },
+            'scroll-map': {
+                name: 'Map Scroll',
+                desc: 'A rough map. The roads are barely marked.',
+            },
+            coin: {
+                name: 'Gold Coin',
+                desc: 'Standard currency. Worth something, somewhere.',
+            },
+            'coin-pile': {
+                name: 'Coin Pile',
+                desc: 'A small fortune. Don\'t lose it.',
+            },
+            bag: {
+                name: 'Travel Bag',
+                desc: 'Empty. Useful.',
+            },
+            pouch: {
+                name: 'Pouch',
+                desc: 'Worn leather. Smells of old coin.',
+            },
+            chain: {
+                name: 'Iron Chain',
+                desc: 'Heavy links. Could restrain something.',
+            },
+            'exile-blade': {
+                name: 'Exile\'s Blade',
+                desc: 'A forgotten sword. It has killed before you.',
+            },
+            'leather-chest': {
+                name: 'Leather Cuirass',
+                desc: 'Tanned in sweat and salt.',
+            },
+            'iron-helm': {
+                name: 'Iron Helm',
+                desc: 'Bears a mark no one recognizes.',
+            },
+            'travel-boots': {
+                name: 'Travel Boots',
+                desc: 'Worn by a thousand miles.',
+            },
+            'worn-belt': {
+                name: 'Soldier\'s Belt',
+                desc: 'Braided leather, broken buckle.',
+            },
+            'health-vial': {
+                name: 'Dark Sap Vial',
+                desc: 'Bitter. Effective.',
+            },
+            'eitr-shard': {
+                name: 'Eitr Shard',
+                desc: '"It should not exist."',
+            },
+            'bone-ring': {
+                name: 'Bone Ring',
+                desc: 'Carved from something one should not carve.',
+            },
+            'old-dagger': {
+                name: 'Rusted Dagger',
+                desc: 'A short blade. Enough for a throat.',
+            },
+        },
+    },
     'asset-check': {
         toggle: {
             one: '{count} missing pack',

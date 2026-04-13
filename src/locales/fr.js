@@ -203,6 +203,240 @@ export const fr = {
             },
         },
     },
+    inventory: {
+        ui: {
+            title: 'Inventaire',
+            subtitle: '— Guerrier exile —',
+            close: 'Fermer',
+            skills: 'Competences',
+            backpack: 'Sac a dos',
+            equipment: 'Equipement',
+            'paperdoll-name': '— Guerrier —',
+            character: 'Personnage',
+            'character-name': 'Exile',
+            'character-class': 'Niveau 1 · Guerrier',
+            stats: 'Caracteristiques',
+            'quick-belt': 'Ceinture rapide',
+            'quick-hint': 'Touches 1 - 4',
+        },
+        slots: {
+            head: 'Tete',
+            neck: 'Cou',
+            chest: 'Armure',
+            weapon: 'Arme',
+            back: 'Cape',
+            shield: 'Bouclier',
+            gloves: 'Gants',
+            'ring-left': 'Ann. G.',
+            legs: 'Jambes',
+            'ring-right': 'Ann. D.',
+            feet: 'Bottes',
+            belt: 'Ceinture',
+        },
+        rarity: {
+            common: 'Commun',
+            uncommon: 'Peu commun',
+            rare: 'Rare',
+            epic: 'Epique',
+            legendary: 'Legendaire',
+        },
+        summary: {
+            health: 'Vie',
+            stamina: 'Endurance',
+            armor: 'Armure',
+            damage: 'Degats',
+        },
+        hints: {
+            use: 'Double-clic : Utiliser',
+            equip: 'Double-clic : Equiper',
+        },
+        toast: {
+            health: '{amount} Vie',
+            stamina: '{amount} Endurance',
+            use: '{item} - {effects}',
+        },
+        'item-stats': {
+            damage: 'Degats',
+            speed: 'Vitesse',
+            armor: 'Armure',
+            block: 'Blocage',
+            heals: 'Soigne',
+            restores: 'Rend',
+            light: 'Lumiere',
+            opens: 'Ouvre',
+            length: 'Longueur',
+            type: 'Type',
+            gold: 'Or',
+            weight: 'Poids',
+            'cold-res': 'Res. froid',
+            pocket: 'Poches',
+            magic: 'Magie',
+            skill: 'Competence',
+            parry: 'Parade',
+            stamina: 'Endurance',
+            hp: 'Vie',
+        },
+        values: {
+            normal: 'Normale',
+            slow: 'Lente',
+            fast: 'Rapide',
+            medium: 'Moyenne',
+            unknown: 'Inconnu',
+            'iron-locks': 'Serrures en fer',
+            'weapon-edge': 'Fil de lame',
+            text: 'Texte',
+            map: 'Carte',
+            light: 'Leger',
+            'full-stamina': 'Endurance complete',
+            quick: 'rapides',
+        },
+        units: {
+            hp: 'PV',
+            stamina: 'Endurance',
+        },
+        items: {
+            'sword-bronze': {
+                name: 'Epee de bronze',
+                desc: 'Forgee dans un bronze ancien. Elle garde encore son fil.',
+            },
+            'axe-bronze': {
+                name: 'Hache de bronze',
+                desc: 'Brutale et fiable. Prisee des soldats.',
+            },
+            'pickaxe-bronze': {
+                name: 'Pioche de bronze',
+                desc: 'Un outil de mineur reconverti pour la guerre.',
+            },
+            knife: {
+                name: 'Couteau de table',
+                desc: 'Pas fait pour tuer. Il y arrive quand meme.',
+            },
+            'shield-wooden': {
+                name: 'Bouclier en bois',
+                desc: 'Des planches de chene liees de fer. Lourd mais solide.',
+            },
+            'potion-health': {
+                name: 'Potion de soin',
+                desc: 'Un breuvage rouge et chaud. Il sent le fer et les herbes.',
+            },
+            'potion-health-lg': {
+                name: 'Grande potion de soin',
+                desc: 'Concentree. Amere. Elle brule en descendant.',
+            },
+            'potion-stamina': {
+                name: 'Tonique d endurance',
+                desc: 'Un tonique vert. Il offre un second souffle.',
+            },
+            'potion-minor': {
+                name: 'Petite fiole',
+                desc: 'Une petite fiole. Mieux que rien.',
+            },
+            chalice: {
+                name: 'Calice beni',
+                desc: 'Une coupe touchee par quelque chose d ancien.',
+            },
+            antidote: {
+                name: 'Antidote',
+                desc: 'Purifie le corps de tout poison.',
+            },
+            carrot: {
+                name: 'Carotte',
+                desc: 'Fraiche du champ. Croquante.',
+            },
+            apple: {
+                name: 'Pomme',
+                desc: 'Rouge et ferme. Un classique du voyageur.',
+            },
+            ale: {
+                name: 'Chope de biere',
+                desc: 'Une boisson forte. Tu la sentiras dans les jambes.',
+            },
+            torch: {
+                name: 'Torche',
+                desc: 'Brule pendant une heure. Garde-la loin de la poudre.',
+            },
+            'key-gold': {
+                name: 'Cle d or',
+                desc: 'Une cle ornee. Tu ignores ce qu elle ouvre.',
+            },
+            'key-iron': {
+                name: 'Cle de fer',
+                desc: 'Une cle simple. Lourde.',
+            },
+            rope: {
+                name: 'Corde',
+                desc: 'Utile pour grimper. Ou pour autre chose.',
+            },
+            whetstone: {
+                name: 'Pierre a aiguiser',
+                desc: 'Une pierre grise de riviere. Elle garde les lames affutees.',
+            },
+            'scroll-1': {
+                name: 'Vieux parchemin',
+                desc: 'L encre a pali. Quelques mots subsistent.',
+            },
+            'scroll-map': {
+                name: 'Parchemin de carte',
+                desc: 'Une carte sommaire. Les routes y sont a peine tracees.',
+            },
+            coin: {
+                name: 'Piece d or',
+                desc: 'Une monnaie ordinaire. Elle vaut quelque chose, quelque part.',
+            },
+            'coin-pile': {
+                name: 'Tas de pieces',
+                desc: 'Une petite fortune. Ne la perds pas.',
+            },
+            bag: {
+                name: 'Sac de voyage',
+                desc: 'Vide. Utile.',
+            },
+            pouch: {
+                name: 'Bourse',
+                desc: 'Cuir use. Elle sent les vieilles pieces.',
+            },
+            chain: {
+                name: 'Chaine de fer',
+                desc: 'Des maillons lourds. De quoi entraver quelque chose.',
+            },
+            'exile-blade': {
+                name: 'Lame de l exile',
+                desc: 'Une epee oubliee. Elle a deja tue avant toi.',
+            },
+            'leather-chest': {
+                name: 'Cuirasse de cuir',
+                desc: 'Tannee dans la sueur et le sel.',
+            },
+            'iron-helm': {
+                name: 'Heaume de fer',
+                desc: 'Il porte une marque que personne ne reconnait.',
+            },
+            'travel-boots': {
+                name: 'Bottes de voyage',
+                desc: 'Usees par mille lieues.',
+            },
+            'worn-belt': {
+                name: 'Ceinture de soldat',
+                desc: 'Cuir tresse, boucle brisee.',
+            },
+            'health-vial': {
+                name: 'Fiole de seve sombre',
+                desc: 'Amere. Efficace.',
+            },
+            'eitr-shard': {
+                name: 'Eclat d Eitr',
+                desc: '"Cela ne devrait pas exister."',
+            },
+            'bone-ring': {
+                name: 'Anneau d os',
+                desc: 'Sculpte dans quelque chose qu on n aurait jamais du tailler.',
+            },
+            'old-dagger': {
+                name: 'Dague rouillee',
+                desc: 'Une lame courte. Suffisante pour une gorge.',
+            },
+        },
+    },
     'asset-check': {
         toggle: {
             one: '{count} pack manquant',
