@@ -82,6 +82,51 @@ export const en = {
             description: 'Quick test scene - character and animations.',
         },
     },
+    'asset-check': {
+        toggle: {
+            one: '{count} missing pack',
+            other: '{count} missing packs',
+        },
+        header: 'Required Quaternius assets',
+        footer: {
+            prefix: '3D assets by',
+            suffix: 'royalty-free',
+        },
+        tiers: {
+            free: 'Free',
+            'patreon-source': 'Patreon · Source',
+        },
+        packs: {
+            'ual-standard': {
+                name: 'Universal Animation Library',
+                description: 'Core animations - locomotion, combat, interactions.',
+            },
+            'ual2-standard': {
+                name: 'Universal Animation Library 2',
+                description: 'Parkour, climbing, and advanced animations.',
+            },
+            'ual-source': {
+                name: 'Animation Library - Source',
+                description: 'High-resolution source versions with .blend files.',
+            },
+            'char-outfits': {
+                name: 'Modular Character Outfits - Fantasy',
+                description: 'Bodies, outfits, hair, and modular beards.',
+            },
+            village: {
+                name: 'Medieval Village MegaKit',
+                description: 'Buildings, walls, furniture, and medieval props.',
+            },
+            nature: {
+                name: 'Nature Pack',
+                description: 'Trees, bushes, rocks, and vegetation.',
+            },
+            props: {
+                name: 'Fantasy Props MegaKit',
+                description: 'Weapons, tools, and fantasy decorations.',
+            },
+        },
+    },
 };
 
 export default en;
