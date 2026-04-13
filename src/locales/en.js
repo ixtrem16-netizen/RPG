@@ -268,6 +268,19 @@ export const en = {
             },
         },
     },
+    town: {
+        trapdoors: {
+            tavern: 'Trapdoor to tavern',
+            cellar: 'Trapdoor to cellar',
+        },
+        npcs: {
+            default: 'NPC',
+            innkeeper: 'Innkeeper',
+            server: 'Server',
+            'villager-one': 'Villager',
+            'villager-two': 'Villager',
+        },
+    },
     inventory: {
         ui: {
             title: 'Inventory',

@@ -268,6 +268,19 @@ export const fr = {
             },
         },
     },
+    town: {
+        trapdoors: {
+            tavern: 'Trappe vers la taverne',
+            cellar: 'Trappe vers la cave',
+        },
+        npcs: {
+            default: 'PNJ',
+            innkeeper: 'Aubergiste',
+            server: 'Serveur',
+            'villager-one': 'Villageois',
+            'villager-two': 'Villageois',
+        },
+    },
     inventory: {
         ui: {
             title: 'Inventaire',

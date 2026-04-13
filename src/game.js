@@ -660,7 +660,7 @@ function animate() {
         }
         if (found !== _nearTrapdoor) {
             _nearTrapdoor = found;
-            _$tpPrompt.textContent = found ? found.label : '';
+            _$tpPrompt.textContent = found ? t(found.labelKey) : '';
             _$tpPrompt.style.opacity = found ? '1' : '0';
         }
 
@@ -700,5 +700,8 @@ onLocaleChange(() => {
     if (_nearDoorId) {
         const door = buildMode.getInteractiveDoors().find(d => d.doorId === _nearDoorId);
         if (door) _$doorPrompt.textContent = door.isOpen ? t('gameplay.door.close') : t('gameplay.door.open');
+    }
+    if (_nearTrapdoor) {
+        _$tpPrompt.textContent = t(_nearTrapdoor.labelKey);
     }
 });
