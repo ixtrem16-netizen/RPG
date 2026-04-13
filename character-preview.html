@@ -122,7 +122,7 @@ import { GLTFLoader }  from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { resolveCharConfig, getAllCharConfigs } from './src/char-config.js';
-import { UAL_PATHS, isHeadRelatedMesh, attachSkinned } from './src/char-loader.js';
+import { UAL_PATHS, CharacterRenderer } from './src/char-loader.js';
 
 // ── Scène ────────────────────────────────────────────────────────
 const vp = document.getElementById('vp');
@@ -177,8 +177,6 @@ function loadGLTF(url) {
     return new Promise((res, rej) => gltfLoader.load(url, g => { cache[url] = g; res(g); }, undefined, rej));
 }
 
-// isHeadRelatedMesh / attachSkinned / UAL_PATHS → src/char-loader.js
-
 // ── Animations ───────────────────────────────────────────────────
 const ANIM_PICK = {
     idle:   n => /idle_loop/i.test(n) || /\bidle\b/i.test(n),
@@ -203,21 +201,16 @@ async function loadAnimations() {
 }
 
 // ── État ─────────────────────────────────────────────────────────
-let charRoot     = null;
-let mixer        = null;
-let activeAction = null;
+let charRenderer = null; // CharacterRenderer — dual-skeleton + shader zones
 let currentAnim  = 'idle';
 
 function playAnimKey(key) {
-    if (!mixer || !allClips.length) return;
+    if (!charRenderer || !allClips.length) return;
     currentAnim = key;
     const pick = ANIM_PICK[key];
     const clip = allClips.find(pick) || allClips[0];
     if (!clip) return;
-    if (activeAction) activeAction.fadeOut(0.3);
-    const action = mixer.clipAction(clip);
-    action.reset().fadeIn(0.3).play();
-    activeAction = action;
+    charRenderer.play(clip);
     document.querySelectorAll('.anim-btn').forEach(b =>
         b.classList.toggle('active', b.dataset.anim === key));
 }
@@ -227,49 +220,13 @@ async function loadChar(cfg) {
     document.getElementById('vp-loading').style.display = 'block';
     document.getElementById('vp-status').textContent = 'Chargement…';
 
-    if (charRoot) { scene.remove(charRoot); charRoot = null; }
-    if (mixer) {
-        try { mixer.stopAllActions(); } catch(e) { console.warn('[CharPreview] stopAllActions:', e.message); }
-        mixer = null; activeAction = null;
-    }
+    // CharacterRenderer — dual-skeleton + shader zones (identique char-builder)
+    if (!charRenderer) charRenderer = new CharacterRenderer(scene, SkeletonUtils);
 
     try {
-        const urls = [cfg.meshUrl, cfg.baseUrl];
-        if (cfg.hairUrl)  urls.push(cfg.hairUrl);
-        if (cfg.beardUrl) urls.push(cfg.beardUrl);
-
-        const gltfs = await Promise.all(urls.map(u => loadGLTF(u)));
-        const [outfitGltf, bodyGltf] = gltfs;
-        const hairGltf  = cfg.hairUrl  ? gltfs[2] : null;
-        const beardGltf = cfg.beardUrl ? gltfs[cfg.hairUrl ? 3 : 2] : null;
-
-        charRoot = SkeletonUtils.clone(outfitGltf.scene);
-        charRoot.traverse(c => {
-            if (!c.isMesh) return;
-            c.castShadow = c.receiveShadow = true;
-            c.frustumCulled = false;
-            (Array.isArray(c.material) ? c.material : [c.material])
-                .forEach(m => { if (m) m.side = THREE.DoubleSide; });
-        });
-
-        // useFallback=true : polygon offset auto sur le full body → pas de z-fighting
-        if (bodyGltf)  attachSkinned(bodyGltf,  charRoot, isHeadRelatedMesh, true);
-        if (hairGltf)  attachSkinned(hairGltf,  charRoot, null, true);
-        if (beardGltf) attachSkinned(beardGltf, charRoot, null, true);
-
-        scene.add(charRoot);
-
-        // Normaliser à 1.75m
-        const box0 = new THREE.Box3().setFromObject(charRoot);
-        charRoot.scale.setScalar(1.75 / (box0.max.y - box0.min.y || 1));
-        const box = new THREE.Box3().setFromObject(charRoot);
-        charRoot.position.y -= box.min.y;
-
-        mixer = new THREE.AnimationMixer(charRoot);
-
+        await charRenderer.load(cfg, loadGLTF);
         if (!ualLoaded) await loadAnimations();
         playAnimKey(currentAnim);
-
         document.getElementById('vp-status').textContent = cfg.name || cfg.meshUrl.split('/').pop();
     } catch(e) {
         document.getElementById('vp-status').textContent = 'Erreur: ' + e.message;
@@ -351,7 +308,7 @@ let _firstFrame = true;
         }
     }
     const delta = clock.getDelta();
-    if (mixer) mixer.update(Math.min(delta, 0.05));
+    charRenderer?.update(Math.min(delta, 0.05));
     controls.update();
     renderer.render(scene, camera);
 })();

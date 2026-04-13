@@ -319,7 +319,7 @@ import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { resolveCharConfig, getAllCharConfigs } from './src/char-config.js';
-import { UAL_PATHS, isHeadRelatedMesh, attachSkinned } from './src/char-loader.js';
+import { UAL_PATHS, CharacterRenderer } from './src/char-loader.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  CONSTANTES
@@ -477,9 +477,7 @@ function loadGLTF(url) {
 // ═══════════════════════════════════════════════════════════════
 //  ETAT — double main (R + L indépendants)
 // ═══════════════════════════════════════════════════════════════
-let charRoot     = null;
-let mixer        = null;
-let activeAction = null;
+let charRenderer = null; // CharacterRenderer — dual-skeleton + shader zones
 let allClips     = [];
 let animFilter   = '';
 let ualLoaded    = false;
@@ -522,9 +520,9 @@ function setCharLoading(txt) {
 }
 
 function findBone(name) {
-    if (!charRoot) return null;
+    if (!charRenderer?.outfitRoot) return null;
     let found = null;
-    charRoot.traverse(n => {
+    charRenderer.outfitRoot.traverse(n => {
         if (n.isBone && n.name.toLowerCase() === name.toLowerCase()) found = n;
     });
     return found;
@@ -617,54 +615,15 @@ async function loadCharacterFromConfig(cfg) {
     document.getElementById('vp-loading').style.display = 'block';
     setCharLoading('Chargement…');
 
-    // Supprimer l'ancien personnage
-    if (charRoot) {
-        detachAllWeapons();
-        scene.remove(charRoot);
-        charRoot = null;
-    }
-    if (mixer) {
-        try { mixer.stopAllActions(); } catch(e) { console.warn('[GripEditor] stopAllActions:', e.message); }
-        try { mixer.uncacheRoot && mixer.uncacheRoot(charRoot); } catch {}
-        mixer = null;
-        activeAction = null;
-    }
+    // Détacher les armes avant de disposer le renderer
+    detachAllWeapons();
+
+    // CharacterRenderer — dual-skeleton + shader zones (identique char-builder)
+    if (!charRenderer) charRenderer = new CharacterRenderer(scene, SkeletonUtils);
 
     try {
-        const urls = [cfg.meshUrl, cfg.baseUrl];
-        if (cfg.hairUrl)  urls.push(cfg.hairUrl);
-        if (cfg.beardUrl) urls.push(cfg.beardUrl);
-
-        console.log('[GripEditor] Chargement perso:', cfg.name, urls);
-        const gltfs = await Promise.all(urls.map(u => loadGLTF(u)));
-        const [outfitGltf, bodyGltf] = gltfs;
-        const hairGltf  = cfg.hairUrl  ? gltfs[2] : null;
-        const beardGltf = cfg.beardUrl ? gltfs[cfg.hairUrl ? 3 : 2] : null;
-
-        charRoot = SkeletonUtils.clone(outfitGltf.scene);
-        charRoot.traverse(c => {
-            if (!c.isMesh) return;
-            c.castShadow = c.receiveShadow = true;
-            c.frustumCulled = false;
-            (Array.isArray(c.material) ? c.material : [c.material])
-                .forEach(m => { if (m) m.side = THREE.DoubleSide; });
-        });
-
-        // Attacher corps (tete/yeux) AVANT le calcul d'echelle
-        // useFallback=true : polygon offset auto sur le full body → pas de z-fighting
-        if (bodyGltf)  attachSkinned(bodyGltf,  charRoot, isHeadRelatedMesh, true);
-        if (hairGltf)  attachSkinned(hairGltf,  charRoot, null, true);
-        if (beardGltf) attachSkinned(beardGltf, charRoot, null, true);
-
-        scene.add(charRoot);
-
-        // Normaliser a 1.75m
-        const box0 = new THREE.Box3().setFromObject(charRoot);
-        charRoot.scale.setScalar(1.75 / (box0.max.y - box0.min.y || 1));
-        const box = new THREE.Box3().setFromObject(charRoot);
-        charRoot.position.y -= box.min.y;
-
-        mixer = new THREE.AnimationMixer(charRoot);
+        console.log('[GripEditor] Chargement perso:', cfg.name, cfg.meshUrl);
+        await charRenderer.load(cfg, loadGLTF);
         document.getElementById('vp-label').textContent = cfg.name || 'Personnage';
 
         // Charger anims si pas encore fait, sinon rejouer idle
@@ -758,11 +717,8 @@ function makeClipRow(clip) {
 }
 
 function playClip(clip) {
-    if (!mixer) return;
-    if (activeAction) activeAction.fadeOut(0.25);
-    const action = mixer.clipAction(clip);
-    action.reset().fadeIn(0.25).play();
-    activeAction = action;
+    if (!charRenderer) return;
+    charRenderer.play(clip);
     document.querySelectorAll('.clip-row').forEach(r => {
         const span = r.querySelector('span');
         r.classList.toggle('active', !!span && span.textContent === clip.name);
@@ -882,11 +838,10 @@ function detachAllWeapons() {
 //  HOLSTER — attache aux bones dos / ceinture
 // ═══════════════════════════════════════════════════════════════
 function resolveBoneByName(name) {
-    if (!charRoot) return null;
-    // Essayer le nom exact, puis variantes communes
+    if (!charRenderer?.outfitRoot) return null;
     const variants = [name, name + '_l', name + '_r', name.replace('_l','').replace('_r','')];
     let found = null;
-    charRoot.traverse(n => {
+    charRenderer.outfitRoot.traverse(n => {
         if (found || !n.isBone) return;
         if (variants.some(v => n.name.toLowerCase() === v.toLowerCase())) found = n;
     });
@@ -902,7 +857,7 @@ async function attachHolster(key) {
     if (hs.pivot && hs.bone) hs.bone.remove(hs.pivot);
     hs.pivot = null; hs.mesh = null; hs.bone = null;
 
-    if (!charRoot) return;
+    if (!charRenderer?.outfitRoot) return;
     document.getElementById('vp-loading').style.display = 'block';
 
     try {
@@ -1316,7 +1271,7 @@ let _firstFrame = true;
         }
     }
     const delta = clock.getDelta();
-    if (mixer) mixer.update(Math.min(delta, 0.05));
+    charRenderer?.update(Math.min(delta, 0.05));
     if (hands.R.bone && boneMkrR.visible) hands.R.bone.getWorldPosition(boneMkrR.position);
     if (hands.L.bone && boneMkrL.visible) hands.L.bone.getWorldPosition(boneMkrL.position);
     controls.update();
