@@ -10,7 +10,7 @@ import { buildWorld, updateChunks, processBuildQueue, updateWater, updateFog,
 import { Player }           from './player.js';
 import { CameraController, CAM_FIRST, CAM_THIRD } from './camera.js';
 import { initGods, setSilenced, onStatDrift,
-         GOD_QUARRELS, godSpeak }                  from './gods.js';
+         GOD_QUARRELS, godSpeakKey }               from './gods.js';
 import { ColorGradeShader } from './shaders.js';
 import { DayNightCycle }   from './daynight.js';
 import { initAudio, resumeAudio, setZoneAmbience,
@@ -491,7 +491,7 @@ function _startGame() {
     _loadGame();
     setLoadProgress(100);   // ferme l'écran de chargement
     setTimeout(() => { inventory = new InventorySystem(player); }, 1600);
-    setTimeout(() => { godSpeak('ylene', "Tu es là. Pour combien de temps ?", 7000); }, 3000);
+    setTimeout(() => { godSpeakKey('ylene', 'gods.whispers.opening.ylene', 7000); }, 3000);
 }
 
 // Premier clic — démarre le jeu si les assets sont prêts, sinon attend onLoad

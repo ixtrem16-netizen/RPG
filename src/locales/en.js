@@ -203,6 +203,71 @@ export const en = {
             },
         },
     },
+    gods: {
+        meta: {
+            vareth: { name: 'Vareth', domain: 'Greed / Ambition' },
+            sorel: { name: 'Sorel', domain: 'Justice / Order' },
+            maren: { name: 'Maren', domain: 'Compassion / Sacrifice' },
+            dusk: { name: 'Dusk', domain: 'Deceit / Shadows' },
+            brahl: { name: 'Brahl', domain: 'War / Strength' },
+            ylene: { name: 'Ylene', domain: 'Knowledge / Truth' },
+            orvane: { name: 'Orvane', domain: 'Chaos / Freedom' },
+        },
+        whispers: {
+            opening: {
+                ylene: 'You are here. For how long?',
+            },
+            drift: {
+                force: {
+                    down: 'You are softening. That is weakness.',
+                    up: 'Good.',
+                },
+                eloquence: {
+                    up: 'You are learning to listen.',
+                },
+                ombre: {
+                    up: 'That is how one moves.',
+                    down: 'You are turning transparent. Pathetic.',
+                },
+                intelligence: {
+                    down: 'You stop observing. You become... ordinary.',
+                },
+                contrast: {
+                    'force-ombre': 'A warrior who hides. I love this world.',
+                },
+            },
+        },
+        dialogue: {
+            'dialogue-instead-of-fight': {
+                'line-1': 'What is this. You talk, now?',
+                'line-2': 'Interesting. Keep going, it is entertaining.',
+                'line-3': 'Pull yourself together. You know what you are.',
+                'line-4': 'Something in you may be changing.',
+            },
+            pickpocket: {
+                'line-1': 'Well done. He would not have spent it wisely.',
+                'line-2': '...',
+                'line-3': 'Sorel goes quiet. It does him good.',
+            },
+            'help-unprompted': {
+                'line-1': 'There. That is it.',
+                'line-2': 'You could have asked for something in return.',
+                'line-3': 'Be quiet, Vareth.',
+                'line-4': '... Alright.',
+            },
+            'entering-underworld': {
+                'line-1': 'I will not say "do not go down there." But know this: below... I can no longer see you.',
+                'line-2': 'Please.',
+                'line-3': 'I have no joke. That is all you need to know.',
+                'line-4': 'I would like to know what you find. If you return, tell me.',
+            },
+            'exiting-underworld': {
+                'line-1': 'You came back. Something changed.',
+                'line-2': 'You are here.',
+                'line-3': 'Well? What was there?',
+            },
+        },
+    },
     inventory: {
         ui: {
             title: 'Inventory',

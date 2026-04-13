@@ -203,6 +203,71 @@ export const fr = {
             },
         },
     },
+    gods: {
+        meta: {
+            vareth: { name: 'Vareth', domain: 'Cupidité / Ambition' },
+            sorel: { name: 'Sorel', domain: 'Justice / Ordre' },
+            maren: { name: 'Maren', domain: 'Compassion / Sacrifice' },
+            dusk: { name: 'Dusk', domain: 'Tromperie / Ombres' },
+            brahl: { name: 'Brahl', domain: 'Guerre / Force' },
+            ylene: { name: 'Ylene', domain: 'Connaissance / Vérité' },
+            orvane: { name: 'Orvane', domain: 'Chaos / Liberté' },
+        },
+        whispers: {
+            opening: {
+                ylene: 'Tu es là. Pour combien de temps ?',
+            },
+            drift: {
+                force: {
+                    down: 'Tu ramollis. C\'est une faiblesse.',
+                    up: 'Bien.',
+                },
+                eloquence: {
+                    up: 'Tu apprends à écouter.',
+                },
+                ombre: {
+                    up: 'Voilà comment on se déplace.',
+                    down: 'Tu deviens transparent. C\'est pitoyable.',
+                },
+                intelligence: {
+                    down: 'Tu cesses d\'observer. Tu deviens... ordinaire.',
+                },
+                contrast: {
+                    'force-ombre': 'Un guerrier qui se cache. J\'adore ce monde.',
+                },
+            },
+        },
+        dialogue: {
+            'dialogue-instead-of-fight': {
+                'line-1': 'Qu\'est-ce que c\'est que ça. Tu parles, maintenant ?',
+                'line-2': 'Intéressant. Continue, c\'est divertissant.',
+                'line-3': 'Reprends-toi. Tu sais ce que tu es.',
+                'line-4': 'Il y a peut-être quelque chose qui change en toi.',
+            },
+            pickpocket: {
+                'line-1': 'Bien joué. Il ne l\'aurait pas dépensé utilement.',
+                'line-2': '...',
+                'line-3': 'Sorel se tait. Ça lui fait du bien.',
+            },
+            'help-unprompted': {
+                'line-1': 'Voilà. C\'est ça.',
+                'line-2': 'Tu aurais pu demander quelque chose en échange.',
+                'line-3': 'Tais-toi, Vareth.',
+                'line-4': '... D\'accord.',
+            },
+            'entering-underworld': {
+                'line-1': 'Je ne dirai pas "ne vas pas là-dedans". Mais sache que là-dessous... je ne peux plus te voir.',
+                'line-2': 'S\'il te plaît.',
+                'line-3': 'Je n\'ai pas de blague. C\'est tout ce que tu as besoin de savoir.',
+                'line-4': 'Je serais curieux de savoir ce que tu vas trouver. Si tu reviens, raconte-moi.',
+            },
+            'exiting-underworld': {
+                'line-1': 'Tu es revenu. Quelque chose a changé.',
+                'line-2': 'Tu es là.',
+                'line-3': 'Alors ? Qu\'est-ce qu\'il y avait ?',
+            },
+        },
+    },
     inventory: {
         ui: {
             title: 'Inventaire',
