@@ -1363,7 +1363,6 @@ const actions  = {};       // nom clip → AnimationAction
 let activeAct  = null;
 let activeClip = '';
 let animPaused = false;          // frame scrubber : gèle le mixer quand true
-let _shieldLayerAction = null;   // couche additive haut-du-corps bouclier (réinitialisée au hot-reload)
 let yOffset    = 0;
 let boneOverrides = {};
 let boneRestPos   = {};
@@ -1675,7 +1674,6 @@ async function hotReloadCharacter(cfg = null) {
     STATE.combatMode = 0; STATE.inCombatStance = false; STATE.blocking = false;
 
     // 2. Supprimer l'ancien personnage de la scène
-    _shieldLayerAction = null; // le mixer va être détruit — invalider le cache
     if (mixer) { try { mixer.stopAllActions(); } catch(e) {} mixer = null; }
     scene.remove(charRoot);
     charRoot.traverse(n => {
@@ -3058,54 +3056,6 @@ function _updateInner(delta) {
 
 } // fin _updateInner
 
-// ═══════════════════════════════════════════════════════════════
-//  SHIELD LAYER — couche additive haut-du-corps (déplacement + garde)
-//
-//  Principe : quand le joueur se déplace (non-sprint) avec le bouclier
-//  tenu (clic droit), on joue la locomotion normale pour les jambes
-//  ET on superpose idle_shield en mode ADDITIF filtré aux os du haut
-//  du corps. Résultat : jambes qui marchent/jogguent + bras en garde.
-// ═══════════════════════════════════════════════════════════════
-
-// Os du haut du corps (tout ce qui est au-dessus du pelvis)
-const _UPPER_RE = /^(spine_|neck_|Head|clavicle_|upperarm_|lowerarm_|hand_|index_|middle_|ring_|pinky_|thumb_)/i;
-
-function _ensureShieldLayer() {
-    if (_shieldLayerAction) return _shieldLayerAction;
-    const baseAct  = actions['idle_shield'];
-    const tposeAct = actions['tpose'];
-    if (!baseAct || !mixer) return null;
-
-    // Cloner pour ne pas altérer le clip original
-    const clip = baseAct.getClip().clone();
-    clip.name  = '_shield_upper_additive';
-
-    // Rendre additif — delta par rapport à la T-pose (ou frame 0 si pas de tpose)
-    THREE.AnimationUtils.makeClipAdditive(clip, 0, tposeAct?.getClip() ?? clip);
-
-    // Filtrer : garder seulement les tracks du haut du corps
-    clip.tracks = clip.tracks.filter(t => _UPPER_RE.test(t.name));
-    if (!clip.tracks.length) return null;
-
-    const act = mixer.clipAction(clip);
-    act.blendMode = THREE.AdditiveAnimationBlendMode;
-    act.setLoop(THREE.LoopRepeat, Infinity);
-    act.weight = 1;
-    _shieldLayerAction = act;
-    return act;
-}
-
-function _startShieldLayer(fade = 0.22) {
-    const act = _ensureShieldLayer();
-    if (!act) return;
-    if (act.isRunning() && act.getEffectiveWeight() > 0.9) return;
-    act.reset().fadeIn(fade).play();
-}
-
-function _stopShieldLayer(fade = 0.22) {
-    if (!_shieldLayerAction?.isRunning()) return;
-    _shieldLayerAction.fadeOut(fade);
-}
 
 // ═══════════════════════════════════════════════════════════════
 //  RESOLVE ANIM — machine à états animation (cascade de priorité)
@@ -3118,12 +3068,6 @@ function _stopShieldLayer(fade = 0.22) {
 const IDLE_ANIMS = new Set(['idle','idle_look','idle_tired','idle_torch','idle_fold']);
 
 function resolveAnim(isMoving, fwd, bck, lft, rgt, sprinting) {
-    // ── Layer shield : actif seulement si en déplacement non-sprint + garde bouclier ──
-    // Géré ici (avant tout return) pour que le stop s'exécute même quand immobile.
-    const wantShieldLayer = STATE.blocking && STATE.hasShield && isMoving && !sprinting;
-    if (wantShieldLayer) _startShieldLayer();
-    else                 _stopShieldLayer();
-
     // ── 1. Aérien ────────────────────────────────────────────────
     if (!STATE.grounded && STATE.traversal === '') {
         if (STATE.jumpPhase === 'start') return; // jump_start en cours, ne pas interrompre
@@ -3164,11 +3108,16 @@ function resolveAnim(isMoving, fwd, bck, lft, rgt, sprinting) {
         playAnim('walk_carry', 0.2);
         return;
     }
-    // Stand : sprint → walk → jog
+    // Stand : sprint → shield-walk → walk → jog
     if (sprinting || STATE.sprintState === 'on') {
         // Sprint + bouclier tenu → sprint_shield (animation full-body dédiée)
         const sprintAnim = (STATE.blocking && STATE.hasShield) ? 'sprint_shield' : 'sprint';
         if (activeClip !== sprintAnim) playAnim(sprintAnim, 0.15);
+        return;
+    }
+    // Bouclier tenu en déplacement non-sprint → idle_shield
+    if (STATE.blocking && STATE.hasShield) {
+        if (activeClip !== 'idle_shield') playAnim('idle_shield', 0.15);
         return;
     }
     if (STATE.walkToggle) {
