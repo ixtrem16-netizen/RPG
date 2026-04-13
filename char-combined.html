@@ -185,7 +185,7 @@ function rebuildScene() {
     if (!outfitGltf || !ualGltf) return;
 
     if (activeAction) { activeAction.stop(); activeAction = null; }
-    if (mixer)        { mixer.stopAllAction(); mixer = null; }
+    if (mixer)        { mixer.stopAllActions(); mixer = null; }
     if (currentModel) { scene.remove(currentModel); currentModel = null; }
 
     const model = SkeletonUtils.clone(outfitGltf.scene);
