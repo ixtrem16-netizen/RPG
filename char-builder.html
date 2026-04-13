@@ -898,8 +898,8 @@ async function rebuild() {
 
     if (activeActionOutfit) { activeActionOutfit.stop(); activeActionOutfit=null; }
     if (activeActionBody)   { activeActionBody.stop();  activeActionBody=null; }
-    if (mixerOutfit) { mixerOutfit.stopAllAction(); mixerOutfit=null; }
-    if (mixerBody)   { mixerBody.stopAllAction();   mixerBody=null; }
+    if (mixerOutfit) { mixerOutfit.stopAllActions(); mixerOutfit=null; }
+    if (mixerBody)   { mixerBody.stopAllActions();   mixerBody=null; }
     if (outfitRoot)  { scene.remove(outfitRoot); outfitRoot=null; }
     if (bodyRoot)    { scene.remove(bodyRoot);   bodyRoot=null; }
     slots = { body:[], hair:[], beard:[] };
