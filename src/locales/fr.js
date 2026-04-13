@@ -281,6 +281,49 @@ export const fr = {
             'villager-two': 'Villageois',
         },
     },
+    pages: {
+        'anim-inspect': {
+            title: 'Inspecteur d animations',
+            heading: 'Bibliotheque d animation — clips disponibles',
+            status: {
+                loading: 'Chargement des animations...',
+                missing: '⚠ Aucun fichier d animation trouve.',
+                loaded: '{count} animations chargees',
+                error: 'Erreur : {message}',
+            },
+        },
+        'soldier-test': {
+            title: 'Soldat — test d animations',
+            buttons: {
+                idle: 'Repos',
+                walk: 'Marche',
+                run: 'Course',
+                't-pose': 'T-pose',
+            },
+            status: {
+                loading: 'Chargement...',
+                progress: 'Chargement... {percent}%',
+                error: 'Erreur : {message}',
+                active: '▶ {animation}',
+                clips: 'Clips detectes',
+            },
+        },
+        'character-preview': {
+            title: 'Apercu des personnages',
+            info: {
+                orbit: 'Clic droit + glisser : orbiter',
+                zoom: 'Molette : zoom',
+            },
+            status: {
+                prompt: 'Cliquez un personnage',
+                loading: 'Chargement...',
+                progress: 'Chargement {percent}%',
+                loaded: '{file}\nAnimations : {clips}',
+                error: 'Erreur : {message}',
+                none: 'aucune',
+            },
+        },
+    },
     inventory: {
         ui: {
             title: 'Inventaire',

@@ -46,28 +46,29 @@ import { initI18n } from './src/i18n.js';
 initI18n();
 </script>
 
-<div id="status">Cliquez un personnage</div>
-<div id="info">Clic droit + drag : orbiter<br>Molette : zoom</div>
+<div id="status">Click a character</div>
+<div id="info"></div>
 
 <div id="ui">
-    <button class="btn" data-src="assets/characters/outfits/Male_Ranger.gltf">♂ Ranger</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Peasant.gltf">♂ Peasant</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Knight.gltf">♂ Knight</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Knight_Cloth.gltf">♂ Knight Cloth</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Noble.gltf">♂ Noble</button>
-    <button class="btn" data-src="assets/characters/outfits/Male_Wizard.gltf">♂ Wizard</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Ranger.gltf">♀ Ranger</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Peasant.gltf">♀ Peasant</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Knight.gltf">♀ Knight</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Knight_Cloth.gltf">♀ Knight Cloth</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Noble.gltf">♀ Noble</button>
-    <button class="btn" data-src="assets/characters/outfits/Female_Wizard.gltf">♀ Wizard</button>
+    <button class="btn" data-src="assets/characters/outfits/Male_Ranger.gltf" data-gender="male" data-outfit="ranger">♂ Ranger</button>
+    <button class="btn" data-src="assets/characters/outfits/Male_Peasant.gltf" data-gender="male" data-outfit="peasant">♂ Peasant</button>
+    <button class="btn" data-src="assets/characters/outfits/Male_Knight.gltf" data-gender="male" data-outfit="knight">♂ Knight</button>
+    <button class="btn" data-src="assets/characters/outfits/Male_Knight_Cloth.gltf" data-gender="male" data-outfit="knight-cloth">♂ Knight Cloth</button>
+    <button class="btn" data-src="assets/characters/outfits/Male_Noble.gltf" data-gender="male" data-outfit="noble">♂ Noble</button>
+    <button class="btn" data-src="assets/characters/outfits/Male_Wizard.gltf" data-gender="male" data-outfit="wizard">♂ Wizard</button>
+    <button class="btn" data-src="assets/characters/outfits/Female_Ranger.gltf" data-gender="female" data-outfit="ranger">♀ Ranger</button>
+    <button class="btn" data-src="assets/characters/outfits/Female_Peasant.gltf" data-gender="female" data-outfit="peasant">♀ Peasant</button>
+    <button class="btn" data-src="assets/characters/outfits/Female_Knight.gltf" data-gender="female" data-outfit="knight">♀ Knight</button>
+    <button class="btn" data-src="assets/characters/outfits/Female_Knight_Cloth.gltf" data-gender="female" data-outfit="knight-cloth">♀ Knight Cloth</button>
+    <button class="btn" data-src="assets/characters/outfits/Female_Noble.gltf" data-gender="female" data-outfit="noble">♀ Noble</button>
+    <button class="btn" data-src="assets/characters/outfits/Female_Wizard.gltf" data-gender="female" data-outfit="wizard">♀ Wizard</button>
 </div>
 
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { onLocaleChange, t } from './src/i18n.js';
 
 // ── Scène ────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -130,9 +131,67 @@ scene.add(ring);
 // ── Chargement ───────────────────────────────────────────────────
 let current = null;
 const loader = new GLTFLoader();
+const statusEl = document.getElementById('status');
+const infoEl = document.getElementById('info');
+let statusState = { type: 'prompt', params: {} };
+
+function setPageTitle() {
+    document.title = t('pages.character-preview.title');
+}
+
+function renderInfo() {
+    infoEl.innerHTML = `${t('pages.character-preview.info.orbit')}<br>${t('pages.character-preview.info.zoom')}`;
+}
+
+function renderButtons() {
+    document.querySelectorAll('.btn').forEach(btn => {
+        const symbol = btn.dataset.gender === 'female' ? '♀' : '♂';
+        btn.textContent = `${symbol} ${t(`char-creation.outfits.${btn.dataset.outfit}`)}`;
+    });
+}
+
+function renderStatus() {
+    switch (statusState.type) {
+        case 'loading':
+            statusEl.textContent = t('pages.character-preview.status.loading');
+            break;
+        case 'progress':
+            statusEl.textContent = t('pages.character-preview.status.progress', statusState.params);
+            break;
+        case 'loaded':
+            statusEl.textContent = t('pages.character-preview.status.loaded', {
+                file: statusState.params.file,
+                clips: statusState.params.clipNames.join(', ') || t('pages.character-preview.status.none'),
+            });
+            break;
+        case 'error':
+            statusEl.textContent = t('pages.character-preview.status.error', statusState.params);
+            break;
+        case 'prompt':
+        default:
+            statusEl.textContent = t('pages.character-preview.status.prompt');
+            break;
+    }
+}
+
+function setStatus(type, params = {}) {
+    statusState = { type, params };
+    renderStatus();
+}
+
+setPageTitle();
+renderInfo();
+renderButtons();
+renderStatus();
+onLocaleChange(() => {
+    setPageTitle();
+    renderInfo();
+    renderButtons();
+    renderStatus();
+});
 
 function loadCharacter(url, btn) {
-    document.getElementById('status').textContent = 'Chargement...';
+    setStatus('loading');
     document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 
@@ -160,19 +219,19 @@ function loadCharacter(url, btn) {
         current = model;
 
         // Infos
-        const clips = gltf.animations.map(a => a.name).join(', ') || 'aucune';
-        const meshCount = [...model.children].filter(c => c.isMesh).length;
-        document.getElementById('status').textContent =
-            url.split('/').pop() + '\nAnimations : ' + clips;
+        setStatus('loaded', {
+            file: url.split('/').pop(),
+            clipNames: gltf.animations.map(a => a.name),
+        });
 
         console.log('Chargé :', url);
         console.log('Animations :', gltf.animations.map(a => a.name));
 
     }, (xhr) => {
         const pct = xhr.total ? Math.round(xhr.loaded / xhr.total * 100) : '...';
-        document.getElementById('status').textContent = 'Chargement ' + pct + '%';
+        setStatus('progress', { percent: pct });
     }, (err) => {
-        document.getElementById('status').textContent = 'Erreur : ' + err.message;
+        setStatus('error', { message: err.message });
         console.error(err);
     });
 }

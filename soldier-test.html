@@ -51,23 +51,24 @@ canvas { display:block; }
 <body>
 <script type="module">
 import { initI18n } from './src/i18n.js';
-initI18n();
+initI18n({ translate: true });
 </script>
 
-<div id="status">Chargement...</div>
+<div id="status">Loading...</div>
 <div id="clip-list"></div>
 
 <div id="ui">
-    <button class="anim-btn active" data-anim="Idle">Idle</button>
-    <button class="anim-btn"        data-anim="Walk">Walk</button>
-    <button class="anim-btn"        data-anim="Run">Run</button>
-    <button class="anim-btn"        data-anim="TPose">T-Pose</button>
+    <button class="anim-btn active" data-anim="Idle"  data-label-key="pages.soldier-test.buttons.idle">Idle</button>
+    <button class="anim-btn"        data-anim="Walk"  data-label-key="pages.soldier-test.buttons.walk">Walk</button>
+    <button class="anim-btn"        data-anim="Run"   data-label-key="pages.soldier-test.buttons.run">Run</button>
+    <button class="anim-btn"        data-anim="TPose" data-label-key="pages.soldier-test.buttons.t-pose">T-Pose</button>
 </div>
 
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader }      from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls }   from 'three/addons/controls/OrbitControls.js';
+import { onLocaleChange, t } from './src/i18n.js';
 
 // ── Scène ────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -135,6 +136,73 @@ scene.add(ring);
 let mixer   = null;
 let actions = {};
 let active  = null;
+const statusEl = document.getElementById('status');
+const clipListEl = document.getElementById('clip-list');
+let statusState = { type: 'loading', params: {} };
+let detectedClips = [];
+
+const BUTTON_LABEL_KEYS = {
+    Idle: 'pages.soldier-test.buttons.idle',
+    Walk: 'pages.soldier-test.buttons.walk',
+    Run: 'pages.soldier-test.buttons.run',
+    TPose: 'pages.soldier-test.buttons.t-pose',
+};
+
+function getAnimLabel(name) {
+    const key = BUTTON_LABEL_KEYS[name];
+    return key ? t(key) : name;
+}
+
+function setPageTitle() {
+    document.title = t('pages.soldier-test.title');
+}
+
+function renderButtons() {
+    document.querySelectorAll('.anim-btn').forEach(btn => {
+        btn.textContent = t(btn.dataset.labelKey);
+    });
+}
+
+function renderStatus() {
+    switch (statusState.type) {
+        case 'progress':
+            statusEl.textContent = t('pages.soldier-test.status.progress', statusState.params);
+            break;
+        case 'active':
+            statusEl.textContent = t('pages.soldier-test.status.active', {
+                animation: getAnimLabel(statusState.params.name),
+            });
+            break;
+        case 'error':
+            statusEl.textContent = t('pages.soldier-test.status.error', statusState.params);
+            break;
+        case 'loading':
+        default:
+            statusEl.textContent = t('pages.soldier-test.status.loading');
+            break;
+    }
+}
+
+function setStatus(type, params = {}) {
+    statusState = { type, params };
+    renderStatus();
+}
+
+function renderClipHeader(clipNames = []) {
+    detectedClips = clipNames;
+    clipListEl.innerHTML = `<span style="color:rgba(200,184,154,0.25);margin-bottom:4px">${t('pages.soldier-test.status.clips')}</span>`
+        + clipNames.map(n => `<span>${n}</span>`).join('');
+}
+
+setPageTitle();
+renderButtons();
+renderStatus();
+onLocaleChange(() => {
+    setPageTitle();
+    renderButtons();
+    renderStatus();
+    if (detectedClips.length > 0) renderClipHeader(detectedClips);
+});
 
 function playAnim(name, crossfade = 0.2) {
     const next = actions[name];
@@ -148,7 +216,7 @@ function playAnim(name, crossfade = 0.2) {
     document.querySelectorAll('.anim-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.anim === name);
     });
-    document.getElementById('status').textContent = '▶  ' + name;
+    setStatus('active', { name });
 }
 
 // ── Chargement Soldier.glb ───────────────────────────────────────
@@ -176,19 +244,17 @@ loader.load(
         }
 
         // Afficher les clips détectés
-        const listEl = document.getElementById('clip-list');
-        listEl.innerHTML = '<span style="color:rgba(200,184,154,0.25);margin-bottom:4px">CLIPS DÉTECTÉS</span>'
-            + clipNames.map(n => `<span>${n}</span>`).join('');
+        renderClipHeader(clipNames);
 
         // Jouer Idle par défaut
         playAnim('Idle', 0);
     },
     (xhr) => {
         const pct = Math.round(xhr.loaded / xhr.total * 100);
-        document.getElementById('status').textContent = 'Chargement... ' + pct + '%';
+        setStatus('progress', { percent: pct });
     },
     (err) => {
-        document.getElementById('status').textContent = 'Erreur : ' + err.message;
+        setStatus('error', { message: err.message });
         console.error(err);
     }
 );

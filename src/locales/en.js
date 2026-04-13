@@ -281,6 +281,49 @@ export const en = {
             'villager-two': 'Villager',
         },
     },
+    pages: {
+        'anim-inspect': {
+            title: 'Animation Inspector',
+            heading: 'Animation Library — Available Clips',
+            status: {
+                loading: 'Loading animations...',
+                missing: '⚠ No animation file found.',
+                loaded: '{count} animations loaded',
+                error: 'Error: {message}',
+            },
+        },
+        'soldier-test': {
+            title: 'Soldier — Test animations',
+            buttons: {
+                idle: 'Idle',
+                walk: 'Walk',
+                run: 'Run',
+                't-pose': 'T-Pose',
+            },
+            status: {
+                loading: 'Loading...',
+                progress: 'Loading... {percent}%',
+                error: 'Error: {message}',
+                active: '▶ {animation}',
+                clips: 'Detected clips',
+            },
+        },
+        'character-preview': {
+            title: 'Character Preview',
+            info: {
+                orbit: 'Right-click + drag: orbit',
+                zoom: 'Wheel: zoom',
+            },
+            status: {
+                prompt: 'Click a character',
+                loading: 'Loading...',
+                progress: 'Loading {percent}%',
+                loaded: '{file}\nAnimations: {clips}',
+                error: 'Error: {message}',
+                none: 'none',
+            },
+        },
+    },
     inventory: {
         ui: {
             title: 'Inventory',
