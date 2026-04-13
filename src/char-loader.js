@@ -32,16 +32,14 @@ export function isHeadRelatedMesh(node) {
         node.skeleton?.bones.some(b => b.name === 'neck_01' || b.name === 'Head');
 }
 
-// Mesh "tête uniquement" : a neck_01/Head SANS spine.
-// Correspond aux meshes yeux, sourcils et tête seule (pas le body complet).
-// → Utilisé par les outils preview (grip-editor, character-preview) qui
-//   attachent body sur le skeleton outfit : exclut le mesh corps plein
-//   pour éviter le z-fighting outfit/skin.
-export function isHeadOnlyMesh(node) {
+// Mesh "corps complet" : a spine + Head/neck_01.
+// Identifie le mesh de peau complet (SuperHero_Male_FullBody…) distinct des
+// meshes accessoires (yeux, sourcils) qui n'ont pas de bones spinaux.
+export function isFullBodyMesh(node) {
     if (!node.isSkinnedMesh || !node.skeleton) return false;
     const bones = new Set(node.skeleton.bones.map(b => b.name));
     return (bones.has('neck_01') || bones.has('Head')) &&
-           !bones.has('spine_01') && !bones.has('spine_02') && !bones.has('spine_03');
+           (bones.has('spine_01') || bones.has('spine_02') || bones.has('spine_03'));
 }
 
 // ── Attacher des SkinnedMesh d'un GLTF sur un squelette cible ───────────────
@@ -88,7 +86,16 @@ export function attachSkinned(srcGltf, outfitRoot, meshFilter, useFallback = fal
             ? srcNode.material : [srcNode.material])
             .map(m => {
                 const c = m ? m.clone() : m;
-                if (c) c.side = THREE.DoubleSide;
+                if (c) {
+                    c.side = THREE.DoubleSide;
+                    // En mode preview (useFallback) : polygon offset pour éviter le
+                    // z-fighting entre le mesh corps et l'outfit superposé
+                    if (useFallback && isFullBodyMesh(srcNode)) {
+                        c.polygonOffset      = true;
+                        c.polygonOffsetFactor = 4;
+                        c.polygonOffsetUnits  = 4;
+                    }
+                }
                 return c;
             });
 
