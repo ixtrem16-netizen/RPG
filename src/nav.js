@@ -1,48 +1,21 @@
-/**
- * src/nav.js — Widget de navigation flottant
- *
- * Deux modes :
- *  • Accès direct (URL directe) : bouton ≡ flottant, navigation normale.
- *  • Dans le shell SPA (iframe)  : invisible — la barre d'onglets du shell gère tout.
- *    Les clics de navigation envoient un postMessage au shell parent.
- */
-(function () {
-    'use strict';
+import { t } from './i18n.js';
+import { HOME_TOOL_ID, TOOL_DEFINITIONS, TOOL_SECTION_ORDER, getToolFile } from './tool-metadata.js';
 
-    const IN_FRAME = window !== window.top;
+const IN_FRAME = window !== window.top;
 
-    // ── Fonction de navigation ───────────────────────────────────────────────
-    // Quand on est dans le shell, on demande au parent de changer d'onglet.
-    // Quand on est en accès direct, on navigue normalement.
-    function navigate(toolId) {
-        if (IN_FRAME) {
-            window.top.postMessage({ type: 'tge-navigate', to: toolId }, '*');
-        } else {
-            const file = toolId === '' ? 'index.html' : toolId + '.html';
-            window.location.href = file;
-        }
+function navigate(toolId) {
+    if (IN_FRAME) {
+        window.top.postMessage({ type: 'tge-navigate', to: toolId }, '*');
+        return;
     }
 
-    // ── En iframe : le shell gère la navigation, on ne s'injecte pas ─────────
-    if (IN_FRAME) return;
+    window.location.href = getToolFile(toolId);
+}
 
-    // ── Accès direct : bouton ≡ flottant ─────────────────────────────────────
-    const TOOLS = [
-        { label: 'Accueil',         id: '',                  icon: '⌂',  cat: null },
-        { label: 'Gameplay Test',   id: 'gameplay-test',     icon: '⚔',  cat: 'Gameplay' },
-        { label: 'Char Builder',    id: 'char-builder',      icon: '◈',  cat: 'Personnage' },
-        { label: 'Char Combiné',    id: 'char-combined',     icon: '◉',  cat: null },
-        { label: 'Char Preview',    id: 'character-preview', icon: '◎',  cat: null },
-        { label: 'Anim Inspector',  id: 'anim-inspect',      icon: '▶',  cat: null },
-        { label: 'Asset Browser',   id: 'asset-browser',     icon: '❖',  cat: 'Environnement' },
-        { label: 'Village Browser', id: 'village-browser',   icon: '⌂',  cat: null },
-        { label: 'Soldier Test',    id: 'soldier-test',      icon: '◆',  cat: 'Test' },
-    ];
-
+if (!IN_FRAME) {
     const currentFile = window.location.pathname.split('/').pop() || 'index.html';
-    const currentId   = currentFile === 'index.html' ? '' : currentFile.replace(/\.html$/, '');
+    const currentId = currentFile === 'index.html' ? HOME_TOOL_ID : currentFile.replace(/\.html$/, '');
 
-    // ── Styles ───────────────────────────────────────────────────────────────
     const css = `
         #_nav-widget {
             position: fixed; bottom: 18px; right: 18px;
@@ -88,55 +61,56 @@
     styleEl.textContent = css;
     document.head.appendChild(styleEl);
 
-    // ── Widget DOM ───────────────────────────────────────────────────────────
     const widget = document.createElement('div');
     widget.id = '_nav-widget';
 
     const toggle = document.createElement('button');
     toggle.id = '_nav-toggle';
     toggle.innerHTML = '&#8801;';
-    toggle.title = 'Navigation outils';
+    toggle.title = t('nav.toggle.title');
 
     const menu = document.createElement('div');
     menu.id = '_nav-menu';
 
-    let lastCat = undefined;
-    TOOLS.forEach(t => {
-        if (t.cat !== undefined && t.cat !== lastCat) {
-            if (lastCat !== undefined) {
-                const sep = document.createElement('div');
-                sep.className = '_nav-sep';
-                menu.appendChild(sep);
-            }
-            if (t.cat !== null) {
-                const cat = document.createElement('div');
-                cat.className = '_nav-cat';
-                cat.textContent = t.cat;
-                menu.appendChild(cat);
-            }
-            lastCat = t.cat;
-        }
-
+    function appendItem(tool) {
         const item = document.createElement('div');
-        item.className = '_nav-item' + (t.id === currentId ? ' _current' : '');
+        item.className = '_nav-item' + (tool.id === currentId ? ' _current' : '');
 
         const icon = document.createElement('span');
         icon.className = '_nicon';
-        icon.textContent = t.icon;
+        icon.textContent = tool.icon;
         item.appendChild(icon);
-        item.appendChild(document.createTextNode(t.label));
+        item.appendChild(document.createTextNode(t(tool.nameKey)));
 
-        if (t.id !== currentId) {
+        if (tool.id !== currentId) {
             item.addEventListener('click', () => {
                 menu.classList.remove('_open');
                 toggle.classList.remove('_open');
-                navigate(t.id);
+                navigate(tool.id);
             });
         }
-        menu.appendChild(item);
-    });
 
-    // ── Toggle ───────────────────────────────────────────────────────────────
+        menu.appendChild(item);
+    }
+
+    appendItem({ id: HOME_TOOL_ID, icon: '⌂', nameKey: 'nav.home' });
+
+    for (const section of TOOL_SECTION_ORDER) {
+        const tools = TOOL_DEFINITIONS.filter(tool => tool.section === section);
+        if (!tools.length) continue;
+
+        const sep = document.createElement('div');
+        sep.className = '_nav-sep';
+        menu.appendChild(sep);
+
+        const cat = document.createElement('div');
+        cat.className = '_nav-cat';
+        cat.textContent = t(`shell.sections.${section}`);
+        menu.appendChild(cat);
+
+        tools.forEach(appendItem);
+    }
+
     toggle.addEventListener('click', e => {
         e.stopPropagation();
         const open = menu.classList.toggle('_open');
@@ -153,4 +127,4 @@
 
     const inject = () => document.body.appendChild(widget);
     document.body ? inject() : document.addEventListener('DOMContentLoaded', inject);
-})();
+}

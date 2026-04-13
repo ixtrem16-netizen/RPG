@@ -128,24 +128,11 @@ html, body { height:100vh; overflow:hidden; background:#070503; font-family:'Geo
 </style>
 </head>
 <body>
-<script type="module">
-import { initI18n } from './src/i18n.js';
-initI18n();
-</script>
 
 <!-- ══ Barre d'onglets ══════════════════════════════════════════ -->
 <div id="shell-bar">
-    <div id="shell-brand" title="Accueil">TGE</div>
-    <div id="shell-tabs">
-        <div class="s-tab primary" data-tool="gameplay-test"><span class="s-icon">⚔</span>Gameplay</div>
-        <div class="s-tab" data-tool="char-builder"><span class="s-icon">◈</span>Char Builder</div>
-        <div class="s-tab" data-tool="char-combined"><span class="s-icon">◉</span>Char Combiné</div>
-        <div class="s-tab" data-tool="character-preview"><span class="s-icon">◎</span>Char Preview</div>
-        <div class="s-tab" data-tool="anim-inspect"><span class="s-icon">▶</span>Animations</div>
-        <div class="s-tab" data-tool="asset-browser"><span class="s-icon">❖</span>Assets</div>
-        <div class="s-tab" data-tool="village-browser"><span class="s-icon">⌂</span>Village</div>
-        <div class="s-tab" data-tool="soldier-test"><span class="s-icon">◆</span>Soldier</div>
-    </div>
+    <div id="shell-brand">TGE</div>
+    <div id="shell-tabs"></div>
 </div>
 
 <!-- ══ Contenu ══════════════════════════════════════════════════ -->
@@ -153,115 +140,124 @@ initI18n();
 
     <!-- Hub -->
     <div id="home" class="active">
-        <div class="studio-label">Quaternius Studio</div>
-        <div class="project-title">Three.js Game Editor</div>
+        <div class="studio-label" data-i18n="shell.home.studio-label">Quaternius Studio</div>
+        <div class="project-title" data-i18n="app.title">Three.js Game Editor</div>
         <div class="ornament">✦ &nbsp;&nbsp; ✦ &nbsp;&nbsp; ✦</div>
 
-        <div class="hub-grid">
-            <div class="hub-section">Gameplay</div>
-            <div class="hub-card primary" data-open="gameplay-test" style="grid-column:span 3">
-                <div class="hub-icon">⚔</div>
-                <div class="hub-cat">Prototype</div>
-                <div class="hub-name">Gameplay Test</div>
-                <div class="hub-desc">Locomotion · Combat · Physique · Ville de Valcrest. Prototype jouable complet — épée, bouclier, arc, magie.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-
-            <div class="hub-section">Personnage</div>
-            <div class="hub-card" data-open="char-builder">
-                <div class="hub-icon">◈</div>
-                <div class="hub-cat">Character</div>
-                <div class="hub-name">Char Builder</div>
-                <div class="hub-desc">Assemblage modulaire — body, outfits, hair, beard. Shaders par zone de couleur.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-            <div class="hub-card" data-open="char-combined">
-                <div class="hub-icon">◉</div>
-                <div class="hub-cat">Character</div>
-                <div class="hub-name">Char Combiné</div>
-                <div class="hub-desc">Builder + aperçu plein corps côte à côte.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-            <div class="hub-card" data-open="character-preview">
-                <div class="hub-icon">◎</div>
-                <div class="hub-cat">Character</div>
-                <div class="hub-name">Char Preview</div>
-                <div class="hub-desc">Aperçu du personnage assemblé avec toutes ses animations actives.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-            <div class="hub-card" data-open="anim-inspect">
-                <div class="hub-icon">▶</div>
-                <div class="hub-cat">Animation</div>
-                <div class="hub-name">Anim Inspector</div>
-                <div class="hub-desc">Browse et preview de tous les clips d'animation (toutes librairies fusionnées).</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-
-            <div class="hub-section">Environnement</div>
-            <div class="hub-card" data-open="asset-browser">
-                <div class="hub-icon">❖</div>
-                <div class="hub-cat">Assets</div>
-                <div class="hub-name">Asset Browser</div>
-                <div class="hub-desc">Tous les assets Quaternius — filtre par catégorie, thumbnails 3D.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-            <div class="hub-card" data-open="village-browser">
-                <div class="hub-icon">⌂</div>
-                <div class="hub-cat">Environnement</div>
-                <div class="hub-name">Village Browser</div>
-                <div class="hub-desc">Browse et preview de toutes les pièces Medieval Village MegaKit.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-<div class="hub-section">Test</div>
-            <div class="hub-card" data-open="soldier-test">
-                <div class="hub-icon">◆</div>
-                <div class="hub-cat">Test</div>
-                <div class="hub-name">Soldier Test</div>
-                <div class="hub-desc">Scène de test rapide — personnage et animations.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-        </div>
+        <div id="hub-grid" class="hub-grid"></div>
     </div>
 
     <!-- Iframes persistantes (lazy-loaded au premier accès) -->
-    <iframe class="t-frame" id="frame-gameplay-test"     title="Gameplay Test"></iframe>
-    <iframe class="t-frame" id="frame-char-builder"      title="Char Builder"></iframe>
-    <iframe class="t-frame" id="frame-char-combined"     title="Char Combiné"></iframe>
-    <iframe class="t-frame" id="frame-character-preview" title="Char Preview"></iframe>
-    <iframe class="t-frame" id="frame-anim-inspect"      title="Anim Inspector"></iframe>
-    <iframe class="t-frame" id="frame-asset-browser"     title="Asset Browser"></iframe>
-    <iframe class="t-frame" id="frame-village-browser"   title="Village Browser"></iframe>
-    <iframe class="t-frame" id="frame-soldier-test"      title="Soldier Test"></iframe>
+    <div id="frame-host"></div>
 </div>
 
-<script>
-(function () {
-    'use strict';
+<script type="module">
+import { initI18n, t, translateDOM } from './src/i18n.js';
+import { HOME_TOOL_ID, TOOL_DEFINITIONS, TOOL_SECTION_ORDER, getToolById, getToolsBySection } from './src/tool-metadata.js';
 
+initI18n();
+
+const shellBrand = document.getElementById('shell-brand');
+const shellTabs = document.getElementById('shell-tabs');
+const hubGrid = document.getElementById('hub-grid');
+const frameHost = document.getElementById('frame-host');
     let _active = '';
 
+    function renderTab(tool) {
+        const tab = document.createElement('div');
+        tab.className = 's-tab' + (tool.primary ? ' primary' : '');
+        tab.dataset.tool = tool.id;
+
+        const icon = document.createElement('span');
+        icon.className = 's-icon';
+        icon.textContent = tool.icon;
+        tab.appendChild(icon);
+        tab.appendChild(document.createTextNode(t(tool.tabLabelKey)));
+        return tab;
+    }
+
+    function renderCard(tool) {
+        const card = document.createElement('div');
+        card.className = 'hub-card' + (tool.primary ? ' primary' : '');
+        card.dataset.open = tool.id;
+        if (tool.homeColumnSpan) card.style.gridColumn = `span ${tool.homeColumnSpan}`;
+
+        const icon = document.createElement('div');
+        icon.className = 'hub-icon';
+        icon.textContent = tool.icon;
+        card.appendChild(icon);
+
+        const cat = document.createElement('div');
+        cat.className = 'hub-cat';
+        cat.textContent = t(tool.badgeKey);
+        card.appendChild(cat);
+
+        const name = document.createElement('div');
+        name.className = 'hub-name';
+        name.textContent = t(tool.nameKey);
+        card.appendChild(name);
+
+        const desc = document.createElement('div');
+        desc.className = 'hub-desc';
+        desc.textContent = t(tool.descriptionKey);
+        card.appendChild(desc);
+
+        const cta = document.createElement('div');
+        cta.className = 'hub-cta';
+        cta.textContent = t('shell.home.cta');
+        card.appendChild(cta);
+
+        return card;
+    }
+
+    function renderShell() {
+        translateDOM();
+        shellBrand.title = t('nav.home');
+        shellTabs.replaceChildren(...TOOL_DEFINITIONS.map(renderTab));
+
+        const hubNodes = [];
+        for (const section of TOOL_SECTION_ORDER) {
+            const title = document.createElement('div');
+            title.className = 'hub-section';
+            title.textContent = t(`shell.sections.${section}`);
+            hubNodes.push(title);
+
+            for (const tool of getToolsBySection(section)) {
+                hubNodes.push(renderCard(tool));
+            }
+        }
+        hubGrid.replaceChildren(...hubNodes);
+
+        frameHost.replaceChildren(
+            ...TOOL_DEFINITIONS.map(tool => {
+                const frame = document.createElement('iframe');
+                frame.className = 't-frame';
+                frame.id = `frame-${tool.id}`;
+                frame.title = t(tool.nameKey);
+                return frame;
+            })
+        );
+    }
+
     function switchTo(toolId) {
-        // Tout masquer
         document.querySelectorAll('.t-frame').forEach(f => f.classList.remove('active'));
         document.querySelectorAll('.s-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('home').classList.remove('active');
-        document.getElementById('shell-brand').classList.remove('active');
+        shellBrand.classList.remove('active');
 
         _active = toolId || '';
 
         if (!toolId) {
             document.getElementById('home').classList.add('active');
-            document.getElementById('shell-brand').classList.add('active');
-            document.title = 'Three.js Game Editor';
+            shellBrand.classList.add('active');
+            document.title = t('app.title');
             history.replaceState(null, '', location.pathname);
             return;
         }
 
-        // Activer l'onglet
         const tab = document.querySelector(`.s-tab[data-tool="${toolId}"]`);
         tab?.classList.add('active');
 
-        // Lazy load : setter le src seulement au premier accès
         const frame = document.getElementById('frame-' + toolId);
         if (frame && !frame._loaded) {
             frame.src = toolId + '.html';
@@ -269,36 +265,34 @@ initI18n();
         }
         frame?.classList.add('active');
 
-        document.title = (tab?.textContent?.trim() || toolId) + ' — TGE';
+        const tool = getToolById(toolId);
+        document.title = `${tool ? t(tool.nameKey) : toolId} - TGE`;
         history.replaceState(null, '', '#' + toolId);
     }
 
-    // Onglets de la barre shell
+    renderShell();
+
     document.querySelectorAll('.s-tab').forEach(tab => {
         tab.addEventListener('click', () => switchTo(tab.dataset.tool));
     });
 
-    // Logo = retour accueil
-    document.getElementById('shell-brand').addEventListener('click', () => switchTo(''));
+    shellBrand.addEventListener('click', () => switchTo(HOME_TOOL_ID));
 
-    // Cartes du hub
     document.querySelectorAll('.hub-card[data-open]').forEach(card => {
         card.addEventListener('click', () => switchTo(card.dataset.open));
     });
 
-    // Messages depuis les iframes (postMessage de nav.js)
     window.addEventListener('message', e => {
         if (e.data?.type === 'tge-navigate') {
             switchTo(e.data.to);
         }
     });
 
-    // Restaurer depuis le hash (#gameplay-test)
     const hash = location.hash.slice(1);
-    switchTo(hash || '');
-})();
+    switchTo(hash || HOME_TOOL_ID);
 </script>
 
 <script src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>
