@@ -206,16 +206,16 @@ export const fr = {
     inventory: {
         ui: {
             title: 'Inventaire',
-            subtitle: '— Guerrier exile —',
+            subtitle: '— Guerrier exilé —',
             close: 'Fermer',
-            skills: 'Competences',
-            backpack: 'Sac a dos',
-            equipment: 'Equipement',
+            skills: 'Compétences',
+            backpack: 'Sac à dos',
+            equipment: 'Équipement',
             'paperdoll-name': '— Guerrier —',
             character: 'Personnage',
-            'character-name': 'Exile',
+            'character-name': 'Exilé',
             'character-class': 'Niveau 1 · Guerrier',
-            stats: 'Caracteristiques',
+            stats: 'Caractéristiques',
             'quick-belt': 'Ceinture rapide',
             'quick-hint': 'Touches 1 - 4',
         },
@@ -237,14 +237,14 @@ export const fr = {
             common: 'Commun',
             uncommon: 'Peu commun',
             rare: 'Rare',
-            epic: 'Epique',
-            legendary: 'Legendaire',
+            epic: 'Épique',
+            legendary: 'Légendaire',
         },
         summary: {
             health: 'Vie',
             stamina: 'Endurance',
             armor: 'Armure',
-            damage: 'Degats',
+            damage: 'Dégâts',
         },
         hints: {
             use: 'Double-clic : Utiliser',
@@ -256,7 +256,7 @@ export const fr = {
             use: '{item} - {effects}',
         },
         'item-stats': {
-            damage: 'Degats',
+            damage: 'Dégâts',
             speed: 'Vitesse',
             armor: 'Armure',
             block: 'Blocage',
@@ -296,7 +296,7 @@ export const fr = {
         },
         items: {
             'sword-bronze': {
-                name: 'Epee de bronze',
+                name: 'Épée de bronze',
                 desc: 'Forgee dans un bronze ancien. Elle garde encore son fil.',
             },
             'axe-bronze': {
@@ -332,7 +332,7 @@ export const fr = {
                 desc: 'Une petite fiole. Mieux que rien.',
             },
             chalice: {
-                name: 'Calice beni',
+                name: 'Calice béni',
                 desc: 'Une coupe touchee par quelque chose d ancien.',
             },
             antidote: {
@@ -356,11 +356,11 @@ export const fr = {
                 desc: 'Brule pendant une heure. Garde-la loin de la poudre.',
             },
             'key-gold': {
-                name: 'Cle d or',
+                name: "Clé d'or",
                 desc: 'Une cle ornee. Tu ignores ce qu elle ouvre.',
             },
             'key-iron': {
-                name: 'Cle de fer',
+                name: 'Clé de fer',
                 desc: 'Une cle simple. Lourde.',
             },
             rope: {
@@ -369,7 +369,7 @@ export const fr = {
             },
             whetstone: {
                 name: 'Pierre a aiguiser',
-                desc: 'Une pierre grise de riviere. Elle garde les lames affutees.',
+                desc: 'Une pierre grise de riviere. Elle garde les lames affûtées.',
             },
             'scroll-1': {
                 name: 'Vieux parchemin',
@@ -400,12 +400,12 @@ export const fr = {
                 desc: 'Des maillons lourds. De quoi entraver quelque chose.',
             },
             'exile-blade': {
-                name: 'Lame de l exile',
-                desc: 'Une epee oubliee. Elle a deja tue avant toi.',
+                name: "Lame de l'exilé",
+                desc: 'Une épée oubliée. Elle a déjà tue avant toi.',
             },
             'leather-chest': {
                 name: 'Cuirasse de cuir',
-                desc: 'Tannee dans la sueur et le sel.',
+                desc: 'Tannée dans la sueur et le sel.',
             },
             'iron-helm': {
                 name: 'Heaume de fer',
@@ -413,7 +413,7 @@ export const fr = {
             },
             'travel-boots': {
                 name: 'Bottes de voyage',
-                desc: 'Usees par mille lieues.',
+                desc: 'Usées par mille lieues.',
             },
             'worn-belt': {
                 name: 'Ceinture de soldat',
@@ -424,7 +424,7 @@ export const fr = {
                 desc: 'Amere. Efficace.',
             },
             'eitr-shard': {
-                name: 'Eclat d Eitr',
+                name: "Éclat d'Eitr",
                 desc: '"Cela ne devrait pas exister."',
             },
             'bone-ring': {
@@ -435,6 +435,58 @@ export const fr = {
                 name: 'Dague rouillee',
                 desc: 'Une lame courte. Suffisante pour une gorge.',
             },
+        },
+    },
+    'char-creation': {
+        ui: {
+            title: 'Création du personnage',
+            name: 'Nom',
+            'name-placeholder': 'Entrez votre nom...',
+            body: 'Corps',
+            outfit: 'Tenue',
+            hair: 'Cheveux',
+            beard: 'Barbe',
+            colors: 'Couleurs',
+            confirm: 'Entrer dans le monde',
+            skip: 'Continuer avec le personnage actuel',
+            hint: 'Glisser pour tourner · Molette pour zoomer',
+        },
+        body: {
+            male: '♂ Homme',
+            female: '♀ Femme',
+        },
+        colors: {
+            hair: 'Cheveux',
+            eyes: 'Yeux',
+            skin: 'Peau',
+            reset: 'Réinit.',
+        },
+        loading: {
+            initializing: 'Initialisation...',
+            loading: 'Chargement...',
+        },
+        defaults: {
+            name: 'Héros',
+        },
+        outfits: {
+            ranger: 'Ranger',
+            peasant: 'Paysan',
+            knight: 'Chevalier',
+            'knight-cloth': 'Chevalier en tissu',
+            noble: 'Noble',
+            wizard: 'Magicien',
+        },
+        hair: {
+            none: 'Aucun',
+            long: 'Longs',
+            parted: 'Raie',
+            'buzzed-male': 'Rasé ♂',
+            'buzzed-female': 'Rasée ♀',
+            buns: 'Chignons',
+        },
+        beard: {
+            none: 'Aucune',
+            beard: 'Barbe',
         },
     },
     'asset-check': {

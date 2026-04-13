@@ -437,6 +437,58 @@ export const en = {
             },
         },
     },
+    'char-creation': {
+        ui: {
+            title: 'Character Creation',
+            name: 'Name',
+            'name-placeholder': 'Enter your name...',
+            body: 'Body',
+            outfit: 'Outfit',
+            hair: 'Hair',
+            beard: 'Beard',
+            colors: 'Colors',
+            confirm: 'Enter the World',
+            skip: 'Continue with current character',
+            hint: 'Drag to rotate · Scroll to zoom',
+        },
+        body: {
+            male: '♂ Male',
+            female: '♀ Female',
+        },
+        colors: {
+            hair: 'Hair',
+            eyes: 'Eyes',
+            skin: 'Skin',
+            reset: 'Reset',
+        },
+        loading: {
+            initializing: 'Initializing...',
+            loading: 'Loading...',
+        },
+        defaults: {
+            name: 'Hero',
+        },
+        outfits: {
+            ranger: 'Ranger',
+            peasant: 'Peasant',
+            knight: 'Knight',
+            'knight-cloth': 'Knight Cloth',
+            noble: 'Noble',
+            wizard: 'Wizard',
+        },
+        hair: {
+            none: 'None',
+            long: 'Long',
+            parted: 'Parted',
+            'buzzed-male': 'Buzzed ♂',
+            'buzzed-female': 'Buzzed ♀',
+            buns: 'Buns',
+        },
+        beard: {
+            none: 'None',
+            beard: 'Beard',
+        },
+    },
     'asset-check': {
         toggle: {
             one: '{count} missing pack',
