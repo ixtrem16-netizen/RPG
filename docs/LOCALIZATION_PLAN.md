@@ -157,6 +157,29 @@ The implementation is non-trivial in scope: the current app likely contains roug
   - audit script or grep-based checks for untranslated literals, missing keys, and untranslated HTML `lang` attributes
   - explicit confirmation that complex pages such as `gameplay-test.html` reload cleanly on locale change and return in the chosen locale
 
+## Incremental implementation chunks
+
+These chunks are intended to be small, mergeable increments. They are the recommended day-to-day execution order, while the phases above remain the architectural grouping.
+
+| Chunk | Scope | Main files | Done when |
+|------|------|------|------|
+| `loc-01-locale-core` | Add the core locale runtime, storage key, lookup API, and dictionary layout | `src/i18n.js`, `src/locales/en.js`, `src/locales/fr.js` | A page can resolve locale, call `t()`, and update `<html lang>` |
+| `loc-02-locale-audit-tooling` | Add the first untranslated-string / missing-key audit checks and lock key naming conventions | audit script or npm script, locale docs | Developers can run a quick check for missing keys and untranslated remnants |
+| `loc-03-shell-metadata` | Centralize tool metadata and key names for shell tabs, cards, and floating nav | `index.html`, `src/nav.js`, shared tool metadata | Shell/nav labels come from keys rather than duplicated literals |
+| `loc-04-shell-switcher-sync` | Add the language switcher and wire live propagation via `LiveSync` | `index.html`, `src/nav.js`, `src/live-sync.js`, `src/i18n.js` | Changing locale updates shell + simple open pages and persists choice |
+| `loc-05-asset-check-shared-ui` | Localize shared lightweight widgets and warnings | `src/asset-check.js` | Missing-pack widget is fully key-driven |
+| `loc-06-ui-player-core` | Localize shared HUD/stat/zone labels and module-level display constants | `src/ui.js`, `src/player.js`, `src/game.js` | Shared gameplay labels render from keys instead of literals |
+| `loc-07-inventory-ui` | Localize inventory rarity labels, slot names, tooltips, and visible prompts | `src/inventory.js` | Inventory UI is locale-aware without changing gameplay state |
+| `loc-08-character-creation` | Localize character creation overlay text, options, and loading text | `src/char-creation.js` | Character creation works in both locales |
+| `loc-09-gods-narrative` | Translate and wire the narrative god/domain/dialogue content | `src/gods.js` | God names, domains, and whispers are key-driven and manually reviewed |
+| `loc-10-town-npc-labels` | Localize town-facing labels and NPC display text | `src/town.js`, `src/npc.js` | Town/NPC user-facing text no longer depends on hardcoded literals |
+| `loc-11-simple-tool-pages` | Localize lower-complexity preview/test pages | `anim-inspect.html`, `soldier-test.html`, `character-preview.html` | These pages switch locale with the standard inline-module pattern |
+| `loc-12-builder-browser-pages` | Localize builder/browser pages with moderate dynamic UI | `char-builder.html`, `char-combined.html`, `asset-browser.html`, `village-browser.html`, `nature-browser.html` | Builders/browsers are key-driven and live-switch correctly |
+| `loc-13-gameplay-page-static` | Localize gameplay page static DOM/chrome and add reload-to-apply locale handling | `gameplay-test.html` | Static HUD/help/loading chrome is localized and locale changes reload cleanly |
+| `loc-14-gameplay-page-dynamic` | Localize gameplay page dynamic prompts, weapon labels, emotes, belt text, and runtime messages | `gameplay-test.html` | Gameplay runtime text comes from keys and stays logic-safe |
+| `loc-15-build-mode-catalog` | Refactor build mode catalogs and related labels to stable IDs + `labelKey`s | `src/build_mode.js` | Build mode no longer persists or depends on localized names |
+| `loc-16-persistence-validation` | Audit saved data, remove redundant localized persistence, and run the final validation sweep | `src/build_mode.js`, `gameplay-test.html`, validation scripts/checklists | Cross-locale loads work and the untranslated-string sweep is clean |
+
 ## Key design decisions
 
 - **Supported locales:** English and French only in the first version
