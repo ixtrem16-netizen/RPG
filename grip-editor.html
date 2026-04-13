@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Grip Editor — TGE</title>
@@ -245,70 +245,70 @@ html, body {
 <div id="left-col">
     <div id="left-header">
         <div id="wl-title">&#x2726; Grip Editor</div>
-        <div id="char-sel-label">Personnage</div>
+        <div id="char-sel-label">Character</div>
         <select id="char-select"></select>
         <div id="char-loading"></div>
     </div>
 
     <div id="mode-tabs">
-        <div class="mode-tab active" data-mode="grip">Main</div>
+        <div class="mode-tab active" data-mode="grip">Grip</div>
         <div class="mode-tab" data-mode="holster">Holster</div>
     </div>
-    <div id="wl-section-hdr">Armes &amp; Outils</div>
+    <div id="wl-section-hdr">Weapons &amp; Tools</div>
     <div id="wl-items"></div>
 
     <div id="anim-section">
         <div id="anim-hdr">
-            <span>Animations</span>
+            <span id="anim-title">Animations</span>
             <span id="anim-count"></span>
         </div>
-        <input id="anim-search" type="text" placeholder="Filtrer clips…" autocomplete="off">
+        <input id="anim-search" type="text" placeholder="Filter clips..." autocomplete="off">
         <div id="clip-list"></div>
     </div>
 
-    <div id="wl-footer"><div id="wl-status">Chargement…</div></div>
+    <div id="wl-footer"><div id="wl-status">Loading...</div></div>
 </div>
 
 <!-- ══ Viewport 3D ════════════════════════════════════════════════ -->
 <div id="viewport-wrap">
     <div id="cam-btns">
-        <button class="cam-btn active" data-view="hand">Main</button>
-        <button class="cam-btn" data-view="full">Corps</button>
-        <button class="cam-btn" data-view="top">Dessus</button>
+        <button class="cam-btn active" data-view="hand">Hand</button>
+        <button class="cam-btn" data-view="full">Body</button>
+        <button class="cam-btn" data-view="top">Top</button>
     </div>
-    <div id="vp-label">Selectionne une arme</div>
-    <div id="vp-loading">Chargement…</div>
-    <div id="vp-hint">Clic droit · Molette · Milieu</div>
+    <div id="vp-label">Select a weapon</div>
+    <div id="vp-loading">Loading...</div>
+    <div id="vp-hint">Right-click · Wheel · Middle</div>
 </div>
 
 <!-- ══ Panneau grip ═══════════════════════════════════════════════ -->
 <div id="grip-panel">
     <div id="gp-header">
-        <div id="gp-title">Parametres <span id="gp-mode-badge" style="font-size:9px;letter-spacing:2px;color:rgba(200,184,154,0.45);font-weight:normal">GRIP</span></div>
-        <div id="gp-weapon">— Aucune selection —</div>
+        <div id="gp-title"><span id="gp-title-text">Parameters</span> <span id="gp-mode-badge" style="font-size:9px;letter-spacing:2px;color:rgba(200,184,154,0.45);font-weight:normal">GRIP</span></div>
+        <div id="gp-weapon">— No selection —</div>
     </div>
     <div id="gp-sliders">
-        <div class="sg-section">Position pivot (bone offset)</div>
+        <div class="sg-section" data-section="pivot-position">Pivot position (bone offset)</div>
         <div class="sg-row"><span class="sg-lbl">px</span><input class="sg-slider" type="range" id="s-px" min="-0.3" max="0.3" step="0.001" value="0"><span class="sg-val" id="v-px">0.000</span></div>
         <div class="sg-row"><span class="sg-lbl">py</span><input class="sg-slider" type="range" id="s-py" min="-0.3" max="0.3" step="0.001" value="0"><span class="sg-val" id="v-py">0.000</span></div>
         <div class="sg-row"><span class="sg-lbl">pz</span><input class="sg-slider" type="range" id="s-pz" min="-0.3" max="0.3" step="0.001" value="0"><span class="sg-val" id="v-pz">0.000</span></div>
-        <div class="sg-section">Rotation mesh (orientation arme)</div>
+        <div class="sg-section" data-section="mesh-rotation">Mesh rotation (weapon orientation)</div>
         <div class="sg-row"><span class="sg-lbl">rx</span><input class="sg-slider" type="range" id="s-rx" min="-3.15" max="3.15" step="0.01" value="0"><span class="sg-val" id="v-rx">0.000</span></div>
         <div class="sg-row"><span class="sg-lbl">ry</span><input class="sg-slider" type="range" id="s-ry" min="-3.15" max="3.15" step="0.01" value="0"><span class="sg-val" id="v-ry">0.000</span></div>
         <div class="sg-row"><span class="sg-lbl">rz</span><input class="sg-slider" type="range" id="s-rz" min="-3.15" max="3.15" step="0.01" value="0"><span class="sg-val" id="v-rz">0.000</span></div>
-        <div class="sg-section">Twist pivot Y (yaw global)</div>
+        <div class="sg-section" data-section="pivot-yaw">Pivot twist Y (global yaw)</div>
         <div class="sg-row"><span class="sg-lbl">ty</span><input class="sg-slider" type="range" id="s-ty" min="-3.15" max="3.15" step="0.01" value="0"><span class="sg-val" id="v-ty">0.000</span></div>
-        <div class="sg-section">Offset prise (long. manche)</div>
+        <div class="sg-section" data-section="grip-offset">Grip offset (handle length)</div>
         <div class="sg-row"><span class="sg-lbl">pvx</span><input class="sg-slider" type="range" id="s-pvx" min="-0.3" max="0.3" step="0.001" value="0"><span class="sg-val" id="v-pvx">0.000</span></div>
-        <div class="sg-section">Echelle</div>
+        <div class="sg-section" data-section="scale">Scale</div>
         <div class="sg-row"><span class="sg-lbl">scale</span><input class="sg-slider" type="range" id="s-sc" min="0.2" max="3.0" step="0.01" value="1"><span class="sg-val" id="v-sc">1.00</span></div>
     </div>
 
     <div id="gp-footer">
-        <button class="gp-btn primary" id="btn-save">Sauvegarder grip</button>
-        <button class="gp-btn" id="btn-reset">Reinitialiser (defauts)</button>
-        <button class="gp-btn" id="btn-export">Exporter tous les grips</button>
-        <button class="gp-btn danger" id="btn-clear-all">Effacer tous les grips</button>
+        <button class="gp-btn primary" id="btn-save">Save grip</button>
+        <button class="gp-btn" id="btn-reset">Reset (defaults)</button>
+        <button class="gp-btn" id="btn-export">Export all grips</button>
+        <button class="gp-btn danger" id="btn-clear-all">Clear all grips</button>
         <pre id="gp-export-box"></pre>
     </div>
 </div>
@@ -320,47 +320,110 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { resolveCharConfig, getAllCharConfigs } from './src/char-config.js';
 import { UAL_PATHS, CharacterRenderer, findIdleClip } from './src/char-loader.js';
+import { initI18n, onLocaleChange, t } from './src/i18n.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  CONSTANTES
 // ═══════════════════════════════════════════════════════════════
 const WEAPON_DEFS = {
-    sword:   { label:'Epee',     hand:'R', path:'assets/environment/props/Sword_Bronze.gltf',    pos:[0,0.06,0.01], rot:[Math.PI/2,0,0] },
-    axe:     { label:'Hache',    hand:'R', path:'assets/environment/props/Axe_Bronze.gltf',      pos:[0,0.05,0   ], rot:[Math.PI/2,0,0] },
-    knife:   { label:'Couteau',  hand:'R', path:'assets/environment/props/Table_Knife.gltf',     pos:[0,0.03,0   ], rot:[Math.PI/2,0,0] },
-    pickaxe: { label:'Pioche',   hand:'R', path:'assets/environment/props/Pickaxe_Bronze.gltf',  pos:[0,0.06,0.01], rot:[Math.PI/2,0,0] },
-    torch:   { label:'Torche',   hand:'L', path:'assets/environment/props/Torch_Metal.gltf',     pos:[0,0.04,0   ], rot:[Math.PI/2,0,0] },
-    shield:  { label:'Bouclier', hand:'L', path:'assets/environment/props/Shield_Wooden.gltf',   pos:[0,0,0.03   ], rot:[0,0,Math.PI/2] },
+    sword:   { labelKey:'pages.gameplay-test.weapons.sword',   hand:'R', path:'assets/environment/props/Sword_Bronze.gltf',    pos:[0,0.06,0.01], rot:[Math.PI/2,0,0] },
+    axe:     { labelKey:'pages.gameplay-test.weapons.axe',     hand:'R', path:'assets/environment/props/Axe_Bronze.gltf',      pos:[0,0.05,0   ], rot:[Math.PI/2,0,0] },
+    knife:   { labelKey:'pages.gameplay-test.weapons.knife',   hand:'R', path:'assets/environment/props/Table_Knife.gltf',     pos:[0,0.03,0   ], rot:[Math.PI/2,0,0] },
+    pickaxe: { labelKey:'pages.gameplay-test.weapons.pickaxe', hand:'R', path:'assets/environment/props/Pickaxe_Bronze.gltf',  pos:[0,0.06,0.01], rot:[Math.PI/2,0,0] },
+    torch:   { labelKey:'pages.gameplay-test.weapons.torch',   hand:'L', path:'assets/environment/props/Torch_Metal.gltf',     pos:[0,0.04,0   ], rot:[Math.PI/2,0,0] },
+    shield:  { labelKey:'pages.gameplay-test.weapons.shield',  hand:'L', path:'assets/environment/props/Shield_Wooden.gltf',   pos:[0,0,0.03   ], rot:[0,0,Math.PI/2] },
 };
 
 // ── Holster — placement quand NON équipé (dos, ceinture) ────────
 // bone: nom du bone d'attache dans le squelette Quaternius
 // slot: label de regroupement UI
 const HOLSTER_DEFS = {
-    sword_back:   { label:'Epee',       slot:'Dos',        bone:'spine_02', path:'assets/environment/props/Sword_Bronze.gltf'   },
-    shield_back:  { label:'Bouclier',   slot:'Dos',        bone:'spine_02', path:'assets/environment/props/Shield_Wooden.gltf'  },
-    axe_belt:     { label:'Hache',      slot:'Ceinture D', bone:'thigh_r',  path:'assets/environment/props/Axe_Bronze.gltf'     },
-    pickaxe_belt: { label:'Pioche',     slot:'Ceinture D', bone:'thigh_r',  path:'assets/environment/props/Pickaxe_Bronze.gltf' },
-    torch_belt:   { label:'Torche',     slot:'Ceinture G', bone:'thigh_l',  path:'assets/environment/props/Torch_Metal.gltf'    },
-    pouch_belt:   { label:'Bourse',     slot:'Ceinture G', bone:'thigh_l',  path:'assets/environment/props/Pouch_Large.gltf'    },
-    bag_belt:     { label:'Sacoche',    slot:'Ceinture D', bone:'thigh_r',  path:'assets/environment/props/Bag.gltf'            },
+    sword_back:   { labelKey:'pages.gameplay-test.weapons.sword',   slotKey:'pages.grip-editor.holster-slots.back',       bone:'spine_02', path:'assets/environment/props/Sword_Bronze.gltf'   },
+    shield_back:  { labelKey:'pages.gameplay-test.weapons.shield',  slotKey:'pages.grip-editor.holster-slots.back',       bone:'spine_02', path:'assets/environment/props/Shield_Wooden.gltf'  },
+    axe_belt:     { labelKey:'pages.gameplay-test.weapons.axe',     slotKey:'pages.grip-editor.holster-slots.belt-right', bone:'thigh_r',  path:'assets/environment/props/Axe_Bronze.gltf'     },
+    pickaxe_belt: { labelKey:'pages.gameplay-test.weapons.pickaxe', slotKey:'pages.grip-editor.holster-slots.belt-right', bone:'thigh_r',  path:'assets/environment/props/Pickaxe_Bronze.gltf' },
+    torch_belt:   { labelKey:'pages.gameplay-test.weapons.torch',   slotKey:'pages.grip-editor.holster-slots.belt-left',  bone:'thigh_l',  path:'assets/environment/props/Torch_Metal.gltf'    },
+    pouch_belt:   { labelKey:'pages.grip-editor.holsters.pouch',    slotKey:'pages.grip-editor.holster-slots.belt-left',  bone:'thigh_l',  path:'assets/environment/props/Pouch_Large.gltf'    },
+    bag_belt:     { labelKey:'pages.grip-editor.holsters.bag',      slotKey:'pages.grip-editor.holster-slots.belt-right', bone:'thigh_r',  path:'assets/environment/props/Bag.gltf'            },
 };
 
 const GRIP_KEY    = 'darkrpg_weapon_grips_v2';
 const HOLSTER_KEY = 'darkrpg_holster_v1';
 // Groupes d'animations (ordre = priorité de classification)
 const ANIM_GROUPS = [
-    { label:'Idle',         test: n => /idle/i.test(n) },
-    { label:'Marche',       test: n => /walk/i.test(n) },
-    { label:'Course',       test: n => /\brun\b|sprint/i.test(n) },
-    { label:'Saut',         test: n => /jump|fall|land|air/i.test(n) },
-    { label:'Combat',       test: n => /attack|combo|slash|stab|fight|block|parry|combat/i.test(n) },
-    { label:'Impact',       test: n => /\bhit\b|hurt|flinch|stagger|death|die|dead/i.test(n) },
-    { label:'Escalade',     test: n => /climb|vault|ledge/i.test(n) },
-    { label:'Interaction',  test: n => /\buse\b|pick|grab|open|drink|eat|cast|aim|bow|arrow/i.test(n) },
-    { label:'Emotes',       test: n => /emote|wave|cheer|dance|bow|sit|kneel/i.test(n) },
-    { label:'Divers',       test: () => true },
+    { labelKey:'pages.grip-editor.anim-groups.idle',        test: n => /idle/i.test(n) },
+    { labelKey:'pages.grip-editor.anim-groups.walk',        test: n => /walk/i.test(n) },
+    { labelKey:'pages.grip-editor.anim-groups.run',         test: n => /\brun\b|sprint/i.test(n) },
+    { labelKey:'pages.grip-editor.anim-groups.jump',        test: n => /jump|fall|land|air/i.test(n) },
+    { labelKey:'pages.grip-editor.anim-groups.combat',      test: n => /attack|combo|slash|stab|fight|block|parry|combat/i.test(n) },
+    { labelKey:'pages.grip-editor.anim-groups.impact',      test: n => /\bhit\b|hurt|flinch|stagger|death|die|dead/i.test(n) },
+    { labelKey:'pages.grip-editor.anim-groups.climb',       test: n => /climb|vault|ledge/i.test(n) },
+    { labelKey:'pages.grip-editor.anim-groups.interaction', test: n => /\buse\b|pick|grab|open|drink|eat|cast|aim|bow|arrow/i.test(n) },
+    { labelKey:'pages.grip-editor.anim-groups.emotes',      test: n => /emote|wave|cheer|dance|bow|sit|kneel/i.test(n) },
+    { labelKey:'pages.grip-editor.anim-groups.misc',        test: () => true },
 ];
+
+function getWeaponLabel(key) {
+    const def = WEAPON_DEFS[key];
+    return def?.labelKey ? t(def.labelKey) : key;
+}
+
+function getHolsterLabel(key) {
+    const def = HOLSTER_DEFS[key];
+    return def?.labelKey ? t(def.labelKey) : key;
+}
+
+function getHolsterSlotLabel(slotKey) {
+    return t(slotKey);
+}
+
+function getHandLabel(hand) {
+    return t(hand === 'R' ? 'pages.gameplay-test.hands.right' : 'pages.gameplay-test.hands.left');
+}
+
+function getModeBadgeLabel(mode = editorMode) {
+    return t(mode === 'holster' ? 'pages.grip-editor.panel.modes.holster' : 'pages.grip-editor.panel.modes.grip');
+}
+
+function getSectionHeaderLabel(mode = editorMode) {
+    return t(mode === 'holster' ? 'pages.grip-editor.sections.body-placement' : 'pages.grip-editor.sections.weapons-tools');
+}
+
+function setPanelEmptyState(key = 'pages.grip-editor.panel.none-selected') {
+    document.getElementById('gp-weapon').textContent = t(key);
+    document.getElementById('gp-mode-badge').textContent = getModeBadgeLabel();
+}
+
+function renderStaticText() {
+    document.title = t('pages.grip-editor.title');
+    document.getElementById('wl-title').innerHTML = `&#x2726; ${t('pages.grip-editor.title-short')}`;
+    document.getElementById('char-sel-label').textContent = t('pages.grip-editor.character.label');
+    document.querySelector('.mode-tab[data-mode="grip"]').textContent = t('pages.grip-editor.modes.grip');
+    document.querySelector('.mode-tab[data-mode="holster"]').textContent = t('pages.grip-editor.modes.holster');
+    document.getElementById('wl-section-hdr').textContent = getSectionHeaderLabel();
+    document.getElementById('anim-title').textContent = t('pages.grip-editor.sections.animations');
+    document.getElementById('anim-search').placeholder = t('pages.grip-editor.search.placeholder');
+    document.querySelector('.cam-btn[data-view="hand"]').textContent = t('pages.grip-editor.camera.hand');
+    document.querySelector('.cam-btn[data-view="full"]').textContent = t('pages.grip-editor.camera.full');
+    document.querySelector('.cam-btn[data-view="top"]').textContent = t('pages.grip-editor.camera.top');
+    document.getElementById('vp-hint').textContent = t('pages.grip-editor.viewport.hint');
+    document.getElementById('vp-loading').textContent = t('pages.grip-editor.viewport.loading');
+    if (!editingKey && !editingHolsterKey) {
+        document.getElementById('vp-label').textContent = t('pages.grip-editor.viewport.select-weapon');
+        setPanelEmptyState();
+    }
+    document.getElementById('gp-title-text').textContent = t('pages.grip-editor.panel.title');
+    document.getElementById('gp-mode-badge').textContent = getModeBadgeLabel();
+    document.querySelector('[data-section="pivot-position"]').textContent = t('pages.grip-editor.panel.sections.pivot-position');
+    document.querySelector('[data-section="mesh-rotation"]').textContent = t('pages.grip-editor.panel.sections.mesh-rotation');
+    document.querySelector('[data-section="pivot-yaw"]').textContent = t('pages.grip-editor.panel.sections.pivot-yaw');
+    document.querySelector('[data-section="grip-offset"]').textContent = t('pages.grip-editor.panel.sections.grip-offset');
+    document.querySelector('[data-section="scale"]').textContent = t('pages.grip-editor.panel.sections.scale');
+    document.getElementById('btn-save').textContent = t('pages.grip-editor.panel.buttons.save');
+    document.getElementById('btn-reset').textContent = t('pages.grip-editor.panel.buttons.reset');
+    document.getElementById('btn-export').textContent = t('pages.grip-editor.panel.buttons.export');
+    document.getElementById('btn-clear-all').textContent = t('pages.grip-editor.panel.buttons.clear-all');
+}
 
 // ═══════════════════════════════════════════════════════════════
 //  PERSISTANCE GRIP — par personnage
@@ -539,17 +602,20 @@ function stateForKey(key) { return key ? hands[handForKey(key)] : null; }
 // ═══════════════════════════════════════════════════════════════
 function buildCharSelector() {
     const sel = document.getElementById('char-select');
+    const currentValue = sel.value;
+    sel.innerHTML = '';
 
     // 1. Personnage joueur sauvegardé
     const o0 = document.createElement('option');
-    o0.value = '__saved__'; o0.textContent = '★ Perso sauvegarde (Char Builder)';
+    o0.value = '__saved__';
+    o0.textContent = t('pages.grip-editor.character.saved');
     sel.appendChild(o0);
 
     // 2. Configs nommées du char builder
     const namedCfgs = getAllCharConfigs();
     if (namedCfgs.length) {
         const grp = document.createElement('optgroup');
-        grp.label = 'Configs sauvegardees';
+        grp.label = t('pages.grip-editor.character.named-group');
         for (const c of namedCfgs) {
             const o = document.createElement('option');
             o.value = '__named__:' + c.name;
@@ -561,7 +627,7 @@ function buildCharSelector() {
 
     // 3. Outfits hardcodés (fallback)
     const grp2 = document.createElement('optgroup');
-    grp2.label = 'Outfits rapides';
+    grp2.label = t('pages.grip-editor.character.outfits-group');
     const OUTFITS = [
         ['Male_Ranger','M Ranger'],['Male_Knight','M Knight'],['Male_Peasant','M Peasant'],
         ['Male_Noble','M Noble'],['Male_Wizard','M Wizard'],
@@ -574,7 +640,10 @@ function buildCharSelector() {
     }
     sel.appendChild(grp2);
 
-    sel.addEventListener('change', () => loadCharacterFromVal(sel.value));
+    if ([...sel.options].some(option => option.value === currentValue)) {
+        sel.value = currentValue;
+    }
+    sel.onchange = () => loadCharacterFromVal(sel.value);
 }
 
 function cfgFromVal(val) {
@@ -602,19 +671,20 @@ function cfgFromVal(val) {
 // ═══════════════════════════════════════════════════════════════
 async function loadCharacterFromVal(val) {
     currentCharKey = _charKeyFromVal(val);
-    // Afficher le profil actif dans le header
-    document.getElementById('char-loading').textContent = 'Profil: ' + currentCharKey;
+    const profileText = t('pages.grip-editor.status.profile', { profile: currentCharKey });
+    document.getElementById('char-loading').textContent = profileText;
     await loadCharacterFromConfig(cfgFromVal(val));
-    // Effacer après chargement
+    const loadingEl = document.getElementById('char-loading');
     setTimeout(() => {
-        if (document.getElementById('char-loading').textContent.startsWith('Profil'))
-            document.getElementById('char-loading').textContent = '';
+        if (!loadingEl.classList.contains('error') && loadingEl.textContent === profileText) {
+            loadingEl.textContent = '';
+        }
     }, 2000);
 }
 
 async function loadCharacterFromConfig(cfg) {
     document.getElementById('vp-loading').style.display = 'block';
-    setCharLoading('Chargement…');
+    setCharLoading(t('pages.grip-editor.status.loading'));
 
     // Détacher les armes avant de disposer le renderer
     detachAllWeapons();
@@ -625,7 +695,7 @@ async function loadCharacterFromConfig(cfg) {
     try {
         console.log('[GripEditor] Chargement perso:', cfg.name, cfg.meshUrl);
         await charRenderer.load(cfg, loadGLTF);
-        document.getElementById('vp-label').textContent = cfg.name || 'Personnage';
+        document.getElementById('vp-label').textContent = cfg.name || t('pages.grip-editor.character.player');
 
         // Charger anims si pas encore fait, sinon rejouer idle
         if (!ualLoaded) {
@@ -633,13 +703,13 @@ async function loadCharacterFromConfig(cfg) {
         } else {
             const idle = findIdleClip(allClips);
             if (idle) playClip(idle);
-            setStatus(allClips.length + ' clips');
+            setStatus(t('pages.grip-editor.status.clips', { count: allClips.length }));
         }
 
         setCharLoading('');
     } catch(e) {
         const el = document.getElementById('char-loading');
-        el.textContent = 'Erreur: ' + e.message;
+        el.textContent = t('pages.grip-editor.status.error', { message: e.message });
         el.className = 'error';
         console.error('[GripEditor] loadCharacterFromConfig:', e);
     }
@@ -650,7 +720,7 @@ async function loadCharacterFromConfig(cfg) {
 //  ANIMATIONS
 // ═══════════════════════════════════════════════════════════════
 async function loadAnimations() {
-    setStatus('Chargement animations…');
+    setStatus(t('pages.grip-editor.status.loading-animations'));
     const results = await Promise.allSettled(UAL_PATHS.map(p => loadGLTF(p)));
     const clipMap = new Map();
     for (const r of results) {
@@ -662,11 +732,11 @@ async function loadAnimations() {
     renderClipList();
     const idle = findIdleClip(allClips);
     if (idle) playClip(idle);
-    setStatus(allClips.length + ' clips');
+    setStatus(t('pages.grip-editor.status.clips', { count: allClips.length }));
 }
 
 function groupClips(clips) {
-    const groups = ANIM_GROUPS.map(g => ({ label: g.label, test: g.test, clips: [] }));
+    const groups = ANIM_GROUPS.map(g => ({ label: t(g.labelKey), test: g.test, clips: [] }));
     for (const clip of clips) {
         const grp = groups.find(g => g.test(clip.name));
         if (grp) grp.clips.push(clip);
@@ -732,8 +802,7 @@ document.querySelectorAll('.mode-tab').forEach(tab => {
         editorMode = tab.dataset.mode;
         document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        const sectionHdr = document.getElementById('wl-section-hdr');
-        sectionHdr.textContent = editorMode === 'grip' ? 'Armes & Outils' : 'Placement Corps';
+        document.getElementById('wl-section-hdr').textContent = getSectionHeaderLabel();
         buildWeaponList();
     });
 });
@@ -776,7 +845,7 @@ async function attachWeapon(key) {
 
         hs.bone = resolveBone(side);
         if (!hs.bone) {
-            setStatus('Bone "hand_' + side.toLowerCase() + '" introuvable');
+            setStatus(t('pages.grip-editor.status.bone-missing-hand', { bone: `hand_${side.toLowerCase()}` }));
             document.getElementById('vp-loading').style.display = 'none';
             return;
         }
@@ -809,7 +878,7 @@ async function attachWeapon(key) {
         refreshWeaponList();
     } catch(e) {
         console.error('attachWeapon:', e);
-        setStatus('Erreur: ' + e.message);
+        setStatus(t('pages.grip-editor.status.error', { message: e.message }));
     }
     document.getElementById('vp-loading').style.display = 'none';
 }
@@ -859,7 +928,7 @@ async function attachHolster(key) {
     try {
         const bone = resolveBoneByName(def.bone);
         if (!bone) {
-            setStatus('Bone "' + def.bone + '" introuvable');
+            setStatus(t('pages.grip-editor.status.bone-missing', { bone: def.bone }));
             document.getElementById('vp-loading').style.display = 'none';
             return;
         }
@@ -892,7 +961,7 @@ async function attachHolster(key) {
         refreshHolsterList();
     } catch(e) {
         console.error('attachHolster:', e);
-        setStatus('Erreur: ' + e.message);
+        setStatus(t('pages.grip-editor.status.error', { message: e.message }));
     }
     document.getElementById('vp-loading').style.display = 'none';
 }
@@ -918,8 +987,8 @@ function loadHolsterSliders(key, g) {
     });
     const def = HOLSTER_DEFS[key];
     document.getElementById('gp-weapon').textContent =
-        def.label + '  —  ' + def.slot + '  (' + def.bone + ')';
-    document.getElementById('gp-mode-badge').textContent = 'HOLSTER';
+        `${getHolsterLabel(key)}  —  ${getHolsterSlotLabel(def.slotKey)}  (${def.bone})`;
+    document.getElementById('gp-mode-badge').textContent = getModeBadgeLabel('holster');
 }
 
 function applyHolsterSliders() {
@@ -946,7 +1015,7 @@ async function selectHolster(key) {
         refreshHolsterList();
     } else {
         refreshHolsterList();
-        document.getElementById('gp-weapon').textContent = '…';
+        document.getElementById('gp-weapon').textContent = t('pages.grip-editor.panel.working');
         await attachHolster(key);
     }
     // Vue full corps pour le holster
@@ -967,7 +1036,7 @@ function buildHolsterList() {
     for (const [slotLabel, entries] of Object.entries(groups)) {
         const hdr = document.createElement('div');
         hdr.className = 'wl-group-hdr';
-        hdr.textContent = slotLabel;
+        hdr.textContent = getHolsterSlotLabel(entries[0][1].slotKey);
         container.appendChild(hdr);
 
         for (const [key, def] of entries) {
@@ -975,8 +1044,8 @@ function buildHolsterList() {
             item.className = 'wl-item holster';
             item.dataset.key = key;
             item.innerHTML = `<div class="wl-info">
-                <span class="wl-name">${def.label}</span>
-                <span class="wl-hand">${def.slot} &bull; ${def.bone}</span>
+                <span class="wl-name">${getHolsterLabel(key)}</span>
+                <span class="wl-hand">${getHolsterSlotLabel(def.slotKey)} &bull; ${def.bone}</span>
             </div>
             <span class="wl-badge">${holsterState[key]?.pivot ? 'ON' : ''}</span>`;
             item.addEventListener('click', () => selectHolster(key));
@@ -985,7 +1054,7 @@ function buildHolsterList() {
                 if (holsterState[key]?.pivot) {
                     if (editingHolsterKey === key) {
                         editingHolsterKey = null;
-                        document.getElementById('gp-weapon').textContent = '— Aucune selection —';
+                        setPanelEmptyState();
                     }
                     detachHolster(key);
                 }
@@ -1035,8 +1104,8 @@ function loadSliders(key, g) {
     });
     const def = WEAPON_DEFS[key];
     document.getElementById('gp-weapon').textContent =
-        def.label + '  —  main ' + (def.hand === 'R' ? 'droite' : 'gauche');
-    document.getElementById('gp-mode-badge').textContent = 'GRIP';
+        `${getWeaponLabel(key)}  —  ${t('pages.grip-editor.panel.hand', { hand: getHandLabel(def.hand) })}`;
+    document.getElementById('gp-mode-badge').textContent = getModeBadgeLabel('grip');
 }
 function applySliders() {
     if (!editingKey) return;
@@ -1069,8 +1138,8 @@ function buildWeaponList() {
         item.className = 'wl-item';
         item.dataset.key = key;
         item.innerHTML = `<div class="wl-info">
-            <span class="wl-name">${def.label}</span>
-            <span class="wl-hand">Main ${def.hand === 'R' ? 'droite' : 'gauche'} &bull; ${key}</span>
+            <span class="wl-name">${getWeaponLabel(key)}</span>
+            <span class="wl-hand">${t('pages.grip-editor.list.hand', { hand: getHandLabel(def.hand), key })}</span>
         </div>
         <span class="wl-badge">${def.hand}</span>`;
         item.addEventListener('click', () => selectWeapon(key));
@@ -1081,7 +1150,7 @@ function buildWeaponList() {
             if (hs?.key === key) {
                 if (editingKey === key) {
                     editingKey = null;
-                    document.getElementById('gp-weapon').textContent = '— Aucune arme —';
+                    setPanelEmptyState('pages.grip-editor.panel.none-weapon');
                 }
                 detachHand(WEAPON_DEFS[key].hand);
             }
@@ -1115,7 +1184,7 @@ async function selectWeapon(key) {
     } else {
         // Pas encore attachée — attacher
         refreshWeaponList();
-        document.getElementById('gp-weapon').textContent = '…';
+        document.getElementById('gp-weapon').textContent = t('pages.grip-editor.panel.working');
         await attachWeapon(key);
         setCameraView(currentView);
     }
@@ -1185,7 +1254,7 @@ document.getElementById('btn-save').addEventListener('click', () => {
         saveGrip(editingKey, readSliders());
     }
     const orig = btn.textContent;
-    btn.textContent = 'Sauvegarde !';
+    btn.textContent = t('pages.grip-editor.panel.buttons.saved');
     setTimeout(() => { btn.textContent = orig; }, 1500);
 });
 document.getElementById('btn-reset').addEventListener('click', () => {
@@ -1224,13 +1293,15 @@ document.getElementById('btn-export').addEventListener('click', () => {
             lines.push(`[HOLSTER/${currentCharKey}] ${key}: pos:[${g.px.toFixed(4)},${g.py.toFixed(4)},${g.pz.toFixed(4)}] rot:[${g.rx.toFixed(4)},${g.ry.toFixed(4)},${g.rz.toFixed(4)}] sc:${g.sc.toFixed(3)} ty:${g.ty.toFixed(4)} pivX:${g.pivX.toFixed(4)}`);
         }
     }
-    box.textContent = lines.length ? lines.join('\n') : '(aucun parametre sauvegarde)';
+    box.textContent = lines.length ? lines.join('\n') : t('pages.grip-editor.panel.export-empty');
     box.style.display = 'block';
     try { navigator.clipboard.writeText(box.textContent); } catch {}
 });
 document.getElementById('btn-clear-all').addEventListener('click', () => {
-    const label = editorMode === 'holster' ? 'holsters' : 'grips';
-    if (!confirm('Effacer les ' + label + ' du profil "' + currentCharKey + '" ?')) return;
+    const label = editorMode === 'holster'
+        ? t('pages.grip-editor.panel.clear-target.holsters')
+        : t('pages.grip-editor.panel.clear-target.grips');
+    if (!confirm(t('pages.grip-editor.panel.clear-confirm', { target: label, profile: currentCharKey }))) return;
     if (editorMode === 'holster') {
         const all = loadAllHolsters();
         delete all[currentCharKey];
@@ -1285,26 +1356,41 @@ new ResizeObserver(() => {
 // ═══════════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════════
-setStatus('Initialisation…');
+initI18n();
+renderStaticText();
+setStatus(t('pages.grip-editor.status.initializing'));
 
 try { buildWeaponList(); } catch(e) {
     console.error('[GripEditor] buildWeaponList:', e);
     document.getElementById('wl-items').innerHTML =
-        '<div style="color:#e08070;padding:10px 14px;font-size:10px">Erreur liste armes: ' + e.message + '</div>';
+        `<div style="color:#e08070;padding:10px 14px;font-size:10px">${t('pages.grip-editor.status.weapon-list-error', { message: e.message })}</div>`;
 }
 
 try { buildCharSelector(); } catch(e) {
     console.error('[GripEditor] buildCharSelector:', e);
-    document.getElementById('char-loading').textContent = 'Erreur sélecteur: ' + e.message;
+    document.getElementById('char-loading').textContent = t('pages.grip-editor.status.selector-error', { message: e.message });
 }
 
-setStatus('Prêt');
+setStatus(t('pages.grip-editor.status.ready'));
+
+onLocaleChange(() => {
+    const currentSelection = document.getElementById('char-select').value || '__saved__';
+    renderStaticText();
+    buildCharSelector();
+    document.getElementById('char-select').value = currentSelection;
+    renderClipList();
+    buildWeaponList();
+    refreshWeaponList();
+    refreshHolsterList();
+    if (editingKey) loadSliders(editingKey, gripFor(editingKey));
+    else if (editingHolsterKey) loadHolsterSliders(editingHolsterKey, holsterFor(editingHolsterKey));
+});
 
 // Charger le personnage sauvegardé par défaut
 loadCharacterFromVal('__saved__');
 </script>
 
-<script src="src/asset-check.js"></script>
-<script src="src/nav.js"></script>
+<script type="module" src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>

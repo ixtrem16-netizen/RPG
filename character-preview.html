@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Char Preview — TGE</title>
@@ -123,6 +123,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { resolveCharConfig, getAllCharConfigs } from './src/char-config.js';
 import { UAL_PATHS, CharacterRenderer, findIdleClip } from './src/char-loader.js';
+import { initI18n, onLocaleChange, t } from './src/i18n.js';
+
+initI18n();
 
 // ── Scène ────────────────────────────────────────────────────────
 const vp = document.getElementById('vp');
@@ -146,6 +149,58 @@ controls.target.set(0, 1.0, 0);
 controls.enableDamping = true; controls.dampingFactor = 0.08;
 controls.minDistance = 1; controls.maxDistance = 8;
 controls.update();
+
+const leftHdrEl = document.getElementById('left-hdr');
+const animHdrEl = document.getElementById('anim-hdr');
+const vpStatusEl = document.getElementById('vp-status');
+const vpLoadingEl = document.getElementById('vp-loading');
+const vpHintEl = document.getElementById('vp-hint');
+
+const ANIM_LABEL_KEYS = {
+    idle: 'pages.character-preview.animations.idle',
+    walk: 'pages.character-preview.animations.walk',
+    run: 'pages.character-preview.animations.run',
+    combat: 'pages.character-preview.animations.combat',
+    jump: 'pages.character-preview.animations.jump',
+};
+
+let statusState = { type: 'prompt', params: {} };
+
+function renderStaticText() {
+    document.title = t('pages.character-preview.title');
+    leftHdrEl.textContent = t('pages.character-preview.sidebar.characters');
+    animHdrEl.textContent = t('pages.character-preview.sidebar.animation');
+    vpHintEl.innerHTML = `${t('pages.character-preview.info.orbit')}<br>${t('pages.character-preview.info.zoom')}`;
+}
+
+function renderAnimationButtons() {
+    document.querySelectorAll('.anim-btn').forEach(btn => {
+        btn.textContent = t(ANIM_LABEL_KEYS[btn.dataset.anim]);
+    });
+}
+
+function renderStatus() {
+    switch (statusState.type) {
+        case 'loading':
+            vpStatusEl.textContent = t('pages.character-preview.status.loading');
+            break;
+        case 'error':
+            vpStatusEl.textContent = t('pages.character-preview.status.error', statusState.params);
+            break;
+        case 'selected':
+            vpStatusEl.textContent = statusState.params.label || t('common.unnamed');
+            break;
+        case 'prompt':
+        default:
+            vpStatusEl.textContent = t('pages.character-preview.status.prompt');
+            break;
+    }
+}
+
+function setStatus(type, params = {}) {
+    statusState = { type, params };
+    renderStatus();
+}
 
 // Lumières
 scene.add(new THREE.AmbientLight(0xffd8a0, 0.55));
@@ -218,8 +273,8 @@ function playAnimKey(key) {
 
 // ── Chargement personnage ─────────────────────────────────────────
 async function loadChar(cfg) {
-    document.getElementById('vp-loading').style.display = 'block';
-    document.getElementById('vp-status').textContent = 'Chargement…';
+    vpLoadingEl.style.display = 'block';
+    setStatus('loading');
 
     // CharacterRenderer — dual-skeleton + shader zones (identique char-builder)
     if (!charRenderer) charRenderer = new CharacterRenderer(scene, SkeletonUtils);
@@ -228,12 +283,14 @@ async function loadChar(cfg) {
         await charRenderer.load(cfg, loadGLTF);
         if (!ualLoaded) await loadAnimations();
         playAnimKey(currentAnim);
-        document.getElementById('vp-status').textContent = cfg.name || cfg.meshUrl.split('/').pop();
+        setStatus('selected', {
+            label: cfg.name || cfg.meshUrl.split('/').pop() || t('common.unnamed'),
+        });
     } catch(e) {
-        document.getElementById('vp-status').textContent = 'Erreur: ' + e.message;
+        setStatus('error', { message: e.message });
         console.error('[CharPreview] loadChar error:', e);
     } finally {
-        document.getElementById('vp-loading').style.display = 'none';
+        vpLoadingEl.style.display = 'none';
     }
 }
 
@@ -242,16 +299,13 @@ function buildList() {
     const list = document.getElementById('char-list');
     list.innerHTML = '';
 
-    console.log('[CharPreview] buildList() lancé');
-
     // 1. Personnage joueur sauvegardé
     const playerCfg = resolveCharConfig();
-    console.log('[CharPreview] playerCfg:', playerCfg?.name, playerCfg?.meshUrl);
     if (playerCfg) {
         const el = document.createElement('div');
         el.className = 'char-item player';
-        el.innerHTML = `<div>&#9733; Perso sauvegarde</div>
-            <div class="char-badge">${playerCfg.name || playerCfg.meshUrl?.split('/').pop() || ''}</div>`;
+        el.innerHTML = `<div>&#9733; ${t('pages.character-preview.saved-player')}</div>
+            <div class="char-badge">${playerCfg.name || playerCfg.meshUrl?.split('/').pop() || t('common.unnamed')}</div>`;
         el.addEventListener('click', () => {
             document.querySelectorAll('.char-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
@@ -280,7 +334,8 @@ function buildList() {
     }
 
     if (!playerCfg && !named.length) {
-        list.innerHTML = '<div id="no-configs">Aucun personnage sauvegarde.<br>Utilise le Char Builder pour en creer un.</div>';
+        list.innerHTML = `<div id="no-configs">${t('pages.character-preview.empty')}</div>`;
+        setStatus('prompt');
         return;
     }
 
@@ -323,10 +378,19 @@ new ResizeObserver(() => {
 }).observe(vp);
 
 // ── Init ──────────────────────────────────────────────────────────
+renderStaticText();
+renderAnimationButtons();
+setStatus('prompt');
 buildList();
+onLocaleChange(() => {
+    renderStaticText();
+    renderAnimationButtons();
+    renderStatus();
+    buildList();
+});
 </script>
 
-<script src="src/asset-check.js"></script>
-<script src="src/nav.js"></script>
+<script type="module" src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>

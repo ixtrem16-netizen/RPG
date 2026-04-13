@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { getHeight, getTerrainNormal } from './world.js';
 import { CharacterController } from './character.js';
 import { resolveCharConfig } from './char-config.js';
+import { onLocaleChange, t } from './i18n.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  NPC.JS — Personnage non-joueur animé avec IA de déambulation
@@ -62,6 +63,8 @@ export class NPC {
 
         const {
             charName     = null,
+            displayName  = null,
+            displayNameKey = 'town.npcs.default',
             wanderRadius = 5,
             speed        = 1.4,
             targetHeight = 1.75,
@@ -69,7 +72,9 @@ export class NPC {
 
         this._speed   = speed;
         this._wanderR = wanderRadius;
-        this._name    = charName || 'NPC';
+        this._name    = displayName || charName || t(displayNameKey);
+        this._displayName = displayName || charName || null;
+        this._displayNameKey = displayName || charName ? null : displayNameKey;
 
         // Position et IA
         const [px, , pz] = pos;
@@ -86,6 +91,11 @@ export class NPC {
 
         // ── Résolution config personnage ──────────────────────
         this._char = new CharacterController(scene);
+        this._syncDisplayName = () => {
+            this._name = this._displayName || (this._displayNameKey ? t(this._displayNameKey) : this._name);
+            if (this._char?._root) this._char._root.name = this._name;
+        };
+        onLocaleChange(() => this._syncDisplayName());
 
         if (charName) {
             // Chargement depuis le char-builder par nom
@@ -100,11 +110,13 @@ export class NPC {
                 eyeColor       : cfg.eyeColor,
                 boneScaleBody  : cfg.boneScaleBody,
                 boneScaleOutfit: cfg.boneScaleOutfit,
-            }).catch(err => console.error(`[NPC] Erreur chargement "${charName}" :`, err));
+            }).then(() => this._syncDisplayName())
+                .catch(err => console.error(`[NPC] Erreur chargement "${charName}" :`, err));
         } else {
             // Ancien style manuel
             this._char.loadRetargeted(meshUrl, animUrls || _NPC_ANIMS, clipMap || _NPC_CLIPS,
                 { targetHeight })
+                .then(() => this._syncDisplayName())
                 .catch(err => console.error('[NPC] Erreur chargement :', err));
         }
     }

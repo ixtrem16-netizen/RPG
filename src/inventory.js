@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { onLocaleChange, t } from './i18n.js';
 
 // ─────────────────────────────────────────────────────────
 //  CSS — injecté automatiquement (module standalone)
@@ -81,27 +82,112 @@ function _injectCSS() {
 // ─────────────────────────────────────────────────────────
 
 const RARITY = {
-    common:    { color:'#9a9a9a', border:'#3a3a3a', label:'Commun'     },
-    uncommon:  { color:'#4caf50', border:'#2a7a2a', label:'Peu commun' },
-    rare:      { color:'#5c9be0', border:'#2a50aa', label:'Rare'       },
-    epic:      { color:'#c060e0', border:'#8030b0', label:'Épique'     },
-    legendary: { color:'#e8a020', border:'#a06010', label:'Légendaire' },
+    common:    { color:'#9a9a9a', border:'#3a3a3a', labelKey:'inventory.rarity.common' },
+    uncommon:  { color:'#4caf50', border:'#2a7a2a', labelKey:'inventory.rarity.uncommon' },
+    rare:      { color:'#5c9be0', border:'#2a50aa', labelKey:'inventory.rarity.rare' },
+    epic:      { color:'#c060e0', border:'#8030b0', labelKey:'inventory.rarity.epic' },
+    legendary: { color:'#e8a020', border:'#a06010', labelKey:'inventory.rarity.legendary' },
 };
 
 const SLOT_DEFS = {
-    head:   'Tête',
-    neck:   'Cou',
-    weapon: 'Arme',
-    shield: 'Bouclier',
-    ring_l: 'Anneau G.',
-    feet:   'Bottes',
-    chest:  'Armure',
-    back:   'Cape',
-    gloves: 'Gants',
-    legs:   'Jambières',
-    ring_r: 'Anneau D.',
-    belt:   'Ceinture',
+    head: 'inventory.slots.head',
+    neck: 'inventory.slots.neck',
+    weapon: 'inventory.slots.weapon',
+    shield: 'inventory.slots.shield',
+    ring_l: 'inventory.slots.ring-left',
+    feet: 'inventory.slots.feet',
+    chest: 'inventory.slots.chest',
+    back: 'inventory.slots.back',
+    gloves: 'inventory.slots.gloves',
+    legs: 'inventory.slots.legs',
+    ring_r: 'inventory.slots.ring-right',
+    belt: 'inventory.slots.belt',
 };
+
+const ITEM_STAT_LABEL_KEYS = {
+    Damage: 'inventory.item-stats.damage',
+    Speed: 'inventory.item-stats.speed',
+    Armor: 'inventory.item-stats.armor',
+    Block: 'inventory.item-stats.block',
+    Heals: 'inventory.item-stats.heals',
+    Restores: 'inventory.item-stats.restores',
+    Light: 'inventory.item-stats.light',
+    Opens: 'inventory.item-stats.opens',
+    Length: 'inventory.item-stats.length',
+    Type: 'inventory.item-stats.type',
+    Gold: 'inventory.item-stats.gold',
+    Weight: 'inventory.item-stats.weight',
+    'Cold Res': 'inventory.item-stats.cold-res',
+    Pocket: 'inventory.item-stats.pocket',
+    Magic: 'inventory.item-stats.magic',
+    Skill: 'inventory.item-stats.skill',
+    Parry: 'inventory.item-stats.parry',
+    Stamina: 'inventory.item-stats.stamina',
+    HP: 'inventory.item-stats.hp',
+};
+
+const ITEM_STAT_VALUE_KEYS = {
+    Normal: 'inventory.values.normal',
+    Slow: 'inventory.values.slow',
+    Fast: 'inventory.values.fast',
+    Medium: 'inventory.values.medium',
+    Unknown: 'inventory.values.unknown',
+    'Iron locks': 'inventory.values.iron-locks',
+    'Weapon edge': 'inventory.values.weapon-edge',
+    Text: 'inventory.values.text',
+    Map: 'inventory.values.map',
+    Light: 'inventory.values.light',
+    'Full Stamina': 'inventory.values.full-stamina',
+};
+
+function _translateWithFallback(key, fallback) {
+    const translated = t(key);
+    return translated === key ? fallback : translated;
+}
+
+function _inventoryLocaleId(id) {
+    return String(id || '').replace(/_/g, '-');
+}
+
+function _itemName(item) {
+    return _translateWithFallback(`inventory.items.${_inventoryLocaleId(item.id)}.name`, item.name || item.id);
+}
+
+function _itemDesc(item) {
+    return _translateWithFallback(`inventory.items.${_inventoryLocaleId(item.id)}.desc`, item.desc || '');
+}
+
+function _slotLabel(slotName) {
+    const key = SLOT_DEFS[slotName];
+    return key ? _translateWithFallback(key, slotName) : slotName;
+}
+
+function _rarityLabel(rarity) {
+    const rarityDef = RARITY[rarity] || RARITY.common;
+    return _translateWithFallback(rarityDef.labelKey, rarity);
+}
+
+function _itemStatLabel(label) {
+    const key = ITEM_STAT_LABEL_KEYS[label];
+    return key ? _translateWithFallback(key, label) : label;
+}
+
+function _itemStatValue(value) {
+    if (typeof value !== 'string') return value;
+    const exactKey = ITEM_STAT_VALUE_KEYS[value];
+    if (exactKey) return _translateWithFallback(exactKey, value);
+
+    let match = value.match(/^([+-]?\d+)\s+HP$/);
+    if (match) return `${match[1]} ${t('inventory.units.hp')}`;
+
+    match = value.match(/^([+-]?\d+)\s+Stamina$/);
+    if (match) return `${match[1]} ${t('inventory.units.stamina')}`;
+
+    match = value.match(/^([+-]?\d+)\s+quick$/);
+    if (match) return `${match[1]} ${t('inventory.values.quick')}`;
+
+    return value;
+}
 
 // ─────────────────────────────────────────────────────────
 //  ICÔNES CANVAS (54×54)
@@ -309,7 +395,7 @@ const ITEM_CATALOG = {
         stats:{'Heals':'+10 HP'},       desc:"A small vial. Better than nothing.",
         model:'SmallBottle', effect:{ hp:10 } },
     chalice:            { id:'chalice',            name:'Blessed Chalice',    type:'consumable', subtype:'hp',      slot:null, rarity:'rare',
-        stats:{'Heals':'+20 HP','+20 Stamina':''}, desc:"A goblet touched by something old.",
+        stats:{'Heals':'+20 HP','Restores':'+20 Stamina'}, desc:"A goblet touched by something old.",
         model:'Chalice', effect:{ hp:20, stamina:20 } },
     antidote:           { id:'antidote',           name:'Antidote',           type:'consumable', subtype:'stamina', slot:null, rarity:'uncommon',
         stats:{'Restores':'Full Stamina'}, desc:"Clears the body of all poison.",
@@ -449,12 +535,15 @@ export class InventorySystem {
         this._eitrGlow      = null;
         this._toastEl       = null;
         this._toastTimer    = null;
+        this._tooltipItem   = null;
+        this._tooltipPoint  = null;
 
         this._buildDOM();
         this._buildToast();
         this._init3D();
         this._populate();
         this._refreshStats();
+        this._bindLocaleUpdates();
     }
 
     // ─── DOM ────────────────────────────────────────────────
@@ -468,10 +557,10 @@ export class InventorySystem {
   <!-- ── En-tête ── -->
   <div class="inv-header">
     <div class="inv-title-wrap">
-      <span class="inv-title">Inventaire</span>
-      <span class="inv-title-sub">— Guerrier Exilé —</span>
+      <span class="inv-title" id="inv-title">Inventory</span>
+      <span class="inv-title-sub" id="inv-title-sub">— Exiled Warrior —</span>
     </div>
-    <button class="inv-close-btn" id="inv-close-btn">✕ Fermer</button>
+    <button class="inv-close-btn" id="inv-close-btn">✕ Close</button>
   </div>
 
   <!-- ── Corps : 3 colonnes ── -->
@@ -480,7 +569,7 @@ export class InventorySystem {
     <!-- COLONNE GAUCHE : Skills + Sac -->
     <div class="inv-col-left">
 
-      <div class="inv-sec-hdr">Compétences</div>
+      <div class="inv-sec-hdr" id="inv-skills-title">Skills</div>
       <div class="inv-skills-grid">
         <div class="inv-skill-slot"><span class="skill-ico">⚔</span></div>
         <div class="inv-skill-slot"><span class="skill-ico">🛡</span></div>
@@ -494,7 +583,7 @@ export class InventorySystem {
 
       <div class="inv-hr"></div>
 
-      <div class="inv-sec-hdr">Sac à dos</div>
+      <div class="inv-sec-hdr" id="inv-bag-title">Backpack</div>
       <div class="inv-bag-wrap">
         <div class="inv-bag-grid" id="inv-bag"></div>
       </div>
@@ -504,7 +593,7 @@ export class InventorySystem {
     <!-- COLONNE CENTRE : Paperdoll -->
     <div class="inv-col-center">
 
-      <div class="inv-sec-hdr" style="width:100%">Équipement</div>
+      <div class="inv-sec-hdr" id="inv-equipment-title" style="width:100%">Equipment</div>
 
       <div class="inv-paperdoll">
 
@@ -512,35 +601,35 @@ export class InventorySystem {
         <canvas id="inv-3d" width="150" height="290"></canvas>
 
         <!-- Slots absolus autour du personnage (au-dessus du canvas) -->
-        <div class="inv-slot inv-eq-slot" data-slot="head"><span class="slot-lbl">Tête</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="neck"><span class="slot-lbl">Cou</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="chest"><span class="slot-lbl">Armure</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="weapon"><span class="slot-lbl">Arme</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="back"><span class="slot-lbl">Cape</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="shield"><span class="slot-lbl">Bouclier</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="gloves"><span class="slot-lbl">Gants</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="ring_l"><span class="slot-lbl">Ann. G.</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="legs"><span class="slot-lbl">Jambes</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="ring_r"><span class="slot-lbl">Ann. D.</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="feet"><span class="slot-lbl">Bottes</span></div>
-        <div class="inv-slot inv-eq-slot" data-slot="belt"><span class="slot-lbl">Ceinture</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="head"><span class="slot-lbl" data-slot-label="head">Head</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="neck"><span class="slot-lbl" data-slot-label="neck">Neck</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="chest"><span class="slot-lbl" data-slot-label="chest">Armor</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="weapon"><span class="slot-lbl" data-slot-label="weapon">Weapon</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="back"><span class="slot-lbl" data-slot-label="back">Back</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="shield"><span class="slot-lbl" data-slot-label="shield">Shield</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="gloves"><span class="slot-lbl" data-slot-label="gloves">Gloves</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="ring_l"><span class="slot-lbl" data-slot-label="ring_l">Ring L.</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="legs"><span class="slot-lbl" data-slot-label="legs">Legs</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="ring_r"><span class="slot-lbl" data-slot-label="ring_r">Ring R.</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="feet"><span class="slot-lbl" data-slot-label="feet">Boots</span></div>
+        <div class="inv-slot inv-eq-slot" data-slot="belt"><span class="slot-lbl" data-slot-label="belt">Belt</span></div>
 
       </div>
 
-      <div class="inv-char-name" id="inv-char-name">— Guerrier —</div>
+      <div class="inv-char-name" id="inv-char-name">— Warrior —</div>
 
     </div>
 
     <!-- COLONNE DROITE : Infos + Stats -->
     <div class="inv-col-right">
 
-      <div class="inv-sec-hdr">Personnage</div>
+      <div class="inv-sec-hdr" id="inv-character-title">Character</div>
       <div class="inv-char-info">
-        <div class="inv-char-bigname">Exilé</div>
-        <div class="inv-char-class">Niveau 1 · Guerrier</div>
+        <div class="inv-char-bigname" id="inv-character-name">Exile</div>
+        <div class="inv-char-class" id="inv-character-class">Level 1 · Warrior</div>
       </div>
 
-      <div class="inv-sec-hdr">Caractéristiques</div>
+      <div class="inv-sec-hdr" id="inv-stats-title">Stats</div>
       <div class="inv-stats-list" id="inv-stats-bar"></div>
 
     </div>
@@ -550,10 +639,10 @@ export class InventorySystem {
   <!-- ── Pied : ceinture rapide ── -->
   <div class="inv-footer">
     <div class="inv-sec-hdr" style="flex-shrink:0;padding:0 10px 0 0;border:none;background:none">
-      Ceinture rapide
+      <span id="inv-quick-title">Quick Belt</span>
     </div>
     <div class="inv-quick-row" id="inv-quick"></div>
-    <div class="inv-quick-hint">Touches 1 – 4</div>
+    <div class="inv-quick-hint" id="inv-quick-hint">Keys 1 - 4</div>
   </div>
 
 </div>
@@ -590,6 +679,43 @@ export class InventorySystem {
         this._ghost   = document.getElementById('inv-ghost');
 
         this._bindInteraction();
+        this._renderStaticText();
+    }
+
+    _bindLocaleUpdates() {
+        onLocaleChange(() => {
+            this._renderStaticText();
+            Object.keys(this.equipped).forEach(slotName => this._renderEqSlot(slotName));
+            this._refreshStats();
+            if (this._tooltipItem && this._tooltipPoint && this._tooltip.style.display !== 'none') {
+                this._showTip(this._tooltipItem, this._tooltipPoint);
+            }
+        });
+    }
+
+    _renderStaticText() {
+        const setText = (selector, value) => {
+            const node = this._root.querySelector(selector);
+            if (node) node.textContent = value;
+        };
+
+        setText('#inv-title', t('inventory.ui.title'));
+        setText('#inv-title-sub', t('inventory.ui.subtitle'));
+        setText('#inv-close-btn', `✕ ${t('inventory.ui.close')}`);
+        setText('#inv-skills-title', t('inventory.ui.skills'));
+        setText('#inv-bag-title', t('inventory.ui.backpack'));
+        setText('#inv-equipment-title', t('inventory.ui.equipment'));
+        setText('#inv-char-name', t('inventory.ui.paperdoll-name'));
+        setText('#inv-character-title', t('inventory.ui.character'));
+        setText('#inv-character-name', t('inventory.ui.character-name'));
+        setText('#inv-character-class', t('inventory.ui.character-class'));
+        setText('#inv-stats-title', t('inventory.ui.stats'));
+        setText('#inv-quick-title', t('inventory.ui.quick-belt'));
+        setText('#inv-quick-hint', t('inventory.ui.quick-hint'));
+
+        this._root.querySelectorAll('[data-slot-label]').forEach(node => {
+            node.textContent = _slotLabel(node.dataset.slotLabel);
+        });
     }
 
     // ─── 3D Preview ─────────────────────────────────────────
@@ -791,7 +917,7 @@ export class InventorySystem {
         const el = this._root.querySelector(`.inv-eq-slot[data-slot="${slotName}"]`);
         if (!el) return;
         const item = this.equipped[slotName];
-        el.innerHTML = item ? '' : `<span class="slot-lbl">${SLOT_DEFS[slotName]}</span>`;
+        el.innerHTML = item ? '' : `<span class="slot-lbl" data-slot-label="${slotName}">${_slotLabel(slotName)}</span>`;
         if (item) el.appendChild(drawIcon(item));
     }
 
@@ -831,17 +957,17 @@ export class InventorySystem {
         let armor = 0, dmg = '4–8';
         Object.values(this.equipped).forEach(item => {
             if (!item) return;
-            if (item.stats?.Armure) armor += parseInt(item.stats.Armure) || 0;
-            if (item.stats?.Dégâts) dmg = item.stats.Dégâts;
+            if (item.stats?.Armor) armor += parseInt(item.stats.Armor, 10) || 0;
+            if (item.stats?.Damage) dmg = item.stats.Damage;
         });
         const p = this.player;
         const row = (label, val) =>
             `<div class="inv-stat-row"><span>${label}</span><b>${val}</b></div>`;
         bar.innerHTML =
-            row('Vie',       `${Math.round(p.hp)} / ${p.maxHp}`) +
-            row('Endurance', `${Math.round(p.stamina)} / ${p.maxStamina}`) +
-            row('Armure',    armor) +
-            row('Dégâts',   dmg);
+            row(t('inventory.summary.health'), `${Math.round(p.hp)} / ${p.maxHp}`) +
+            row(t('inventory.summary.stamina'), `${Math.round(p.stamina)} / ${p.maxStamina}`) +
+            row(t('inventory.summary.armor'), armor) +
+            row(t('inventory.summary.damage'), dmg);
     }
 
     // ─── Drag & Drop + Tooltip ──────────────────────────────
@@ -883,19 +1009,33 @@ export class InventorySystem {
         root.addEventListener('mouseover', e => {
             if (this._drag) return;
             const el = e.target.closest('[data-slot],[data-bag-idx],[data-quick-idx]');
-            if (!el) { this._tooltip.style.display = 'none'; return; }
+            if (!el) {
+                this._tooltip.style.display = 'none';
+                this._tooltipItem = null;
+                this._tooltipPoint = null;
+                return;
+            }
             const { item } = this._itemAt(el);
             if (item) this._showTip(item, e);
-            else this._tooltip.style.display = 'none';
+            else {
+                this._tooltip.style.display = 'none';
+                this._tooltipItem = null;
+                this._tooltipPoint = null;
+            }
         });
 
         root.addEventListener('mousemove', e => {
-            if (this._tooltip.style.display !== 'none') this._moveTip(e);
+            if (this._tooltip.style.display !== 'none') {
+                this._tooltipPoint = { clientX: e.clientX, clientY: e.clientY };
+                this._moveTip(e);
+            }
         });
 
         root.addEventListener('mouseout', e => {
             if (!e.relatedTarget?.closest?.('#inventory')) {
                 this._tooltip.style.display = 'none';
+                this._tooltipItem = null;
+                this._tooltipPoint = null;
             }
         });
 
@@ -1030,21 +1170,23 @@ export class InventorySystem {
     _showTip(item, e) {
         const r = RARITY[item.rarity] || RARITY.common;
         const statsHtml = Object.entries(item.stats || {})
-            .map(([k,v]) => `<div class="tt-row"><span>${k}</span><b>${v}</b></div>`)
+            .map(([k,v]) => `<div class="tt-row"><span>${_itemStatLabel(k)}</span><b>${_itemStatValue(v)}</b></div>`)
             .join('');
         const isConsumable = item.type === 'consumable' ||
             (item.effect && (item.effect.hp !== undefined || item.effect.stamina !== undefined) && !item.effect.weapon);
         const isEquippable = item.slot && SLOT_DEFS[item.slot];
-        const hint = isConsumable ? 'Double-clic : Utiliser'
-                   : isEquippable ? 'Double-clic : Équiper'
+        const hint = isConsumable ? t('inventory.hints.use')
+                   : isEquippable ? t('inventory.hints.equip')
                    : '';
         this._tooltip.innerHTML =
-            `<div class="tt-name" style="color:${r.color}">${item.name}</div>` +
-            `<div class="tt-rar" style="color:${r.color}88">${r.label}${(item.qty||1)>1?' ×'+item.qty:''}</div>` +
+            `<div class="tt-name" style="color:${r.color}">${_itemName(item)}</div>` +
+            `<div class="tt-rar" style="color:${r.color}88">${_rarityLabel(item.rarity)}${(item.qty||1)>1?' ×'+item.qty:''}</div>` +
             statsHtml +
-            (item.desc ? `<div class="tt-desc">${item.desc}</div>` : '') +
+            (_itemDesc(item) ? `<div class="tt-desc">${_itemDesc(item)}</div>` : '') +
             (hint ? `<div style="margin-top:7px;font-size:0.48rem;letter-spacing:0.18em;color:#4a3618;text-transform:uppercase;">${hint}</div>` : '');
         this._tooltip.style.display = 'block';
+        this._tooltipItem = item;
+        this._tooltipPoint = { clientX: e.clientX, clientY: e.clientY };
         this._moveTip(e);
     }
 
@@ -1097,16 +1239,16 @@ export class InventorySystem {
             const before = p.hp || 0;
             p.hp = Math.max(0, Math.min(p.maxHp || 100, before + item.effect.hp));
             const delta = Math.round(p.hp - before);
-            if (delta > 0) msgs.push(`+${delta} Vie`);
-            else if (delta < 0) msgs.push(`${delta} Vie`);
+            if (delta > 0) msgs.push(t('inventory.toast.health', { amount: `+${delta}` }));
+            else if (delta < 0) msgs.push(t('inventory.toast.health', { amount: `${delta}` }));
         }
 
         if (item.effect.stamina !== undefined) {
             const before = p.stamina || 0;
             p.stamina = Math.max(0, Math.min(p.maxStamina || 100, before + item.effect.stamina));
             const delta = Math.round(p.stamina - before);
-            if (delta > 0) msgs.push(`+${delta} Endurance`);
-            else if (delta < 0) msgs.push(`${delta} Endurance`);
+            if (delta > 0) msgs.push(t('inventory.toast.stamina', { amount: `+${delta}` }));
+            else if (delta < 0) msgs.push(t('inventory.toast.stamina', { amount: `${delta}` }));
         }
 
         if (msgs.length === 0) return false;
@@ -1122,7 +1264,7 @@ export class InventorySystem {
 
         this._refreshStats();
         this._onUse?.(item);
-        this._showToast(`${item.name} — ${msgs.join(' · ')}`);
+        this._showToast(t('inventory.toast.use', { item: _itemName(item), effects: msgs.join(' · ') }));
         return true;
     }
 
@@ -1137,6 +1279,8 @@ export class InventorySystem {
         this.isOpen = false;
         this._root.classList.remove('visible');
         this._tooltip.style.display = 'none';
+        this._tooltipItem = null;
+        this._tooltipPoint = null;
     }
 
     // ─── Tick (animation 3D) ────────────────────────────────

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Character + Animation Combiner</title>
@@ -74,26 +74,30 @@ body { background:#0d0f12; font-family:'Georgia', serif; color:#c8b89a;
 </script>
 </head>
 <body>
+<script type="module">
+import { initI18n } from './src/i18n.js';
+initI18n();
+</script>
 
 <div id="sidebar">
     <!-- Outfit -->
-    <div class="section-title">Personnage</div>
+    <div class="section-title" data-i18n="pages.char-combined.sections.character">Character</div>
     <div class="btn-group" id="outfit-btns">
-        <div class="sel-btn active" data-src="assets/characters/outfits/Male_Ranger.gltf">♂ Ranger</div>
-        <div class="sel-btn" data-src="assets/characters/outfits/Male_Peasant.gltf">♂ Peasant</div>
-        <div class="sel-btn" data-src="assets/characters/outfits/Female_Ranger.gltf">♀ Ranger</div>
-        <div class="sel-btn" data-src="assets/characters/outfits/Female_Peasant.gltf">♀ Peasant</div>
+        <div class="sel-btn active" data-src="assets/characters/outfits/Male_Ranger.gltf" data-icon="♂" data-label-key="char-creation.outfits.ranger">♂ Ranger</div>
+        <div class="sel-btn" data-src="assets/characters/outfits/Male_Peasant.gltf" data-icon="♂" data-label-key="char-creation.outfits.peasant">♂ Peasant</div>
+        <div class="sel-btn" data-src="assets/characters/outfits/Female_Ranger.gltf" data-icon="♀" data-label-key="char-creation.outfits.ranger">♀ Ranger</div>
+        <div class="sel-btn" data-src="assets/characters/outfits/Female_Peasant.gltf" data-icon="♀" data-label-key="char-creation.outfits.peasant">♀ Peasant</div>
     </div>
 
     <!-- Recherche + liste clips -->
-    <input id="clip-search" type="text" placeholder="Filtrer les clips...">
+    <input id="clip-search" type="text" placeholder="Filter clips...">
     <div id="clip-list"></div>
     <div id="status-bar">—</div>
 </div>
 
 <div id="viewport">
     <div id="label">—</div>
-    <div id="hint">Clic droit : orbiter<br>Molette : zoom</div>
+    <div id="hint"></div>
 </div>
 
 <script type="module">
@@ -101,6 +105,7 @@ import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { onLocaleChange, t, translateDOM } from './src/i18n.js';
 
 // ── Scène ─────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -159,6 +164,8 @@ const loader = new GLTFLoader();
 let outfitGltf = null, ualGltf = null;
 let currentModel = null, mixer = null, activeAction = null;
 let allClips = [], filterTerm = '';
+let currentClip = null;
+let statusState = null;
 
 const UAL_PATHS = [
     'assets/characters/animations/UAL1_Standard.glb',
@@ -168,13 +175,17 @@ const UAL_PATHS = [
 ];
 
 let currentOutfitSrc = document.querySelector('#outfit-btns .sel-btn').dataset.src;
+const clipSearchEl = document.getElementById('clip-search');
+const labelEl = document.getElementById('label');
+const statusEl = document.getElementById('status-bar');
+const hintEl = document.getElementById('hint');
 
 // ── Combinaison outfit + animations ──────────────────────────────
 function rebuildScene() {
     if (!outfitGltf || !ualGltf) return;
 
     if (activeAction) { activeAction.stop(); activeAction = null; }
-    if (mixer)        { mixer.stopAllAction(); mixer = null; }
+    if (mixer)        { mixer.stopAllActions(); mixer = null; }
     if (currentModel) { scene.remove(currentModel); currentModel = null; }
 
     const model = SkeletonUtils.clone(outfitGltf.scene);
@@ -197,7 +208,7 @@ function rebuildScene() {
         THREE.AnimationClip.parse(THREE.AnimationClip.toJSON(clip))
     ).sort((a, b) => a.name.localeCompare(b.name));
 
-    setStatus('Prêt — ' + allClips.length + ' clips');
+    setStatus('pages.char-combined.status.ready', { count: allClips.length });
     renderClipList();
 
     // Jouer idle en premier
@@ -211,8 +222,8 @@ function playClip(clip) {
     const action = mixer.clipAction(clip);
     action.reset().fadeIn(0.2).play();
     activeAction = action;
-    document.getElementById('label').textContent =
-        (currentOutfitSrc.split('/').pop().replace('.gltf','')) + '\n' + clip.name;
+    currentClip = clip;
+    renderLabel();
 }
 
 // ── Liste clips ───────────────────────────────────────────────────
@@ -225,7 +236,8 @@ function renderClipList() {
         const el = document.createElement('div');
         el.className = 'clip-item';
         el.dataset.name = clip.name;
-        el.innerHTML = `<span>${clip.name}</span><span class="dur">${clip.duration.toFixed(2)}s</span>`;
+        el.innerHTML = `<span>${clip.name}</span><span class="dur">${clip.duration.toFixed(2)}${t('pages.char-combined.seconds')}</span>`;
+        el.classList.toggle('active', currentClip?.name === clip.name);
         el.addEventListener('click', () => {
             document.querySelectorAll('.clip-item').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
@@ -235,24 +247,28 @@ function renderClipList() {
     }
 }
 
-document.getElementById('clip-search').addEventListener('input', e => {
+clipSearchEl.addEventListener('input', e => {
     filterTerm = e.target.value;
     renderClipList();
 });
 
 // ── Chargement outfit ─────────────────────────────────────────────
 function loadOutfit(src) {
-    setStatus('Chargement outfit...');
+    setStatus('pages.char-combined.status.loading-outfit');
     loader.load(src, gltf => {
         outfitGltf = gltf;
-        setStatus('Outfit OK — ' + (ualGltf ? 'combo...' : 'attente UAL'));
+        setStatus(
+            ualGltf
+                ? 'pages.char-combined.status.outfit-ready-combine'
+                : 'pages.char-combined.status.outfit-ready-waiting'
+        );
         rebuildScene();
-    }, undefined, err => setStatus('⚠ Outfit : ' + err.message));
+    }, undefined, err => setStatus('pages.char-combined.status.outfit-error', { error: err.message }));
 }
 
 // ── Chargement UAL (toutes libs fusionnées) ───────────────────────
 async function loadUAL() {
-    setStatus('Chargement animations...');
+    setStatus('pages.char-combined.status.loading-animations');
     const results = await Promise.allSettled(
         UAL_PATHS.map(p => new Promise((res, rej) => loader.load(p, res, undefined, rej)))
     );
@@ -265,7 +281,12 @@ async function loadUAL() {
     // Stocker les clips fusionnés dans un faux gltf pour compatibilité avec rebuildScene
     ualGltf = { animations: [...clipMap.values()] };
     const count = ualGltf.animations.length;
-    setStatus(count + ' clips chargés' + (outfitGltf ? ' — reconstruction...' : ' — attente outfit'));
+    setStatus(
+        outfitGltf
+            ? 'pages.char-combined.status.animations-ready-rebuild'
+            : 'pages.char-combined.status.animations-ready-waiting',
+        { count }
+    );
     rebuildScene();
 }
 
@@ -276,16 +297,63 @@ document.querySelectorAll('#outfit-btns .sel-btn').forEach(btn => {
         btn.classList.add('active');
         currentOutfitSrc = btn.dataset.src;
         outfitGltf = null;
+        renderLabel();
         loadOutfit(currentOutfitSrc);
     });
 });
 
 
-function setStatus(msg) { document.getElementById('status-bar').textContent = msg; }
+function getCurrentOutfitLabel() {
+    const activeButton = document.querySelector('#outfit-btns .sel-btn.active');
+    return activeButton ? `${activeButton.dataset.icon} ${t(activeButton.dataset.labelKey)}` : '—';
+}
+
+function renderOutfitButtons() {
+    document.querySelectorAll('#outfit-btns .sel-btn').forEach(btn => {
+        btn.textContent = `${btn.dataset.icon} ${t(btn.dataset.labelKey)}`;
+    });
+}
+
+function renderLabel() {
+    if (!currentClip) {
+        labelEl.textContent = '—';
+        return;
+    }
+    labelEl.textContent = `${getCurrentOutfitLabel()}\n${currentClip.name}`;
+}
+
+function renderStaticText() {
+    document.title = t('pages.char-combined.title');
+    clipSearchEl.placeholder = t('pages.char-combined.clip-search-placeholder');
+    hintEl.innerHTML = `${t('pages.char-combined.hint.orbit')}<br>${t('pages.char-combined.hint.zoom')}`;
+}
+
+function renderStatus() {
+    statusEl.textContent = statusState ? t(statusState.key, statusState.params) : '—';
+}
+
+function setStatus(key, params = {}) {
+    statusState = { key, params };
+    renderStatus();
+}
+
+translateDOM(document.body);
+renderStaticText();
+renderOutfitButtons();
+renderLabel();
 
 // ── Démarrage ─────────────────────────────────────────────────────
 loadOutfit(currentOutfitSrc);
 loadUAL();
+
+onLocaleChange(() => {
+    translateDOM(document.body);
+    renderStaticText();
+    renderOutfitButtons();
+    renderStatus();
+    renderLabel();
+    renderClipList();
+});
 
 // ── Boucle ────────────────────────────────────────────────────────
 const clock = new THREE.Clock();
@@ -302,7 +370,7 @@ window.addEventListener('resize', () => {
     renderer.setSize(vp.clientWidth, vp.clientHeight);
 });
 </script>
-<script src="src/asset-check.js"></script>
-<script src="src/nav.js"></script>
+<script type="module" src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>

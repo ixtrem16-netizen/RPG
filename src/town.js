@@ -653,8 +653,8 @@ function _assembleTaverne(scene, m, cx, cz) {
     // Trappe cave (interaction F depuis game.js)
     const fTrap = _fp(cx, cz, 8, 10);
     _trapdoors.push(
-        { x: cx, y: fTrap.buildY, z: cz + HD + 0.9, label: 'ext' },
-        { x: cx, y: fTrap.buildY - WH, z: cz + HD - 1.2, label: 'cave' }
+        { x: cx, y: fTrap.buildY, z: cz + HD + 0.9, labelKey: 'town.trapdoors.tavern' },
+        { x: cx, y: fTrap.buildY - WH, z: cz + HD - 1.2, labelKey: 'town.trapdoors.cellar' }
     );
 }
 
@@ -754,10 +754,10 @@ function _loadNature(scene, loader, ox, oz) {
 function _spawnNPCs(scene, ox, oz, tx, tz) {
     const by = getHeight(ox, oz);
     const configs = [
-        { x: tx,      z: tz + 3,  r: 4  },   // Aubergiste près de l'entrée
-        { x: tx + 2,  z: tz - 8,  r: 3  },   // Serveur intérieur
-        { x: ox + 8,  z: oz + 5,  r: 15 },   // Villageois place
-        { x: ox - 6,  z: oz + 3,  r: 12 },   // Villageois 2
+        { x: tx,      z: tz + 3,  r: 4,  nameKey: 'town.npcs.innkeeper' },   // Aubergiste près de l'entrée
+        { x: tx + 2,  z: tz - 8,  r: 3,  nameKey: 'town.npcs.server' },      // Serveur intérieur
+        { x: ox + 8,  z: oz + 5,  r: 15, nameKey: 'town.npcs.villager-one' },// Villageois place
+        { x: ox - 6,  z: oz + 3,  r: 12, nameKey: 'town.npcs.villager-two' },// Villageois 2
     ];
     for (const cfg of configs) {
         const npc = new NPC(
@@ -765,7 +765,7 @@ function _spawnNPCs(scene, ox, oz, tx, tz) {
             OUTFITS + 'Male_Ranger.gltf',
             NPC_ANIMS, NPC_CLIPS,
             [cfg.x, getHeight(cfg.x, cfg.z), cfg.z],
-            { wanderRadius: cfg.r }
+            { wanderRadius: cfg.r, displayNameKey: cfg.nameKey }
         );
         _npcs.push(npc);
     }

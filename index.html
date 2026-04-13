@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Three.js Game Editor</title>
@@ -33,6 +33,31 @@ html, body { height:100vh; overflow:hidden; background:#070503; font-family:'Geo
     scrollbar-width:none;
 }
 #shell-tabs::-webkit-scrollbar { display:none; }
+
+#shell-locale {
+    display:flex; align-items:center; gap:4px;
+    padding:0 10px;
+    border-left:1px solid rgba(200,184,154,0.07);
+    flex-shrink:0;
+}
+.shell-locale-btn {
+    background:rgba(200,184,154,0.04);
+    border:1px solid rgba(200,184,154,0.14);
+    color:rgba(200,184,154,0.5);
+    cursor:pointer;
+    font-family:'Georgia',serif;
+    font-size:8px;
+    letter-spacing:1.6px;
+    padding:4px 7px;
+    text-transform:uppercase;
+    transition:color 0.12s, border-color 0.12s, background 0.12s;
+}
+.shell-locale-btn:hover { color:rgba(200,184,154,0.85); border-color:rgba(200,184,154,0.35); }
+.shell-locale-btn.active {
+    color:#d4a84b;
+    border-color:rgba(212,168,75,0.55);
+    background:rgba(212,168,75,0.10);
+}
 
 .s-tab {
     display:flex; align-items:center; gap:6px;
@@ -131,16 +156,9 @@ html, body { height:100vh; overflow:hidden; background:#070503; font-family:'Geo
 
 <!-- ══ Barre d'onglets ══════════════════════════════════════════ -->
 <div id="shell-bar">
-    <div id="shell-brand" title="Accueil">TGE</div>
-    <div id="shell-tabs">
-        <div class="s-tab primary" data-tool="gameplay-test"><span class="s-icon">⚔</span>Gameplay</div>
-        <div class="s-tab" data-tool="char-builder"><span class="s-icon">◈</span>Char Builder</div>
-<div class="s-tab" data-tool="character-preview"><span class="s-icon">◎</span>Char Preview</div>
-        <div class="s-tab" data-tool="anim-inspect"><span class="s-icon">▶</span>Animations</div>
-        <div class="s-tab" data-tool="asset-browser"><span class="s-icon">❖</span>Assets</div>
-        <div class="s-tab primary" data-tool="world-builder"><span class="s-icon">⬡</span>World Builder</div>
-        <div class="s-tab primary" data-tool="grip-editor"><span class="s-icon">✦</span>Grip Editor</div>
-    </div>
+    <div id="shell-brand">TGE</div>
+    <div id="shell-tabs"></div>
+    <div id="shell-locale"></div>
 </div>
 
 <!-- ══ Contenu ══════════════════════════════════════════════════ -->
@@ -148,144 +166,197 @@ html, body { height:100vh; overflow:hidden; background:#070503; font-family:'Geo
 
     <!-- Hub -->
     <div id="home" class="active">
-        <div class="studio-label">Quaternius Studio</div>
-        <div class="project-title">Three.js Game Editor</div>
+        <div class="studio-label" data-i18n="shell.home.studio-label">Quaternius Studio</div>
+        <div class="project-title" data-i18n="app.title">Three.js Game Editor</div>
         <div class="ornament">✦ &nbsp;&nbsp; ✦ &nbsp;&nbsp; ✦</div>
 
-        <div class="hub-grid">
-            <div class="hub-section">Gameplay</div>
-            <div class="hub-card primary" data-open="gameplay-test" style="grid-column:span 3">
-                <div class="hub-icon">⚔</div>
-                <div class="hub-cat">Prototype</div>
-                <div class="hub-name">Gameplay Test</div>
-                <div class="hub-desc">Locomotion · Combat · Physique · Ville de Valcrest. Prototype jouable complet — épée, bouclier, arc, magie.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-
-            <div class="hub-section">Personnage</div>
-            <div class="hub-card" data-open="char-builder">
-                <div class="hub-icon">◈</div>
-                <div class="hub-cat">Character</div>
-                <div class="hub-name">Char Builder</div>
-                <div class="hub-desc">Assemblage modulaire — body, outfits, hair, beard. Shaders par zone de couleur.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-<div class="hub-card" data-open="character-preview">
-                <div class="hub-icon">◎</div>
-                <div class="hub-cat">Character</div>
-                <div class="hub-name">Char Preview</div>
-                <div class="hub-desc">Aperçu du personnage assemblé avec toutes ses animations actives.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-            <div class="hub-card" data-open="anim-inspect">
-                <div class="hub-icon">▶</div>
-                <div class="hub-cat">Animation</div>
-                <div class="hub-name">Anim Inspector</div>
-                <div class="hub-desc">Browse et preview de tous les clips d'animation (toutes librairies fusionnées).</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-
-            <div class="hub-section">Environnement</div>
-            <div class="hub-card" data-open="asset-browser">
-                <div class="hub-icon">❖</div>
-                <div class="hub-cat">Assets</div>
-                <div class="hub-name">Asset Browser</div>
-                <div class="hub-desc">Tous les assets Quaternius — filtre par catégorie, thumbnails 3D.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-            <div class="hub-section">Éditeur</div>
-            <div class="hub-card primary" data-open="world-builder" style="grid-column:span 2">
-                <div class="hub-icon">⬡</div>
-                <div class="hub-cat">Éditeur de monde</div>
-                <div class="hub-name">World Builder</div>
-                <div class="hub-desc">FreeCam · Placement d'assets · Snap grille · Portes animées · Undo/Redo · Export JS — tous les assets Quaternius disponibles.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-            <div class="hub-card primary" data-open="grip-editor">
-                <div class="hub-icon">✦</div>
-                <div class="hub-cat">Éditeur d'armes</div>
-                <div class="hub-name">Grip Editor</div>
-                <div class="hub-desc">Ajustement précis du grip de chaque arme/outil — position, rotation, échelle. Sauvegarde partagée avec Gameplay Test.</div>
-                <div class="hub-cta">Ouvrir →</div>
-            </div>
-        </div>
+        <div id="hub-grid" class="hub-grid"></div>
     </div>
 
     <!-- Iframes persistantes (lazy-loaded au premier accès) -->
-    <iframe class="t-frame" id="frame-gameplay-test"     title="Gameplay Test"></iframe>
-    <iframe class="t-frame" id="frame-char-builder"      title="Char Builder"></iframe>
-<iframe class="t-frame" id="frame-character-preview" title="Char Preview"></iframe>
-    <iframe class="t-frame" id="frame-anim-inspect"      title="Anim Inspector"></iframe>
-    <iframe class="t-frame" id="frame-asset-browser"     title="Asset Browser"></iframe>
-    <iframe class="t-frame" id="frame-world-builder"     title="World Builder"></iframe>
-    <iframe class="t-frame" id="frame-grip-editor"       title="Grip Editor"></iframe>
+    <div id="frame-host"></div>
 </div>
 
-<script>
-(function () {
-    'use strict';
+<script type="module">
+import { SUPPORTED_LOCALES, getLocale, initI18n, onLocaleChange, setLocale, t, translateDOM } from './src/i18n.js';
+import { HOME_TOOL_ID, TOOL_DEFINITIONS, TOOL_SECTION_ORDER, getToolById, getToolsBySection } from './src/tool-metadata.js';
 
-    let _active = '';
+initI18n();
 
-    function switchTo(toolId) {
-        // Tout masquer
-        document.querySelectorAll('.t-frame').forEach(f => f.classList.remove('active'));
-        document.querySelectorAll('.s-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById('home').classList.remove('active');
-        document.getElementById('shell-brand').classList.remove('active');
+const shellBrand = document.getElementById('shell-brand');
+const shellTabs = document.getElementById('shell-tabs');
+const shellLocale = document.getElementById('shell-locale');
+const hubGrid = document.getElementById('hub-grid');
+const frameHost = document.getElementById('frame-host');
+let _active = '';
 
-        _active = toolId || '';
+function renderTab(tool) {
+    const tab = document.createElement('div');
+    tab.className = 's-tab' + (tool.primary ? ' primary' : '');
+    tab.dataset.tool = tool.id;
 
-        if (!toolId) {
-            document.getElementById('home').classList.add('active');
-            document.getElementById('shell-brand').classList.add('active');
-            document.title = 'Three.js Game Editor';
-            history.replaceState(null, '', location.pathname);
-            return;
+    const icon = document.createElement('span');
+    icon.className = 's-icon';
+    icon.textContent = tool.icon;
+    tab.appendChild(icon);
+    tab.appendChild(document.createTextNode(t(tool.tabLabelKey)));
+    return tab;
+}
+
+function renderCard(tool) {
+    const card = document.createElement('div');
+    card.className = 'hub-card' + (tool.primary ? ' primary' : '');
+    card.dataset.open = tool.id;
+    if (tool.homeColumnSpan) card.style.gridColumn = `span ${tool.homeColumnSpan}`;
+
+    const icon = document.createElement('div');
+    icon.className = 'hub-icon';
+    icon.textContent = tool.icon;
+    card.appendChild(icon);
+
+    const cat = document.createElement('div');
+    cat.className = 'hub-cat';
+    cat.textContent = t(tool.badgeKey);
+    card.appendChild(cat);
+
+    const name = document.createElement('div');
+    name.className = 'hub-name';
+    name.textContent = t(tool.nameKey);
+    card.appendChild(name);
+
+    const desc = document.createElement('div');
+    desc.className = 'hub-desc';
+    desc.textContent = t(tool.descriptionKey);
+    card.appendChild(desc);
+
+    const cta = document.createElement('div');
+    cta.className = 'hub-cta';
+    cta.textContent = t('shell.home.cta');
+    card.appendChild(cta);
+
+    return card;
+}
+
+function renderLocaleSwitcher() {
+    const currentLocale = getLocale();
+    const buttons = SUPPORTED_LOCALES.map(locale => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'shell-locale-btn' + (locale === currentLocale ? ' active' : '');
+        button.dataset.locale = locale;
+        button.textContent = locale.toUpperCase();
+        button.title = `${t('locale.label')}: ${t(`locale.names.${locale}`)}`;
+        return button;
+    });
+
+    shellLocale.replaceChildren(...buttons);
+}
+
+function ensureFrames() {
+    if (!frameHost.children.length) {
+        for (const tool of TOOL_DEFINITIONS) {
+            const frame = document.createElement('iframe');
+            frame.className = 't-frame';
+            frame.id = `frame-${tool.id}`;
+            frameHost.appendChild(frame);
         }
-
-        // Activer l'onglet
-        const tab = document.querySelector(`.s-tab[data-tool="${toolId}"]`);
-        tab?.classList.add('active');
-
-        // Lazy load : setter le src seulement au premier accès
-        const frame = document.getElementById('frame-' + toolId);
-        if (frame && !frame._loaded) {
-            frame.src = toolId + '.html';
-            frame._loaded = true;
-        }
-        frame?.classList.add('active');
-
-        document.title = (tab?.textContent?.trim() || toolId) + ' — TGE';
-        history.replaceState(null, '', '#' + toolId);
     }
 
-    // Onglets de la barre shell
-    document.querySelectorAll('.s-tab').forEach(tab => {
-        tab.addEventListener('click', () => switchTo(tab.dataset.tool));
-    });
+    for (const tool of TOOL_DEFINITIONS) {
+        const frame = document.getElementById(`frame-${tool.id}`);
+        if (frame) frame.title = t(tool.nameKey);
+    }
+}
 
-    // Logo = retour accueil
-    document.getElementById('shell-brand').addEventListener('click', () => switchTo(''));
+function renderShell() {
+    translateDOM();
+    shellBrand.title = t('nav.home');
+    shellTabs.replaceChildren(...TOOL_DEFINITIONS.map(renderTab));
+    renderLocaleSwitcher();
 
-    // Cartes du hub
-    document.querySelectorAll('.hub-card[data-open]').forEach(card => {
-        card.addEventListener('click', () => switchTo(card.dataset.open));
-    });
+    const hubNodes = [];
+    for (const section of TOOL_SECTION_ORDER) {
+        const title = document.createElement('div');
+        title.className = 'hub-section';
+        title.textContent = t(`shell.sections.${section}`);
+        hubNodes.push(title);
 
-    // Messages depuis les iframes (postMessage de nav.js)
-    window.addEventListener('message', e => {
-        if (e.data?.type === 'tge-navigate') {
-            switchTo(e.data.to);
+        for (const tool of getToolsBySection(section)) {
+            hubNodes.push(renderCard(tool));
         }
-    });
+    }
+    hubGrid.replaceChildren(...hubNodes);
 
-    // Restaurer depuis le hash (#gameplay-test)
-    const hash = location.hash.slice(1);
-    switchTo(hash || '');
-})();
+    ensureFrames();
+}
+
+function switchTo(toolId) {
+    document.querySelectorAll('.t-frame').forEach(frame => frame.classList.remove('active'));
+    document.querySelectorAll('.s-tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById('home').classList.remove('active');
+    shellBrand.classList.remove('active');
+
+    _active = toolId || '';
+
+    if (!toolId) {
+        document.getElementById('home').classList.add('active');
+        shellBrand.classList.add('active');
+        document.title = t('app.title');
+        history.replaceState(null, '', location.pathname);
+        return;
+    }
+
+    const tab = document.querySelector(`.s-tab[data-tool="${toolId}"]`);
+    tab?.classList.add('active');
+
+    const frame = document.getElementById(`frame-${toolId}`);
+    if (frame && !frame._loaded) {
+        frame.src = `${toolId}.html`;
+        frame._loaded = true;
+    }
+    frame?.classList.add('active');
+
+    const tool = getToolById(toolId);
+    document.title = `${tool ? t(tool.nameKey) : toolId} - TGE`;
+    history.replaceState(null, '', `#${toolId}`);
+}
+
+renderShell();
+
+shellBrand.addEventListener('click', () => switchTo(HOME_TOOL_ID));
+shellTabs.addEventListener('click', e => {
+    const tab = e.target.closest('.s-tab');
+    if (!tab) return;
+    switchTo(tab.dataset.tool);
+});
+hubGrid.addEventListener('click', e => {
+    const card = e.target.closest('.hub-card[data-open]');
+    if (!card) return;
+    switchTo(card.dataset.open);
+});
+shellLocale.addEventListener('click', e => {
+    const button = e.target.closest('.shell-locale-btn');
+    if (!button) return;
+    setLocale(button.dataset.locale);
+});
+
+onLocaleChange(() => {
+    const activeTool = _active;
+    renderShell();
+    switchTo(activeTool);
+});
+
+window.addEventListener('message', e => {
+    if (e.data?.type === 'tge-navigate') {
+        switchTo(e.data.to);
+    }
+});
+
+const hash = location.hash.slice(1);
+switchTo(hash || HOME_TOOL_ID);
 </script>
 
-<script src="src/asset-check.js"></script>
+<script type="module" src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>

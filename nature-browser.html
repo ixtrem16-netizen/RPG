@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Nature Pack — Browser</title>
@@ -68,9 +68,13 @@ body { background:#0d0f12; font-family:'Georgia', serif; color:#c8b89a;
 </script>
 </head>
 <body>
+<script type="module">
+import { initI18n } from './src/i18n.js';
+initI18n();
+</script>
 
 <div id="sidebar">
-    <input id="search" type="text" placeholder="Rechercher...">
+    <input id="search" type="text" placeholder="Search...">
     <div id="categories"></div>
     <div id="list"></div>
     <div id="count"></div>
@@ -78,14 +82,15 @@ body { background:#0d0f12; font-family:'Georgia', serif; color:#c8b89a;
 
 <div id="viewport">
     <div id="obj-name">—</div>
-    <div id="loading-overlay">Chargement...</div>
-    <div id="hint">Clic droit + drag : orbiter<br>Molette : zoom<br>Clic gauche + drag : panoramique</div>
+    <div id="loading-overlay">Loading...</div>
+    <div id="hint"></div>
 </div>
 
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { onLocaleChange, t } from './src/i18n.js';
 
 const BASE = 'assets/environment/nature/';
 const OBJECTS = [
@@ -98,7 +103,15 @@ const OBJECTS = [
     'Grass_Large','Grass_Large_Extruded','Grass_Small',
     'MapleTree_1','MapleTree_2','MapleTree_3','MapleTree_4','MapleTree_5',
 ];
-const CATEGORIES = ['Tout','BirchTree','Bush','DeadTree','Flower','Grass','MapleTree'];
+const CATEGORIES = [
+    { id: 'all', prefix: null, labelKey: 'pages.nature-browser.categories.all' },
+    { id: 'BirchTree', prefix: 'BirchTree', labelKey: 'pages.nature-browser.categories.birch' },
+    { id: 'Bush', prefix: 'Bush', labelKey: 'pages.nature-browser.categories.bush' },
+    { id: 'DeadTree', prefix: 'DeadTree', labelKey: 'pages.nature-browser.categories.dead-tree' },
+    { id: 'Flower', prefix: 'Flower', labelKey: 'pages.nature-browser.categories.flower' },
+    { id: 'Grass', prefix: 'Grass', labelKey: 'pages.nature-browser.categories.grass' },
+    { id: 'MapleTree', prefix: 'MapleTree', labelKey: 'pages.nature-browser.categories.maple' },
+];
 
 // ── Scène ─────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -145,6 +158,9 @@ scene.add(ground);
 let current = null;
 const loader = new GLTFLoader();
 const overlay = document.getElementById('loading-overlay');
+const searchEl = document.getElementById('search');
+const hintEl = document.getElementById('hint');
+const countEl = document.getElementById('count');
 
 function loadObject(name) {
     overlay.classList.add('visible');
@@ -179,30 +195,43 @@ function loadObject(name) {
 }
 
 // ── UI ────────────────────────────────────────────────────────────
-let activeCat = 'Tout', searchTerm = '';
+let activeCat = 'all', searchTerm = '';
 
 const catEl = document.getElementById('categories');
-CATEGORIES.forEach(cat => {
-    const btn = document.createElement('div');
-    btn.className = 'cat-btn' + (cat === 'Tout' ? ' active' : '');
-    btn.textContent = cat;
-    btn.addEventListener('click', () => {
-        activeCat = cat;
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderList();
-    });
-    catEl.appendChild(btn);
-});
+function setPageTitle() {
+    document.title = t('pages.nature-browser.title');
+}
 
-document.getElementById('search').addEventListener('input', e => {
+function renderStaticText() {
+    searchEl.placeholder = t('pages.nature-browser.search-placeholder');
+    overlay.textContent = t('pages.nature-browser.loading');
+    hintEl.innerHTML = `${t('pages.nature-browser.hint.orbit')}<br>${t('pages.nature-browser.hint.zoom')}<br>${t('pages.nature-browser.hint.pan')}`;
+}
+
+function renderCategories() {
+    catEl.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+        const btn = document.createElement('div');
+        btn.className = 'cat-btn' + (cat.id === activeCat ? ' active' : '');
+        btn.textContent = t(cat.labelKey);
+        btn.addEventListener('click', () => {
+            activeCat = cat.id;
+            renderCategories();
+            renderList();
+        });
+        catEl.appendChild(btn);
+    });
+}
+
+searchEl.addEventListener('input', e => {
     searchTerm = e.target.value.toLowerCase();
     renderList();
 });
 
 function renderList() {
     const filtered = OBJECTS.filter(name => {
-        const catMatch = activeCat === 'Tout' || name.startsWith(activeCat);
+        const category = CATEGORIES.find(cat => cat.id === activeCat);
+        const catMatch = !category?.prefix || name.startsWith(category.prefix);
         const srcMatch = name.toLowerCase().includes(searchTerm);
         return catMatch && srcMatch;
     });
@@ -216,11 +245,21 @@ function renderList() {
         el.addEventListener('click', () => loadObject(name));
         listEl.appendChild(el);
     });
-    document.getElementById('count').textContent = filtered.length + ' objets';
+    countEl.textContent = t('pages.nature-browser.count', { count: filtered.length });
 }
 
+setPageTitle();
+renderStaticText();
+renderCategories();
 renderList();
 loadObject('MapleTree_1');
+
+onLocaleChange(() => {
+    setPageTitle();
+    renderStaticText();
+    renderCategories();
+    renderList();
+});
 
 (function animate() {
     requestAnimationFrame(animate);
@@ -234,7 +273,7 @@ window.addEventListener('resize', () => {
     renderer.setSize(vp.clientWidth, vp.clientHeight);
 });
 </script>
-<script src="src/asset-check.js"></script>
-<script src="src/nav.js"></script>
+<script type="module" src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>
