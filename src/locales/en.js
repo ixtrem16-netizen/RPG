@@ -82,6 +82,127 @@ export const en = {
             description: 'Quick test scene - character and animations.',
         },
     },
+    gameplay: {
+        loading: {
+            'click-to-play': '— Click to play —',
+            world: 'Loading world...',
+            'in-progress': 'Loading in progress...',
+        },
+        mode: {
+            combat: 'Combat',
+            selection: 'Selection',
+            fps: 'FPS',
+            'fps-free': 'FPS - free cursor',
+            'third-person': 'Third person',
+            'third-person-free': 'Third person - free cursor',
+        },
+        pause: {
+            fullscreen: 'FULLSCREEN',
+            windowed: 'WINDOWED',
+            save: 'SAVE',
+            saved: 'SAVED',
+        },
+        door: {
+            open: '[ F ] Open door',
+            close: '[ F ] Close door',
+        },
+        stats: {
+            force: 'Strength',
+            endurance: 'Endurance',
+            agilite: 'Agility',
+            intelligence: 'Intelligence',
+            eloquence: 'Eloquence',
+            perception: 'Perception',
+            volonte: 'Willpower',
+            ombre: 'Shadow',
+        },
+        minimap: {
+            cardinals: {
+                n: 'N',
+                ne: 'NE',
+                e: 'E',
+                se: 'SE',
+                s: 'S',
+                sw: 'SW',
+                w: 'W',
+                nw: 'NW',
+            },
+        },
+        drift: {
+            force: {
+                up: {
+                    '0': 'Your movements gain certainty.',
+                    '1': 'The weight of your weapons seems lighter.',
+                },
+                down: {
+                    '0': 'Your hands reach for the pommel of a sword that is no longer there.',
+                    '1': 'Something softens inside you. Not your muscles. Not yet.',
+                },
+            },
+            endurance: {
+                up: {
+                    '0': 'You endure more without even noticing.',
+                },
+                down: {
+                    '0': 'You run out of breath where you should not.',
+                },
+            },
+            agilite: {
+                up: {
+                    '0': 'Your feet search for holds differently than before.',
+                    '1': 'You move differently now. More economical.',
+                },
+                down: {
+                    '0': 'Your gear feels heavy. You feel it in every turn.',
+                },
+            },
+            intelligence: {
+                up: {
+                    '0': 'You start weighing your observations before speaking.',
+                    '1': 'Connections form more quickly.',
+                },
+                down: {
+                    '0': 'You act without thinking. It is faster. Not necessarily better.',
+                },
+            },
+            eloquence: {
+                up: {
+                    '0': 'Words come to you more naturally.',
+                    '1': 'People seem to listen to you more.',
+                },
+                down: {
+                    '0': 'Words ring hollow. Even to you.',
+                },
+            },
+            perception: {
+                up: {
+                    '0': 'You notice what others ignore.',
+                    '1': 'Something has sharpened in the way you look at the world.',
+                },
+                down: {
+                    '0': 'You miss things. You know it. You keep going anyway.',
+                },
+            },
+            volonte: {
+                up: {
+                    '0': 'Something has hardened. Not your muscles. Something else.',
+                    '1': 'You resist better what presses on you.',
+                },
+                down: {
+                    '0': 'You falter where you used to stand firm.',
+                },
+            },
+            ombre: {
+                up: {
+                    '0': 'You learn to take up less space.',
+                    '1': 'You slip by more easily. You are not sure that is good.',
+                },
+                down: {
+                    '0': 'You act in the open. People notice.',
+                },
+            },
+        },
+    },
     'asset-check': {
         toggle: {
             one: '{count} missing pack',

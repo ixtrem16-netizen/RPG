@@ -1,5 +1,5 @@
 import { getDominantZone } from './world.js';
-import { STAT_NAMES }     from './player.js';
+import { t }              from './i18n.js';
 
 // ═════════════════���═════════════════════════════════════════════
 //  UI.JS — HUD, messages de dérive d'identité, minimap, zone
@@ -62,58 +62,58 @@ export function updateBars(player) {
 
 // ── Messages de dérive d'identité ────────────────────────────
 // Textes narratifs par stat + direction de dérive
-const DRIFT_MESSAGES = {
+const DRIFT_MESSAGE_KEYS = {
     force: {
-        up:   ["Tes mouvements gagnent en certitude.", "Le poids de tes armes semble moindre."],
-        down: ["Tes mains cherchent le pommeau d'une épée qui n'est plus là.", "Quelque chose se ramollit en toi. Pas tes muscles. Pas encore."],
+        up:   ['gameplay.drift.force.up.0', 'gameplay.drift.force.up.1'],
+        down: ['gameplay.drift.force.down.0', 'gameplay.drift.force.down.1'],
     },
     endurance: {
-        up:   ["Tu endures davantage sans t'en apercevoir."],
-        down: ["Tu t'essouffle là où tu ne le devrais pas."],
+        up:   ['gameplay.drift.endurance.up.0'],
+        down: ['gameplay.drift.endurance.down.0'],
     },
     agilite: {
-        up:   ["Tes pieds cherchent les prises différemment qu'avant.", "Tu te déplaces autrement. Plus économe."],
-        down: ["L'équipement pèse. Tu le sens dans les virages."],
+        up:   ['gameplay.drift.agilite.up.0', 'gameplay.drift.agilite.up.1'],
+        down: ['gameplay.drift.agilite.down.0'],
     },
     intelligence: {
-        up:   ["Tu commences à peser tes observations avant de parler.", "Les connexions s'établissent plus vite."],
-        down: ["Tu agis sans réfléchir. C'est plus rapide. Pas nécessairement mieux."],
+        up:   ['gameplay.drift.intelligence.up.0', 'gameplay.drift.intelligence.up.1'],
+        down: ['gameplay.drift.intelligence.down.0'],
     },
     eloquence: {
-        up:   ["Tu trouves les mots plus naturellement.", "Les gens semblent t'écouter davantage."],
-        down: ["Les mots sonnent creux. Même pour toi."],
+        up:   ['gameplay.drift.eloquence.up.0', 'gameplay.drift.eloquence.up.1'],
+        down: ['gameplay.drift.eloquence.down.0'],
     },
     perception: {
-        up:   ["Tu remarques ce que les autres ignorent.", "Quelque chose s'est affiné dans ta façon de regarder."],
-        down: ["Tu passes à côté de choses. Tu le sais. Tu continues quand même."],
+        up:   ['gameplay.drift.perception.up.0', 'gameplay.drift.perception.up.1'],
+        down: ['gameplay.drift.perception.down.0'],
     },
     volonte: {
-        up:   ["Quelque chose s'est endurci. Pas tes muscles. Autre chose.", "Tu résistes mieux à ce qui te sollicite."],
-        down: ["Tu vacilles là où tu tenais bon avant."],
+        up:   ['gameplay.drift.volonte.up.0', 'gameplay.drift.volonte.up.1'],
+        down: ['gameplay.drift.volonte.down.0'],
     },
     ombre: {
-        up:   ["Tu apprends à occuper moins d'espace.", "Tu passes inaperçu plus facilement. Tu n'es pas sûr que c'est bien."],
-        down: ["Tu agis à visage découvert. Certains le remarquent."],
+        up:   ['gameplay.drift.ombre.up.0', 'gameplay.drift.ombre.up.1'],
+        down: ['gameplay.drift.ombre.down.0'],
     },
 };
 
 export function showDriftMessage(statName, delta) {
     if (!$driftMsg) return;
-    const msgs = DRIFT_MESSAGES[statName];
+    const msgs = DRIFT_MESSAGE_KEYS[statName];
     if (!msgs) return;
 
     const pool = delta >= 0 ? msgs.up : msgs.down;
     if (!pool || pool.length === 0) return;
 
-    const text = pool[Math.floor(Math.random() * pool.length)];
+    const text = t(pool[Math.floor(Math.random() * pool.length)]);
 
     $driftMsg.classList.remove('visible');
-    clearTimeout(_driftMsg._hideTimeout);
+    clearTimeout($driftMsg._hideTimeout);
 
     setTimeout(() => {
         $driftMsg.textContent = text;
         $driftMsg.classList.add('visible');
-        _driftMsg._hideTimeout = setTimeout(() => {
+        $driftMsg._hideTimeout = setTimeout(() => {
             $driftMsg.classList.remove('visible');
         }, 5000);
     }, 300);
@@ -125,14 +125,14 @@ const MM_CX = 80, MM_CY = 80, MM_R = 62;   // rayon réduit → place pour les l
 
 // Rose des vents : 4 cardinaux + 4 inter-cardinaux
 const _CARDINALS = [
-    { a: 0,              t: 'N',  c: '#ff4444', bold: true  },
-    { a: Math.PI / 4,    t: 'NE', c: '#888',    bold: false },
-    { a: Math.PI / 2,    t: 'E',  c: '#bbb',    bold: false },
-    { a: 3*Math.PI / 4,  t: 'SE', c: '#888',    bold: false },
-    { a: Math.PI,        t: 'S',  c: '#bbb',    bold: false },
-    { a: -3*Math.PI / 4, t: 'SO', c: '#888',    bold: false },
-    { a: -Math.PI / 2,   t: 'O',  c: '#bbb',    bold: false },
-    { a: -Math.PI / 4,   t: 'NO', c: '#888',    bold: false },
+    { a: 0,              key: 'gameplay.minimap.cardinals.n',  c: '#ff4444', bold: true  },
+    { a: Math.PI / 4,    key: 'gameplay.minimap.cardinals.ne', c: '#888',    bold: false },
+    { a: Math.PI / 2,    key: 'gameplay.minimap.cardinals.e',  c: '#bbb',    bold: false },
+    { a: 3*Math.PI / 4,  key: 'gameplay.minimap.cardinals.se', c: '#888',    bold: false },
+    { a: Math.PI,        key: 'gameplay.minimap.cardinals.s',  c: '#bbb',    bold: false },
+    { a: -3*Math.PI / 4, key: 'gameplay.minimap.cardinals.sw', c: '#888',    bold: false },
+    { a: -Math.PI / 2,   key: 'gameplay.minimap.cardinals.w',  c: '#bbb',    bold: false },
+    { a: -Math.PI / 4,   key: 'gameplay.minimap.cardinals.nw', c: '#888',    bold: false },
 ];
 
 export function updateMinimap(playerX, playerZ, playerYaw, zones) {
@@ -210,17 +210,18 @@ export function updateMinimap(playerX, playerZ, playerYaw, zones) {
     const LR = MM_R + 12;  // rayon texte (hors cercle)
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    for (const { a, t, c, bold } of _CARDINALS) {
+    for (const { a, key, c, bold } of _CARDINALS) {
         const sa = a - playerYaw;           // angle écran
         const lx = MM_CX + Math.sin(sa) * LR;
         const ly = MM_CY - Math.cos(sa) * LR;
+        const label = t(key);
         // Ne dessiner que si dans le canvas
         if (lx < 2 || lx > 138 || ly < 2 || ly > 138) continue;
         ctx.font      = (bold ? 'bold ' : '') + (bold ? '10px' : '8px') + ' sans-serif';
         ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillText(t, lx + 1, ly + 1);   // ombre
+        ctx.fillText(label, lx + 1, ly + 1);   // ombre
         ctx.fillStyle = c;
-        ctx.fillText(t, lx, ly);
+        ctx.fillText(label, lx, ly);
     }
 
     // ── Bord circulaire extérieur ──────────────────────────────

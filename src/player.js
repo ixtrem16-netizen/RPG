@@ -4,6 +4,7 @@ import { getStructureHeight, getCeilingHeight, resolveWallCollision } from './co
 import { CAM_FIRST } from './camera.js';
 import { CharacterController } from './character.js';
 import { resolveCharConfig } from './char-config.js';
+import { t } from './i18n.js';
 
 const CHAR_ANIMS = [
     'assets/characters/animations/UAL1_Standard.glb',
@@ -38,16 +39,21 @@ const _targetQuat  = new THREE.Quaternion();
 // ─────────────────────────────────────────────────────────────
 //  STATS — 8 attributs, tous 0–100, dérivent par le comportement
 // ─────────────────────────────────────────────────────────────
-export const STAT_NAMES = {
-    force       : 'Force',
-    endurance   : 'Endurance',
-    agilite     : 'Agilité',
-    intelligence: 'Intelligence',
-    eloquence   : 'Éloquence',
-    perception  : 'Perception',
-    volonte     : 'Volonté',
-    ombre       : 'Ombre',
+export const STAT_LABEL_KEYS = {
+    force       : 'gameplay.stats.force',
+    endurance   : 'gameplay.stats.endurance',
+    agilite     : 'gameplay.stats.agilite',
+    intelligence: 'gameplay.stats.intelligence',
+    eloquence   : 'gameplay.stats.eloquence',
+    perception  : 'gameplay.stats.perception',
+    volonte     : 'gameplay.stats.volonte',
+    ombre       : 'gameplay.stats.ombre',
 };
+
+export function getStatLabel(statName) {
+    const key = STAT_LABEL_KEYS[statName];
+    return key ? t(key) : statName;
+}
 
 // Tensions entre attributs (monter l'un freine l'autre passivement)
 const STAT_TENSIONS = [
