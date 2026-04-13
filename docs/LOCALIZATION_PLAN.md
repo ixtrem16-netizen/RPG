@@ -211,6 +211,23 @@ These chunks are intended to be small, mergeable increments. They are the recomm
 - **Risk: a visible flash of the wrong language appears before locale bootstrap finishes**
   - Mitigation: initialize locale as early as possible on page load, bootstrap lazy-loaded iframes with localStorage immediately, then reconcile with shell locale on handshake.
 
+## Post-implementation bug fixes
+
+Bugs discovered during multi-model code review (Claude Opus, GPT-5.2, Claude Sonnet 4, GPT-5.1) after the loc-01 through loc-16 implementation was completed.
+
+| Fix | Severity | Scope | Main files | Description |
+|-----|----------|-------|------------|-------------|
+| `loc-fix-01` | 🔴 Critical | ~60 hardcoded French `_flashHUD()` messages in build mode | `src/build_mode.js`, `src/locales/en.js`, `src/locales/fr.js` | `t()` is imported but only used for catalog labels. All flash messages like "Placé ✓", "Supprimé ✓", "Aucune pièce visée", undo/redo, mode switches remain raw French. English users see French feedback throughout build mode. |
+| `loc-fix-02` | 🔴 Critical | French accent/diacritic regressions + English leftovers | `src/locales/fr.js`, `src/locales/build-mode-catalog-fr.js` | ~17 missing accents in fr.js (`epee`→`épée`, `apercu`→`aperçu`, `Agilite`→`Agilité`, `FENETRE`→`FENÊTRE`, `Tete`→`Tête`, missing apostrophes `d une`→`d'une`). ~15 untranslated English terms in build-mode-catalog-fr.js (`Thin`, `Inset`, `Top Down`, etc.). |
+| `loc-fix-03` | 🟡 Medium | `mixer.stopAllAction()` typo in char-combined.html | `char-combined.html` | Missing trailing "s" — should be `mixer.stopAllActions()`. Will throw at runtime when switching outfits. Not a localization bug but present in the localization changes. |
+| `loc-fix-04` | 🟡 Medium | `'(sans nom)'` hardcoded French fallback in game.js | `src/game.js` | `_pickName()` fallback at line 465 returns French text. Should use `t()` with a locale key. |
+| `loc-fix-05` | 🟡 Medium | Zone names in world.js not localized | `src/world.js`, `src/ui.js`, `src/locales/en.js`, `src/locales/fr.js` | 15 zone definitions use hardcoded French `name` fields ("Terres Brûlées", "Grande Forêt Sans Nom", etc.). `ui.js` displays them directly without `t()`. English users see French zone names. |
+| `loc-fix-06` | 🟡 Medium | French fallback text in char-builder.html DOM | `char-builder.html` | Elements with `data-i18n` attributes still have French fallback text ("Corps", "Coiffure", "Barbe"). Causes flash-of-French on initial load for English locale. Should use English (DEFAULT_LOCALE) as fallback. |
+| `loc-fix-07` | 🟢 Low | Hardcoded sign text in gameplay-test.html | `gameplay-test.html` | `makeSign('STAIRS')`, `makeSign('CLIMB')`, etc. are English literals baked into 3D world text, bypassing i18n. |
+| `loc-fix-08` | 🟢 Low | `emitLocaleChange()` listener isolation | `src/i18n.js`, `src/live-sync.js` | No try/catch around listener callbacks — one throwing subscriber stops all subsequent listeners. |
+| `loc-fix-09` | 🟢 Low | `t()` silent fallback on invalid explicit locale | `src/i18n.js` | `t('key', {}, 'de')` silently returns current locale's value instead of deterministic fallback or warning. |
+| `loc-fix-10` | 🟢 Low | LiveSync message handler missing shape guard | `src/live-sync.js` | `const { type, payload } = data` will throw if inbound data is null/string/malformed. |
+
 ## Recommended execution order
 
 1. Build i18n foundation and locale synchronization

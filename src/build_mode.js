@@ -1314,7 +1314,7 @@ export class BuildMode {
 
     _toggleGroupItem(e) {
         const target = this._pickTarget(e);
-        if (!target) { this._flashHUD('Aucune pièce visée'); return; }
+        if (!target) { this._flashHUD(t('build-mode.flash.no-piece-targeted')); return; }
 
         const entry = this._placed.find(en => en._obj === target);
 
@@ -1326,7 +1326,7 @@ export class BuildMode {
             const g = this._groupGhosts.splice(existIdx, 1)[0];
             if (g) this._scene.remove(g);
             this._recalcGroupCenter();
-            this._flashHUD(`Désélectionné  (${this._groupSel.length} pièces)`);
+            this._flashHUD(t('build-mode.flash.deselected', { count: this._groupSel.length }));
             return;
         }
 
@@ -1346,7 +1346,7 @@ export class BuildMode {
         this._recalcGroupCenter();
 
         const n = this._groupSel.length;
-        this._flashHUD(`+Sélection (${n} pièce${n>1?'s':''}) — Clic droit=Déplacer  •  Alt+Clic gauche=Ajouter  •  ⇧Clic droit=Supprimer  •  Échap=Annuler`);
+        this._flashHUD(t('build-mode.flash.selection-added', { count: n }));
     }
 
     // ── Groupe — confirmer le déplacement ─────────────────────
@@ -1383,7 +1383,7 @@ export class BuildMode {
         this._cancelGroup();
         this._refreshHUD();
         const n = snapshots.length;
-        this._flashHUD(`${n} pièce${n>1?'s':''} déplacée${n>1?'s':''} ✓  (Ctrl+Z pour annuler)`);
+        this._flashHUD(t('build-mode.flash.pieces-moved', { count: n }));
     }
 
     // ── Groupe — annuler la sélection ─────────────────────────
@@ -1480,7 +1480,7 @@ export class BuildMode {
         this._save();
         // Conserver l'axisLockOrigin à la position du ghost placé (permet de continuer sur le même axe)
         if (this._axisLock && this._ghost) this._axisLockOrigin.copy(this._ghost.position);
-        this._flashHUD('Placé ✓');
+        this._flashHUD(t('build-mode.flash.placed'));
     }
 
     // ── Suppression ────────────────────────────────────────────
@@ -1497,17 +1497,17 @@ export class BuildMode {
         });
         this._ray.set(this._rayOrigin, this._rayDir);
         const hits = this._ray.intersectObjects(candidates, false);
-        if (!hits.length) { this._flashHUD('Rien à supprimer'); return; }
+        if (!hits.length) { this._flashHUD(t('build-mode.flash.nothing-to-delete')); return; }
         let target = hits[0].object;
         while (target.parent && target.parent !== this._scene) target = target.parent;
-        if (!target.parent) { this._flashHUD('Rien à supprimer'); return; }
+        if (!target.parent) { this._flashHUD(t('build-mode.flash.nothing-to-delete')); return; }
         this._deleteTarget(target);
     }
 
     /** Supprimer la pièce sous le curseur souris (mode curseur libre) */
     _deleteAtCursor(e) {
         const target = this._pickTarget(e);
-        if (!target) { this._flashHUD('Rien à supprimer'); return; }
+        if (!target) { this._flashHUD(t('build-mode.flash.nothing-to-delete')); return; }
         this._deleteTarget(target);
     }
 
@@ -1528,7 +1528,7 @@ export class BuildMode {
                 }
             }
             this._save();
-            this._flashHUD('Supprimé ✓  (Ctrl+Z pour annuler)');
+            this._flashHUD(t('build-mode.flash.deleted'));
             return;
         }
         const key = this._worldKey(target);
@@ -1536,16 +1536,16 @@ export class BuildMode {
         this._deletedWorldKeys.add(key);
         this._recordAction({ type: 'delete_world', key, obj: target });
         this._saveWorldDeletions();
-        this._flashHUD('Supprimé ✓  décor  (Ctrl+Z pour annuler)');
+        this._flashHUD(t('build-mode.flash.deleted-decor'));
     }
 
     // ── Sélection d'une pièce (Shift+clic gauche) ─────────────
 
     _selectObjectAtCursor(e) {
         const target = this._pickTarget(e);
-        if (!target) { this._flashHUD('Aucune pièce visée'); return; }
+        if (!target) { this._flashHUD(t('build-mode.flash.no-piece-targeted')); return; }
         const item = this._itemFromObject(target);
-        if (!item) { this._flashHUD('Pièce non identifiable dans le catalogue'); return; }
+        if (!item) { this._flashHUD(t('build-mode.flash.piece-not-in-catalog')); return; }
         this._setQuickSlot(item);
     }
 
@@ -1602,7 +1602,7 @@ export class BuildMode {
         this._loadGhostCurrent();
         this._refreshHUD();
         this._refreshHotbar();
-        this._flashHUD(`● ${_getCatalogItemLabel(this._resolveCatalogItem(item))}  →  slot rapide actif`);
+        this._flashHUD(t('build-mode.flash.quick-slot-set', { label: _getCatalogItemLabel(this._resolveCatalogItem(item)) }));
     }
 
     // ── Résolution URL depuis un objet scène ──────────────────
@@ -1786,19 +1786,19 @@ export class BuildMode {
     }
 
     _undo() {
-        if (!this._undoStack.length) { this._flashHUD('Rien à annuler'); return; }
+        if (!this._undoStack.length) { this._flashHUD(t('build-mode.flash.nothing-to-undo')); return; }
         const action = this._undoStack.pop();
 
         if (action.type === 'place') {
             const obj = action.entry._obj;
-            if (!obj) { this._flashHUD('Chargement encore en cours…'); this._undoStack.push(action); return; }
+            if (!obj) { this._flashHUD(t('build-mode.flash.loading-in-progress')); this._undoStack.push(action); return; }
             this._scene.remove(obj);
             const pi = this._placed3d.indexOf(obj);
             if (pi !== -1) this._placed3d.splice(pi, 1);
             const ei = this._placed.indexOf(action.entry);
             if (ei !== -1) this._placed.splice(ei, 1);
             this._save();
-            this._flashHUD('Placement annulé ✓  (Ctrl+Y = refaire)');
+            this._flashHUD(t('build-mode.flash.undo-place'));
 
         } else if (action.type === 'delete_placed') {
             const obj = action.entry._obj;
@@ -1807,14 +1807,14 @@ export class BuildMode {
             this._placed3d.push(obj);
             this._placed.push(action.entry);
             this._save();
-            this._flashHUD('Suppression annulée ✓  (Ctrl+Y = refaire)');
+            this._flashHUD(t('build-mode.flash.undo-delete'));
 
         } else if (action.type === 'delete_world') {
             this._scene.add(action.obj);
             this._deletedWorldKeys.delete(action.key);
             this._pendingWorldDels.delete(action.key);
             this._saveWorldDeletions();
-            this._flashHUD('Suppression annulée ✓  décor  (Ctrl+Y = refaire)');
+            this._flashHUD(t('build-mode.flash.undo-delete-decor'));
 
         } else if (action.type === 'group_move') {
             for (const s of action.snapshots) {
@@ -1831,13 +1831,13 @@ export class BuildMode {
             }
             this._save();
             if (action.snapshots.some(s => !s.entry)) this._saveWorldTransforms();
-            this._flashHUD(`Déplacement annulé ✓  (${action.snapshots.length} pièces)  (Ctrl+Y = refaire)`);
+            this._flashHUD(t('build-mode.flash.undo-move', { count: action.snapshots.length }));
         }
         this._redoStack.push(action);
     }
 
     _redo() {
-        if (!this._redoStack.length) { this._flashHUD('Rien à refaire'); return; }
+        if (!this._redoStack.length) { this._flashHUD(t('build-mode.flash.nothing-to-redo')); return; }
         const action = this._redoStack.pop();
 
         if (action.type === 'place') {
@@ -1856,7 +1856,7 @@ export class BuildMode {
             this._placed.push(action.entry);
             this._undoStack.push(action);
             this._save();
-            this._flashHUD('Refait ✓  (placement)');
+            this._flashHUD(t('build-mode.flash.redo-place'));
 
         } else if (action.type === 'delete_placed') {
             const entry = action.entry;
@@ -1869,14 +1869,14 @@ export class BuildMode {
             if (ei !== -1) this._placed.splice(ei, 1);
             this._undoStack.push(action);
             this._save();
-            this._flashHUD('Refait ✓  (suppression)');
+            this._flashHUD(t('build-mode.flash.redo-delete'));
 
         } else if (action.type === 'delete_world') {
             if (action.obj) this._scene.remove(action.obj);
             this._deletedWorldKeys.add(action.key);
             this._undoStack.push(action);
             this._saveWorldDeletions();
-            this._flashHUD('Refait ✓  (suppression décor)');
+            this._flashHUD(t('build-mode.flash.redo-delete-decor'));
 
         } else if (action.type === 'group_move') {
             for (const s of action.snapshots) {
@@ -1894,7 +1894,7 @@ export class BuildMode {
             this._undoStack.push(action);
             this._save();
             if (action.snapshots.some(s => !s.entry)) this._saveWorldTransforms();
-            this._flashHUD(`Refait ✓  (déplacement ${action.snapshots.length} pièces)`);
+            this._flashHUD(t('build-mode.flash.redo-move', { count: action.snapshots.length }));
         }
     }
 
@@ -1902,7 +1902,7 @@ export class BuildMode {
 
     _duplicate() {
         if (!this._groupSel.length) {
-            this._flashHUD('Sélectionnez des objets (Tab) puis Ctrl+D');
+            this._flashHUD(t('build-mode.flash.select-objects-first'));
             return;
         }
         let count = 0;
@@ -1933,16 +1933,16 @@ export class BuildMode {
         }
         if (count) {
             this._save();
-            this._flashHUD(`${count} pièce${count > 1 ? 's' : ''} dupliquée${count > 1 ? 's' : ''} ✓  (+0.5m XZ)`);
+            this._flashHUD(t('build-mode.flash.duplicated', { count }));
         } else {
-            this._flashHUD('Duplication impossible (objets hors catalogue)');
+            this._flashHUD(t('build-mode.flash.duplication-failed'));
         }
     }
 
     // ── Focus caméra sur la sélection (F en mode sélection) ───
 
     _focusSelection() {
-        if (!this._groupSel.length) { this._flashHUD('Rien de sélectionné'); return; }
+        if (!this._groupSel.length) { this._flashHUD(t('build-mode.flash.nothing-selected')); return; }
         const center = new THREE.Vector3();
         for (const s of this._groupSel) center.add(s.obj.position);
         center.divideScalar(this._groupSel.length);
@@ -1956,7 +1956,7 @@ export class BuildMode {
         const euler = new THREE.Euler().setFromQuaternion(this._camera.quaternion, 'YXZ');
         this._freeCam._yaw   = euler.y;
         this._freeCam._pitch = euler.x;
-        this._flashHUD('📷 Caméra centrée sur la sélection');
+        this._flashHUD(t('build-mode.flash.camera-focused'));
     }
 
     // ── Grille visuelle snap ───────────────────────────────────
@@ -2001,7 +2001,7 @@ export class BuildMode {
         this._placed   = [];
         this._placed3d = [];
         this._save();
-        this._flashHUD('Tout effacé');
+        this._flashHUD(t('build-mode.flash.all-cleared'));
     }
 
     // ── Chargement modèle (cache) ──────────────────────────────
@@ -2181,7 +2181,7 @@ export class BuildMode {
             // Désactiver
             this._axisLock = null;
             this._refreshHUD();
-            this._flashHUD('Axe libre');
+            this._flashHUD(t('build-mode.flash.axis-free'));
         } else {
             // Activer : mémoriser la position courante du ghost ou du groupe
             if (this._ghost) {
@@ -2192,15 +2192,15 @@ export class BuildMode {
             this._axisLock = axis;
             this._refreshHUD();
             this._flashHUD(axis === 'x'
-                ? '← → Axe X verrouillé (Z gelé)  — X pour déverrouiller'
-                : '↑ ↓ Axe Z verrouillé (X gelé)  — Z pour déverrouiller');
+                ? t('build-mode.flash.axis-locked-x')
+                : t('build-mode.flash.axis-locked-z'));
         }
     }
 
     // ── Export JS ─────────────────────────────────────────────
 
     _export() {
-        if (!this._placed.length) { this._flashHUD('Rien à exporter'); return; }
+        if (!this._placed.length) { this._flashHUD(t('build-mode.flash.nothing-to-export')); return; }
         const lines = [
             '// ══ BUILD MODE EXPORT ══',
             `// ${this._placed.length} objet(s) — coller dans _assembleTavern() ou équivalent`,
@@ -2242,7 +2242,7 @@ export class BuildMode {
         }
         lines.push('');
         console.log('%c' + lines.join('\n'), 'color:#8f8;font-family:monospace');
-        this._flashHUD(`Export ✓  (${lineCount} lignes dans la console)`);
+        this._flashHUD(t('build-mode.flash.exported', { count: lineCount }));
     }
 
     // ── Persistance ────────────────────────────────────────────
@@ -2332,7 +2332,7 @@ export class BuildMode {
                     this._hotbar[n] = { ...this._invHoveredItem };
                     this._saveHotbar();
                     this._refreshHotbar();
-                    this._flashHUD(`Slot ${n === 9 ? 0 : n + 1} ← ${_getCatalogItemLabel(this._resolveCatalogItem(this._invHoveredItem))}`);
+                    this._flashHUD(t('build-mode.flash.slot-assigned', { slot: n === 9 ? 0 : n + 1, label: _getCatalogItemLabel(this._resolveCatalogItem(this._invHoveredItem)) }));
                 }
                 return;
             }
@@ -2346,7 +2346,7 @@ export class BuildMode {
             // Delete — tout effacer (avec confirmation)
             if (e.code === 'Delete') {
                 if (this._deleteConfirm) { this._clearAll(); this._deleteConfirm = false; }
-                else { this._flashHUD('Appuyer à nouveau sur Suppr pour tout effacer'); this._deleteConfirm = true; setTimeout(() => { this._deleteConfirm = false; }, 3000); }
+                else { this._flashHUD(t('build-mode.flash.confirm-delete-all')); this._deleteConfirm = true; setTimeout(() => { this._deleteConfirm = false; }, 3000); }
                 return;
             }
 
@@ -2362,11 +2362,11 @@ export class BuildMode {
                     e.preventDefault();
                     if (this._quickSlot) {
                         this._quickActive = !this._quickActive;
-                        if (this._quickActive) { this._loadGhostCurrent(); this._flashHUD(`● ${_getCatalogItemLabel(this._resolveCatalogItem(this._quickSlot))}  actif`); }
-                        else { this._loadGhostCurrent(); this._flashHUD('Slot rapide désactivé'); }
+                        if (this._quickActive) { this._loadGhostCurrent(); this._flashHUD(t('build-mode.flash.quick-slot-active', { label: _getCatalogItemLabel(this._resolveCatalogItem(this._quickSlot)) })); }
+                        else { this._loadGhostCurrent(); this._flashHUD(t('build-mode.flash.quick-slot-disabled')); }
                         this._refreshHotbar(); this._refreshHUD();
                     } else {
-                        this._flashHUD('Slot rapide vide  (Shift+clic gauche sur une pièce)');
+                        this._flashHUD(t('build-mode.flash.quick-slot-empty'));
                     }
                     break;
                 case 'KeyI':
@@ -2393,7 +2393,7 @@ export class BuildMode {
                 case 'Escape':
                     if (this._groupSel.length > 0) {
                         this._cancelGroup();
-                        this._flashHUD('Sélection groupe annulée');
+                        this._flashHUD(t('build-mode.flash.group-selection-cancelled'));
                     }
                     break;
 
@@ -2426,7 +2426,7 @@ export class BuildMode {
                     } else if (this._groupSel.length > 0) {
                         this._groupRotDelta  = 0;
                         this._groupHeightOff = 0;
-                        this._flashHUD('Groupe : rotation/hauteur réinitialisées');
+                        this._flashHUD(t('build-mode.flash.group-reset'));
                     } else if (!this._selectionMode) {
                         this._resetRot();
                     }
@@ -2461,8 +2461,8 @@ export class BuildMode {
                     this._surfaceSnap = !this._surfaceSnap;
                     this._refreshHUD();
                     this._flashHUD(this._surfaceSnap
-                        ? '⊕ Surface Snap ON — ghost s\'aligne sur la face visée (idéal pour cadres)'
-                        : '⊕ Surface Snap OFF');
+                        ? t('build-mode.flash.surface-snap-on')
+                        : t('build-mode.flash.surface-snap-off'));
                     break;
 
                 case 'KeyT':
@@ -2471,8 +2471,8 @@ export class BuildMode {
                     this._faceSnapEnabled = !this._faceSnapEnabled;
                     this._refreshHUD();
                     this._flashHUD(this._faceSnapEnabled
-                        ? '⌲ Face Snap ON — s\'accroche automatiquement aux faces des pièces'
-                        : '⌲ Face Snap OFF');
+                        ? t('build-mode.flash.face-snap-on')
+                        : t('build-mode.flash.face-snap-off'));
                     break;
             }
         });
@@ -2538,12 +2538,12 @@ export class BuildMode {
                 if (!this._selectionMode && this._ghost) {
                     // Mode placement : décalage profondeur du ghost
                     this._depthOffset = Math.round((this._depthOffset + step) * 100) / 100;
-                    this._flashHUD(`Profondeur : ${this._depthOffset >= 0 ? '+' : ''}${this._depthOffset.toFixed(2)} m`);
+                    this._flashHUD(t('build-mode.flash.depth', { value: (this._depthOffset >= 0 ? '+' : '') + this._depthOffset.toFixed(2) }));
                 } else if (this._groupSel.length > 0) {
                     if (this._isMoving) {
                         // Déplacement actif : offset profondeur du curseur
                         this._groupDepthOff = Math.round((this._groupDepthOff + step) * 100) / 100;
-                        this._flashHUD(`Profondeur : ${this._groupDepthOff >= 0 ? '+' : ''}${this._groupDepthOff.toFixed(2)} m`);
+                        this._flashHUD(t('build-mode.flash.depth', { value: (this._groupDepthOff >= 0 ? '+' : '') + this._groupDepthOff.toFixed(2) }));
                     } else {
                         // Sélection au repos : déplacer directement vers/loin
                         const fwd = new THREE.Vector3();
@@ -2585,7 +2585,7 @@ export class BuildMode {
                         this._recordAction({ type: 'group_move', source: 'depth', snapshots });
                         this._save();
                         if (snapshots.some(s => !s.entry)) this._saveWorldTransforms();
-                        this._flashHUD(`Profondeur ${step > 0 ? '→' : '←'} ${Math.abs(step).toFixed(2)} m`);
+                        this._flashHUD(t('build-mode.flash.depth-step', { arrow: step > 0 ? '→' : '←', value: Math.abs(step).toFixed(2) }));
                     }
                 }
                 return;
@@ -2598,7 +2598,7 @@ export class BuildMode {
                     if (this._isMoving) {
                         // Pendant déplacement actif : offset relatif au curseur
                         this._groupHeightOff = Math.round((this._groupHeightOff + step) * 100) / 100;
-                        this._flashHUD(`Hauteur déplacement : ${this._groupHeightOff >= 0 ? '+' : ''}${this._groupHeightOff.toFixed(2)} m`);
+                        this._flashHUD(t('build-mode.flash.move-height', { value: (this._groupHeightOff >= 0 ? '+' : '') + this._groupHeightOff.toFixed(2) }));
                     } else {
                         // Sélectionné au repos : déplacer directement les objets en Y
                         const snapshots = [];
@@ -2631,7 +2631,7 @@ export class BuildMode {
                         this._recordAction({ type: 'group_move', source: 'height', snapshots });
                         this._save();
                         if (snapshots.some(s => !s.entry)) this._saveWorldTransforms();
-                        this._flashHUD(`Y → ${this._groupSel[0].obj.position.y.toFixed(2)} m`);
+                        this._flashHUD(t('build-mode.flash.y-position', { value: this._groupSel[0].obj.position.y.toFixed(2) }));
                     }
                 } else if (!this._selectionMode) {
                     this._heightOffset = Math.round((this._heightOffset + step) * 100) / 100;
@@ -2679,7 +2679,7 @@ export class BuildMode {
                 this._recordAction({ type: 'group_move', source: 'push', snapshots });
                 this._save();
                 if (snapshots.some(s => !s.entry)) this._saveWorldTransforms();
-                this._flashHUD(`Poussé ${step > 0 ? '↑' : '↓'} ${Math.abs(step).toFixed(2)} m`);
+                this._flashHUD(t('build-mode.flash.pushed', { arrow: step > 0 ? '↑' : '↓', value: Math.abs(step).toFixed(2) }));
             } else if (e.ctrlKey) {
                 // Ctrl+Molette = dolly caméra
                 const _dir = new THREE.Vector3();
@@ -2709,7 +2709,7 @@ export class BuildMode {
                 this._scene.remove(this._floorPlane);
                 this._floorPlane = null;
             }
-            this._flashHUD('Plancher libre');
+            this._flashHUD(t('build-mode.flash.floor-unlocked'));
         } else {
             // Verrouiller au Y courant du ghost (terrain + offset)
             const g = this._ghost;
@@ -2733,7 +2733,7 @@ export class BuildMode {
             this._floorPlane.name = '__floorPlane__';
             this._scene.add(this._floorPlane);
 
-            this._flashHUD(`Plancher verrouillé  Y = ${this._floorY.toFixed(2)} m`);
+            this._flashHUD(t('build-mode.flash.floor-locked', { value: this._floorY.toFixed(2) }));
         }
         this._refreshHUD();
     }
@@ -2745,7 +2745,7 @@ export class BuildMode {
     _selectSingle(e) {
         const target = this._pickTarget(e);
         this._cancelGroup();  // efface toute sélection/déplacement précédent
-        if (!target) { this._flashHUD('Aucun objet visé'); return; }
+        if (!target) { this._flashHUD(t('build-mode.flash.no-object-targeted')); return; }
 
         const entry = this._placed.find(en => en._obj === target);
 
@@ -2764,14 +2764,14 @@ export class BuildMode {
         this._groupRotDelta  = 0;
         this._groupHeightOff = 0;
         this._groupCenter.copy(target.position);
-        this._flashHUD('● Sélectionné — Clic droit=Déplacer  •  Alt+Clic gauche=Ajouter  •  ⇧Clic droit=Supprimer  •  Échap=Annuler');
+        this._flashHUD(t('build-mode.flash.selected-single'));
     }
 
     // ── Saisir la sélection pour déplacement temps réel ──────────
 
     _grabSelection() {
         if (!this._groupSel.length) {
-            this._flashHUD('Aucune sélection — Clic gauche pour sélectionner');
+            this._flashHUD(t('build-mode.flash.no-selection'));
             return;
         }
         if (this._isMoving) return;  // déjà en cours
@@ -2781,13 +2781,13 @@ export class BuildMode {
         this._isMoving = true;
         const n = this._groupSel.length;
         this._refreshHUD();
-        this._flashHUD(`Déplacement (${n} pièce${n>1?'s':''}) — Clic gauche/F confirmer  •  Q/E rotation  •  ⇧Molette hauteur  •  Échap annuler`);
+        this._flashHUD(t('build-mode.flash.moving', { count: n }));
     }
 
     // ── Supprimer la sélection active ────────────────────────────
 
     _deleteSelected() {
-        if (!this._groupSel.length) { this._flashHUD('Aucune sélection à supprimer'); return; }
+        if (!this._groupSel.length) { this._flashHUD(t('build-mode.flash.no-selection-to-delete')); return; }
         const n = this._groupSel.length;
         // Si déplacement en cours, restaurer d'abord
         if (this._isMoving) {
@@ -2804,13 +2804,13 @@ export class BuildMode {
         this._groupSel       = [];
         this._groupRotDelta  = 0;
         this._groupHeightOff = 0;
-        this._flashHUD(`${n} objet${n>1?'s':''} supprimé${n>1?'s':''} ✓  (Ctrl+Z pour annuler)`);
+        this._flashHUD(t('build-mode.flash.objects-deleted', { count: n }));
     }
 
     // ── Alt+R : restaurer la dernière sélection de groupe ────────
 
     _restoreLastGroup() {
-        if (!this._lastGroupObjects.length) { this._flashHUD('Aucune sélection précédente'); return; }
+        if (!this._lastGroupObjects.length) { this._flashHUD(t('build-mode.flash.no-previous-selection')); return; }
         this._cancelGroup();
         for (const obj of this._lastGroupObjects) {
             if (!this._scene.children.includes(obj)) continue;
@@ -2825,10 +2825,10 @@ export class BuildMode {
             });
             this._groupGhosts.push(null);
         }
-        if (!this._groupSel.length) { this._flashHUD('Objets précédents introuvables'); return; }
+        if (!this._groupSel.length) { this._flashHUD(t('build-mode.flash.previous-objects-not-found')); return; }
         this._recalcGroupCenter();
         const n = this._groupSel.length;
-        this._flashHUD(`Sélection restaurée (${n} pièce${n>1?'s':''}) — Clic droit=Déplacer  •  ⇧Clic droit=Supprimer  •  Échap=Annuler`);
+        this._flashHUD(t('build-mode.flash.selection-restored', { count: n }));
     }
 
     // ── Toggle Placement ↔ Sélection (Tab) ────────────────────
@@ -2839,12 +2839,12 @@ export class BuildMode {
         if (this._selectionMode) {
             // Entrer en mode sélection : masquer le ghost de placement
             this._removeGhost();
-            this._flashHUD('◎ MODE SÉLECTION — Clic gauche=Sélectionner  •  Alt+Clic=Groupe  •  Clic droit=Déplacer  •  ⇧Clic droit=Supprimer  •  Tab=Placement');
+            this._flashHUD(t('build-mode.flash.mode-selection'));
         } else {
             // Entrer en mode placement : annuler sélection + restaurer ghost
             this._cancelGroup();
             this._loadGhostCurrent();
-            this._flashHUD('◈ MODE PLACEMENT — F/Clic placer  •  Ctrl+Z undo  •  Tab=Sélection');
+            this._flashHUD(t('build-mode.flash.mode-placement'));
         }
         this._refreshHUD();
     }
@@ -2852,7 +2852,7 @@ export class BuildMode {
     _toggleFreeCamLock() {
         const free = this._freeCam.toggleCursorFree();
         this._refreshHUD();
-        this._flashHUD(free ? 'Souris libre  (V = revenir)' : 'Caméra active  (V = curseur libre)');
+        this._flashHUD(free ? t('build-mode.flash.mouse-free') : t('build-mode.flash.camera-active'));
     }
 
     // ── Hotbar ─────────────────────────────────────────────────
@@ -2891,8 +2891,8 @@ export class BuildMode {
         qs.addEventListener('click', () => {
             if (this._quickSlot) {
                 this._quickActive = !this._quickActive;
-                if (this._quickActive) { this._loadGhostCurrent(); this._flashHUD(`● ${_getCatalogItemLabel(this._resolveCatalogItem(this._quickSlot))}  actif`); }
-                else { this._loadGhostCurrent(); this._flashHUD('Slot rapide désactivé'); }
+                if (this._quickActive) { this._loadGhostCurrent(); this._flashHUD(t('build-mode.flash.quick-slot-active', { label: _getCatalogItemLabel(this._resolveCatalogItem(this._quickSlot)) })); }
+                else { this._loadGhostCurrent(); this._flashHUD(t('build-mode.flash.quick-slot-disabled')); }
                 this._refreshHotbar(); this._refreshHUD();
             }
         });
@@ -3004,7 +3004,7 @@ export class BuildMode {
         this._hotbar[this._hotbarSlot] = { catIdx, itemIdx, url: item.url };
         this._saveHotbar();
         this._selectHotbarSlot(this._hotbarSlot);
-        this._flashHUD(`Slot ${this._hotbarSlot === 9 ? 0 : this._hotbarSlot + 1} ← ${_getCatalogItemLabel(item)}`);
+        this._flashHUD(t('build-mode.flash.slot-assigned', { slot: this._hotbarSlot === 9 ? 0 : this._hotbarSlot + 1, label: _getCatalogItemLabel(item) }));
     }
 
     _saveHotbar() {
