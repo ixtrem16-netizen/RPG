@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>World Builder — TGE</title>
+<title data-i18n="pages.world-builder.title">World Builder — TGE</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { width:100%; height:100%; overflow:hidden; background:#070503; }
@@ -68,13 +68,13 @@ canvas { display:block; }
 <body>
 
 <div id="loading">
-    <div class="load-title">Quaternius Studio</div>
-    <div class="load-name">World Builder</div>
+    <div class="load-title" data-i18n="pages.world-builder.loading.brand">Quaternius Studio</div>
+    <div class="load-name" data-i18n="pages.world-builder.loading.name">World Builder</div>
     <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
-    <div class="load-hint">Initialisation…</div>
+    <div class="load-hint" data-i18n="pages.world-builder.loading.initializing">Initializing...</div>
 </div>
 
-<div id="hint-b">[ B ] — Basculer mode édition</div>
+<div id="hint-b" data-i18n="pages.world-builder.hint-toggle">[ B ] - Toggle build mode</div>
 <div id="char-status"></div>
 
 <script type="module">
@@ -84,6 +84,7 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { BuildMode }     from './src/build_mode.js';
 import { resolveCharConfig } from './src/char-config.js';
 import { UAL_PATHS, CharacterRenderer, findIdleClip } from './src/char-loader.js';
+import { initI18n, onLocaleChange, t, translateDOM } from './src/i18n.js';
 
 // ── Scène ────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -180,10 +181,15 @@ function _loadGLTF(url) {
 const charRenderer = new CharacterRenderer(scene, SkeletonUtils);
 const charStatus   = document.getElementById('char-status');
 
+function renderStaticText() {
+    translateDOM();
+    document.title = t('pages.world-builder.title');
+}
+
 async function loadPlayer() {
     const cfg = resolveCharConfig();
     if (!cfg) return;
-    charStatus.textContent = 'Chargement personnage…';
+    charStatus.textContent = t('pages.world-builder.status.loading-character');
     try {
         await charRenderer.load(cfg, _loadGLTF);
         // Charger la bibliothèque d'animations et jouer idle
@@ -196,13 +202,18 @@ async function loadPlayer() {
         const clips = [...clipMap.values()];
         const idle = findIdleClip(clips);
         if (idle) charRenderer.play(idle);
-        charStatus.textContent = '★ ' + (cfg.name || 'Joueur');
+        charStatus.textContent = t('pages.world-builder.status.player-ready', {
+            name: cfg.name || t('pages.world-builder.status.player'),
+        });
     } catch(e) {
-        charStatus.textContent = 'Perso: erreur';
+        charStatus.textContent = t('pages.world-builder.status.error');
         console.warn('[WorldBuilder] Chargement personnage échoué:', e);
     }
 }
 
+initI18n();
+renderStaticText();
+onLocaleChange(renderStaticText);
 loadPlayer();
 
 // ── Boucle de rendu ──────────────────────────────────────────────
@@ -237,7 +248,7 @@ setTimeout(() => {
 }, 400);
 </script>
 
-<script src="src/asset-check.js"></script>
-<script src="src/nav.js"></script>
+<script type="module" src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>

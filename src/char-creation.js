@@ -19,6 +19,7 @@
 import * as THREE from 'three';
 import { OrbitControls }      from 'three/addons/controls/OrbitControls.js';
 import { CharacterController } from './character.js';
+import { onLocaleChange, t, translateDOM } from './i18n.js';
 
 // ─── Chemins assets ──────────────────────────────────────────────
 const P_BODY   = {
@@ -39,33 +40,33 @@ const UAL_CANDIDATES = [
 // ─── Options de personnalisation ─────────────────────────────────
 const OUTFITS = {
     M: [
-        { val:'Male_Ranger',       label:'Ranger' },
-        { val:'Male_Peasant',      label:'Peasant' },
-        { val:'Male_Knight',       label:'Knight' },
-        { val:'Male_Knight_Cloth', label:'Knight Cloth' },
-        { val:'Male_Noble',        label:'Noble' },
-        { val:'Male_Wizard',       label:'Wizard' },
+        { val:'Male_Ranger',       labelKey:'char-creation.outfits.ranger' },
+        { val:'Male_Peasant',      labelKey:'char-creation.outfits.peasant' },
+        { val:'Male_Knight',       labelKey:'char-creation.outfits.knight' },
+        { val:'Male_Knight_Cloth', labelKey:'char-creation.outfits.knight-cloth' },
+        { val:'Male_Noble',        labelKey:'char-creation.outfits.noble' },
+        { val:'Male_Wizard',       labelKey:'char-creation.outfits.wizard' },
     ],
     F: [
-        { val:'Female_Ranger',       label:'Ranger' },
-        { val:'Female_Peasant',      label:'Peasant' },
-        { val:'Female_Knight',       label:'Knight' },
-        { val:'Female_Knight_Cloth', label:'Knight Cloth' },
-        { val:'Female_Noble',        label:'Noble' },
-        { val:'Female_Wizard',       label:'Wizard' },
+        { val:'Female_Ranger',       labelKey:'char-creation.outfits.ranger' },
+        { val:'Female_Peasant',      labelKey:'char-creation.outfits.peasant' },
+        { val:'Female_Knight',       labelKey:'char-creation.outfits.knight' },
+        { val:'Female_Knight_Cloth', labelKey:'char-creation.outfits.knight-cloth' },
+        { val:'Female_Noble',        labelKey:'char-creation.outfits.noble' },
+        { val:'Female_Wizard',       labelKey:'char-creation.outfits.wizard' },
     ],
 };
 const HAIRS = [
-    { val:'',                  label:'None' },
-    { val:'Hair_Long',         label:'Long' },
-    { val:'Hair_SimpleParted', label:'Parted' },
-    { val:'Hair_Buzzed',       label:'Buzzed ♂' },
-    { val:'Hair_BuzzedFemale', label:'Buzzed ♀' },
-    { val:'Hair_Buns',         label:'Buns' },
+    { val:'',                  labelKey:'char-creation.hair.none' },
+    { val:'Hair_Long',         labelKey:'char-creation.hair.long' },
+    { val:'Hair_SimpleParted', labelKey:'char-creation.hair.parted' },
+    { val:'Hair_Buzzed',       labelKey:'char-creation.hair.buzzed-male' },
+    { val:'Hair_BuzzedFemale', labelKey:'char-creation.hair.buzzed-female' },
+    { val:'Hair_Buns',         labelKey:'char-creation.hair.buns' },
 ];
 const BEARDS = [
-    { val:'',           label:'None' },
-    { val:'Hair_Beard', label:'Beard' },
+    { val:'',           labelKey:'char-creation.beard.none' },
+    { val:'Hair_Beard', labelKey:'char-creation.beard.beard' },
 ];
 
 // ClipMap — assez de clips pour que le fallback de CharacterController trouve l'idle
@@ -258,70 +259,71 @@ function buildHTML(allowSkip) {
     el.innerHTML = `
     <div id="cc-panel">
       <div id="cc-panel-inner">
-        <div id="cc-title">Character Creation</div>
+        <div id="cc-title" data-i18n="char-creation.ui.title">Character Creation</div>
 
         <div class="cc-section">
-          <span class="cc-label">Name</span>
+          <span class="cc-label" data-i18n="char-creation.ui.name">Name</span>
           <input id="cc-name" type="text" maxlength="24"
-                 placeholder="Enter your name..." autocomplete="off">
+                 placeholder="Enter your name..." autocomplete="off"
+                 data-i18n-attr="placeholder:char-creation.ui.name-placeholder">
         </div>
 
         <div class="cc-section">
-          <span class="cc-label">Body</span>
+          <span class="cc-label" data-i18n="char-creation.ui.body">Body</span>
           <div class="cc-toggle">
-            <div class="cc-toggle-btn" data-body="M">♂ Male</div>
-            <div class="cc-toggle-btn" data-body="F">♀ Female</div>
+            <div class="cc-toggle-btn" data-body="M" data-i18n="char-creation.body.male">♂ Male</div>
+            <div class="cc-toggle-btn" data-body="F" data-i18n="char-creation.body.female">♀ Female</div>
           </div>
         </div>
 
         <div class="cc-section">
-          <span class="cc-label">Outfit</span>
+          <span class="cc-label" data-i18n="char-creation.ui.outfit">Outfit</span>
           <div id="cc-outfits" class="cc-grid"></div>
         </div>
 
         <div class="cc-section">
-          <span class="cc-label">Hair</span>
+          <span class="cc-label" data-i18n="char-creation.ui.hair">Hair</span>
           <div id="cc-hairs" class="cc-grid"></div>
         </div>
 
         <div class="cc-section" id="cc-beard-section">
-          <span class="cc-label">Beard</span>
+          <span class="cc-label" data-i18n="char-creation.ui.beard">Beard</span>
           <div id="cc-beards" class="cc-grid"></div>
         </div>
 
         <div class="cc-section">
-          <span class="cc-label">Colors</span>
+          <span class="cc-label" data-i18n="char-creation.ui.colors">Colors</span>
           <div class="cc-colors">
             <div class="cc-color-row">
-              <span>Hair</span>
+              <span data-i18n="char-creation.colors.hair">Hair</span>
               <input type="color" id="cc-hair-color" value="#3d2b1f">
-              <button class="cc-color-reset" data-reset="hair">Reset</button>
+              <button class="cc-color-reset" data-reset="hair" data-i18n="char-creation.colors.reset">Reset</button>
             </div>
             <div class="cc-color-row">
-              <span>Eyes</span>
+              <span data-i18n="char-creation.colors.eyes">Eyes</span>
               <input type="color" id="cc-eye-color" value="#2e6e9e">
-              <button class="cc-color-reset" data-reset="eye">Reset</button>
+              <button class="cc-color-reset" data-reset="eye" data-i18n="char-creation.colors.reset">Reset</button>
             </div>
             <div class="cc-color-row">
-              <span>Skin</span>
+              <span data-i18n="char-creation.colors.skin">Skin</span>
               <input type="color" id="cc-skin-color" value="#c68642">
-              <button class="cc-color-reset" data-reset="skin">Reset</button>
+              <button class="cc-color-reset" data-reset="skin" data-i18n="char-creation.colors.reset">Reset</button>
             </div>
           </div>
         </div>
       </div>
 
       <div id="cc-footer">
-        <button id="cc-confirm">Enter the World</button>
-        ${allowSkip ? '<span id="cc-skip">Continue with current character</span>' : ''}
+        <button id="cc-confirm" data-i18n="char-creation.ui.confirm">Enter the World</button>
+        ${allowSkip ? '<span id="cc-skip" data-i18n="char-creation.ui.skip">Continue with current character</span>' : ''}
       </div>
     </div>
 
     <div id="cc-preview">
       <canvas id="cc-canvas"></canvas>
-      <div id="cc-hint">Drag to rotate · Scroll to zoom</div>
+      <div id="cc-hint" data-i18n="char-creation.ui.hint">Drag to rotate · Scroll to zoom</div>
       <div id="cc-loading">
-        <div id="cc-loading-text">Initializing...</div>
+        <div id="cc-loading-text" data-i18n="char-creation.loading.initializing">Initializing...</div>
         <div id="cc-loading-bar-wrap"><div id="cc-loading-bar"></div></div>
       </div>
     </div>`;
@@ -398,10 +400,12 @@ export function showCharCreation({ allowSkip = false } = {}) {
         injectCSS();
         const overlay = buildHTML(allowSkip);
         document.body.appendChild(overlay);
+        translateDOM(overlay);
 
         // ── État initial (reprend la config existante si dispo) ──
+        const getDefaultName = () => t('char-creation.defaults.name');
         const state = {
-            name     : 'Hero',
+            name     : getDefaultName(),
             body     : 'M',
             outfit   : 'Male_Ranger',
             hair     : '',
@@ -434,9 +438,11 @@ export function showCharCreation({ allowSkip = false } = {}) {
         const loadEl  = overlay.querySelector('#cc-loading');
         const loadTxt = overlay.querySelector('#cc-loading-text');
         const loadBar = overlay.querySelector('#cc-loading-bar');
-        function setLoading(on, msg = '') {
+        let loadingKey = 'char-creation.loading.initializing';
+        function setLoading(on, key = loadingKey) {
             loadEl.classList.toggle('cc-hidden', !on);
-            if (msg) loadTxt.textContent = msg;
+            loadingKey = key || loadingKey;
+            loadTxt.textContent = t(loadingKey);
             if (!on) loadBar.style.width = '100%';
         }
         function setProgress(p) { loadBar.style.width = (p * 100) + '%'; }
@@ -444,7 +450,7 @@ export function showCharCreation({ allowSkip = false } = {}) {
         // ── Chargement / rechargement du personnage ───────────────
         async function reloadCharacter() {
             const myId = ++loadId;
-            setLoading(true, 'Loading...');
+            setLoading(true, 'char-creation.loading.loading');
             setProgress(0.1);
 
             // Supprimer l'ancien
@@ -517,7 +523,7 @@ export function showCharCreation({ allowSkip = false } = {}) {
             for (const item of items) {
                 const d = document.createElement('div');
                 d.className = 'cc-opt' + (getActive() === item.val ? ' cc-active' : '');
-                d.textContent = item.label;
+                d.textContent = t(item.labelKey);
                 d.addEventListener('click', () => {
                     if (getActive() === item.val) return;
                     onSelect(item.val);
@@ -550,7 +556,7 @@ export function showCharCreation({ allowSkip = false } = {}) {
         const nameInput = overlay.querySelector('#cc-name');
         nameInput.value = state.name;
         nameInput.addEventListener('input', () => {
-            state.name = nameInput.value.trim() || 'Hero';
+            state.name = nameInput.value.trim() || getDefaultName();
         });
 
         // Body M/F
@@ -613,9 +619,18 @@ export function showCharCreation({ allowSkip = false } = {}) {
         if (state.eyeColor)  overlay.querySelector('#cc-eye-color').value  = state.eyeColor;
         if (state.skinColor) overlay.querySelector('#cc-skin-color').value = state.skinColor;
 
+        const unsubscribeLocale = onLocaleChange(() => {
+            translateDOM(overlay);
+            fillOutfits();
+            fillHairs();
+            fillBeards();
+            loadTxt.textContent = t(loadingKey);
+        });
+
         // ── Fermeture ─────────────────────────────────────────────
         function closeOverlay() {
             cancelAnimationFrame(rafId);
+            unsubscribeLocale();
             overlay.classList.remove('cc-visible');
             setTimeout(() => {
                 preview.renderer.dispose();
@@ -626,7 +641,7 @@ export function showCharCreation({ allowSkip = false } = {}) {
 
         function confirmAndClose() {
             localStorage.setItem('darkrpg_character_v1', JSON.stringify({
-                name     : nameInput.value.trim() || 'Hero',
+                name     : nameInput.value.trim() || getDefaultName(),
                 body     : state.body,
                 outfit   : state.outfit,
                 hair     : state.hair,

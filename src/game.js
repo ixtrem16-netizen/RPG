@@ -10,7 +10,7 @@ import { buildWorld, updateChunks, processBuildQueue, updateWater, updateFog,
 import { Player }           from './player.js';
 import { CameraController, CAM_FIRST, CAM_THIRD } from './camera.js';
 import { initGods, setSilenced, onStatDrift,
-         GOD_QUARRELS, godSpeak }                  from './gods.js';
+         GOD_QUARRELS, godSpeakKey }               from './gods.js';
 import { ColorGradeShader } from './shaders.js';
 import { DayNightCycle }   from './daynight.js';
 import { initAudio, resumeAudio, setZoneAmbience,
@@ -21,6 +21,7 @@ import { InventorySystem }                        from './inventory.js';
 import { buildTown, getTownNPCs, getTavernTrapdoors } from './town.js';
 import { updateTorches }                            from './builder.js';
 import { BuildMode }                               from './build_mode.js';
+import { onLocaleChange, t }                       from './i18n.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  SCÈNE
@@ -63,13 +64,15 @@ composer.addPass(new OutputPass());
 let _assetsLoaded = false;   // true quand le manager dédié a tiré onLoad
 let _userClicked  = false;   // true quand l'utilisateur a cliqué pour jouer
 let _audioInit    = false;
+let _saveButtonState = 'idle';
+let _saveButtonResetTimeout = null;
 
 export const gameLoadManager = new THREE.LoadingManager(
     // onLoad
     () => {
         _assetsLoaded = true;
         setLoadProgress(92);
-        setLoadHint('— Cliquez pour jouer —', true);
+        setLoadHint(t('gameplay.loading.click-to-play'), true);
         if (_userClicked) _startGame();
     },
     // onProgress
@@ -82,7 +85,7 @@ export const gameLoadManager = new THREE.LoadingManager(
 );
 
 setLoadProgress(5);
-setLoadHint('Chargement du monde…', false);
+setLoadHint(t('gameplay.loading.world'), false);
 
 // ─────────────────────────────────────────────────────────────
 //  MONDE
@@ -132,7 +135,7 @@ const $modeInd = document.getElementById('mode-indicator');
 let _combatMode = false;
 function _toggleCombatMode() {
     _combatMode = !_combatMode;
-    $modeInd.textContent = _combatMode ? 'Combat' : 'Sélection';
+    $modeInd.textContent = _combatMode ? t('gameplay.mode.combat') : t('gameplay.mode.selection');
     $modeInd.classList.toggle('combat', _combatMode);
 }
 
@@ -145,8 +148,8 @@ function _updateModeIndicator() {
     const isFPS    = camCtrl.mode === CAM_FIRST;
     const locked   = camCtrl.cursorLockActive;
     const modeName = isFPS
-        ? (locked ? 'FPS'          : 'FPS — curseur libre')
-        : (locked ? '3e personne'  : '3e personne — curseur libre');
+        ? (locked ? t('gameplay.mode.fps') : t('gameplay.mode.fps-free'))
+        : (locked ? t('gameplay.mode.third-person') : t('gameplay.mode.third-person-free'));
     document.getElementById('mode-indicator').textContent = modeName;
 }
 
@@ -180,7 +183,7 @@ document.addEventListener('keydown', e => {
                     buildMode.toggleDoor(_nearDoorId);
                     // Mettre à jour le texte du prompt immédiatement
                     const _d = buildMode.getInteractiveDoors().find(d => d.doorId === _nearDoorId);
-                    if (_d) _$doorPrompt.textContent = _d.isOpen ? '[ F ]  Fermer la porte' : '[ F ]  Ouvrir la porte';
+                    if (_d) _$doorPrompt.textContent = _d.isOpen ? t('gameplay.door.close') : t('gameplay.door.open');
                 }
                 break;
             case 'Tab':
@@ -242,7 +245,14 @@ let _intentionalFsExit = false;
 
 function _syncFsButton() {
     if ($btnFullscreen)
-        $btnFullscreen.textContent = document.fullscreenElement ? 'MODE FENÊTRÉ' : 'PLEIN ÉCRAN';
+        $btnFullscreen.textContent = document.fullscreenElement ? t('gameplay.pause.windowed') : t('gameplay.pause.fullscreen');
+}
+
+function _syncSaveButton() {
+    if (!$btnSave) return;
+    $btnSave.textContent = _saveButtonState === 'saved'
+        ? t('gameplay.pause.saved')
+        : t('gameplay.pause.save');
 }
 
 function enterFullscreen() {
@@ -320,8 +330,13 @@ $btnFullscreen?.addEventListener('click', () => {
 
 $btnSave?.addEventListener('click', () => {
     _saveGame();
-    $btnSave.textContent = 'SAUVEGARDÉ';
-    setTimeout(() => { $btnSave.textContent = 'SAUVEGARDER'; }, 2000);
+    _saveButtonState = 'saved';
+    _syncSaveButton();
+    clearTimeout(_saveButtonResetTimeout);
+    _saveButtonResetTimeout = setTimeout(() => {
+        _saveButtonState = 'idle';
+        _syncSaveButton();
+    }, 2000);
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -447,7 +462,7 @@ function _pickName(obj) {
         if (o.name && o.name !== '') parts.push(o.name);
         o = o.parent;
     }
-    return parts.length ? parts.join(' › ') : '(sans nom)';
+    return parts.length ? parts.join(' › ') : t('common.unnamed');
 }
 
 function _startTeleport(trap) {
@@ -476,18 +491,18 @@ function _startGame() {
     _loadGame();
     setLoadProgress(100);   // ferme l'écran de chargement
     setTimeout(() => { inventory = new InventorySystem(player); }, 1600);
-    setTimeout(() => { godSpeak('ylene', "Tu es là. Pour combien de temps ?", 7000); }, 3000);
+    setTimeout(() => { godSpeakKey('ylene', 'gods.whispers.opening.ylene', 7000); }, 3000);
 }
 
 // Premier clic — démarre le jeu si les assets sont prêts, sinon attend onLoad
 document.addEventListener('click', () => {
-    _userClicked = true;
-    if (_assetsLoaded) {
-        _startGame();
-    } else {
-        // Assets pas encore prêts — afficher un retour visuel
-        setLoadHint('Chargement en cours…', true);
-    }
+        _userClicked = true;
+        if (_assetsLoaded) {
+            _startGame();
+        } else {
+            // Assets pas encore prêts — afficher un retour visuel
+        setLoadHint(t('gameplay.loading.in-progress'), true);
+        }
 }, { once: true });
 
 // ─────────────────────────────────────────────────────────────
@@ -645,7 +660,7 @@ function animate() {
         }
         if (found !== _nearTrapdoor) {
             _nearTrapdoor = found;
-            _$tpPrompt.textContent = found ? found.label : '';
+            _$tpPrompt.textContent = found ? t(found.labelKey) : '';
             _$tpPrompt.style.opacity = found ? '1' : '0';
         }
 
@@ -661,7 +676,7 @@ function animate() {
             _nearDoorId = foundDoor;
             if (foundDoor) {
                 const d = buildMode.getInteractiveDoors().find(d => d.doorId === foundDoor);
-                _$doorPrompt.textContent = d?.isOpen ? '[ F ]  Fermer la porte' : '[ F ]  Ouvrir la porte';
+                _$doorPrompt.textContent = d?.isOpen ? t('gameplay.door.close') : t('gameplay.door.open');
             }
             _$doorPrompt.style.opacity = foundDoor ? '1' : '0';
         }
@@ -675,3 +690,18 @@ function animate() {
 }
 
 animate();
+
+_syncFsButton();
+_syncSaveButton();
+onLocaleChange(() => {
+    _syncFsButton();
+    _syncSaveButton();
+    _updateModeIndicator();
+    if (_nearDoorId) {
+        const door = buildMode.getInteractiveDoors().find(d => d.doorId === _nearDoorId);
+        if (door) _$doorPrompt.textContent = door.isOpen ? t('gameplay.door.close') : t('gameplay.door.open');
+    }
+    if (_nearTrapdoor) {
+        _$tpPrompt.textContent = t(_nearTrapdoor.labelKey);
+    }
+});

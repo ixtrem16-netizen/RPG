@@ -7,49 +7,28 @@
 //  Dans les Entrailles (y < −5) : silence total.
 // ═══════════════════════════════════════════════════════════════
 
+import { onLocaleChange, t } from './i18n.js';
+
+function createGod(id, stat) {
+    return {
+        id,
+        nameKey: `gods.meta.${id}.name`,
+        domainKey: `gods.meta.${id}.domain`,
+        stat,
+        el: null,
+        get name() { return t(this.nameKey); },
+        get domain() { return t(this.domainKey); },
+    };
+}
+
 export const GODS = {
-    vareth: {
-        id: 'vareth', name: 'Vareth',
-        domain: 'Cupidité / Ambition',
-        stat: 'ombre',          // stat qu'il surveille
-        el: null,               // element DOM, initialisé dans init()
-    },
-    sorel: {
-        id: 'sorel', name: 'Sorel',
-        domain: 'Justice / Ordre',
-        stat: 'volonte',
-        el: null,
-    },
-    maren: {
-        id: 'maren', name: 'Maren',
-        domain: 'Compassion / Sacrifice',
-        stat: 'eloquence',
-        el: null,
-    },
-    dusk: {
-        id: 'dusk', name: 'Dusk',
-        domain: 'Tromperie / Ombres',
-        stat: 'ombre',
-        el: null,
-    },
-    brahl: {
-        id: 'brahl', name: 'Brahl',
-        domain: 'Guerre / Force',
-        stat: 'force',
-        el: null,
-    },
-    ylene: {
-        id: 'ylene', name: 'Ylene',
-        domain: 'Connaissance / Vérité',
-        stat: 'intelligence',
-        el: null,
-    },
-    orvane: {
-        id: 'orvane', name: 'Orvane',
-        domain: 'Chaos / Liberté',
-        stat: null,     // Orvane commente les contrastes, pas une stat fixe
-        el: null,
-    },
+    vareth: createGod('vareth', 'ombre'),
+    sorel: createGod('sorel', 'volonte'),
+    maren: createGod('maren', 'eloquence'),
+    dusk: createGod('dusk', 'ombre'),
+    brahl: createGod('brahl', 'force'),
+    ylene: createGod('ylene', 'intelligence'),
+    orvane: createGod('orvane', null),
 };
 
 // ── File d'attente des murmures ──────────────────────────────
@@ -57,6 +36,7 @@ const _queue    = [];
 let   _active   = false;
 let   _hideTimer = 0;
 let   _currentEl = null;
+let   _currentSpeech = null;
 
 // ── Mémoire des dieux — influence accumulée ──────────────────
 const _influence = {
@@ -85,6 +65,8 @@ export function setSilenced(val) {
         }
         _queue.length = 0;
         _active = false;
+        _currentEl = null;
+        _currentSpeech = null;
     }
 }
 
@@ -96,10 +78,18 @@ export function setSilenced(val) {
  * @param {number} delay   — délai avant affichage en ms (défaut 0)
  */
 export function godSpeak(godId, text, duration = 6000, delay = 0) {
+    enqueueGodSpeech(godId, { text, duration, delay });
+}
+
+export function godSpeakKey(godId, textKey, duration = 6000, delay = 0, params = {}) {
+    enqueueGodSpeech(godId, { textKey, duration, delay, params });
+}
+
+function enqueueGodSpeech(godId, { text = '', textKey = '', duration = 6000, delay = 0, params = {} } = {}) {
     if (_silenced) return;
     const god = GODS[godId];
     if (!god || !god.el) return;
-    _queue.push({ god, text, duration, delay });
+    _queue.push({ god, text, textKey, params, duration, delay });
     if (!_active) _processQueue();
 }
 
@@ -110,7 +100,13 @@ export function godSpeak(godId, text, duration = 6000, delay = 0) {
 export function godDialogue(sequence) {
     if (_silenced) return;
     for (const item of sequence) {
-        godSpeak(item.id, item.text, item.duration || 6000, item.delay || 0);
+        enqueueGodSpeech(item.id, {
+            text: item.text,
+            textKey: item.textKey,
+            params: item.params,
+            duration: item.duration || 6000,
+            delay: item.delay || 0,
+        });
     }
 }
 
@@ -120,17 +116,21 @@ function _processQueue() {
 
     const item = _queue.shift();
     setTimeout(() => {
-        const { god, text, duration } = item;
-        if (!god.el) return;
+        const { god, duration } = item;
+        if (!god.el) {
+            setTimeout(_processQueue, 0);
+            return;
+        }
 
         // Cacher le précédent
         if (_currentEl && _currentEl !== god.el) {
             _currentEl.classList.remove('visible');
         }
 
-        god.el.querySelector('.god-text').textContent = text;
+        god.el.querySelector('.god-text').textContent = resolveGodSpeechText(item);
         god.el.classList.add('visible');
         _currentEl = god.el;
+        _currentSpeech = item;
 
         // Accumule l'influence
         _influence[god.id] = (_influence[god.id] || 0) + 1;
@@ -138,10 +138,16 @@ function _processQueue() {
         // Programmer la disparition
         setTimeout(() => {
             god.el.classList.remove('visible');
+            if (_currentSpeech === item) _currentSpeech = null;
             setTimeout(_processQueue, 800);  // gap entre murmures
         }, duration);
 
     }, item.delay);
+}
+
+function resolveGodSpeechText(item) {
+    if (item.textKey) return t(item.textKey, item.params || {});
+    return item.text;
 }
 
 // ── Dérive de stat observée — réaction possible des dieux ────
@@ -156,35 +162,35 @@ export function onStatDrift(statName, delta, playerStats) {
 
     // Brahl — surveille Force et Endurance
     if (statName === 'force' && !up) {
-        godSpeak('brahl', "Tu ramollis. C'est une faiblesse.", 5000, 500);
+        godSpeakKey('brahl', 'gods.whispers.drift.force.down', 5000, 500);
     } else if (statName === 'force' && up) {
         // Brahl approuve silencieusement (rare)
-        if (Math.random() < 0.3) godSpeak('brahl', "Bien.", 3000, 200);
+        if (Math.random() < 0.3) godSpeakKey('brahl', 'gods.whispers.drift.force.up', 3000, 200);
     }
 
     // Maren — surveille Éloquence
     if (statName === 'eloquence' && up) {
-        if (Math.random() < 0.4) godSpeak('maren', "Tu apprends à écouter.", 5500, 300);
+        if (Math.random() < 0.4) godSpeakKey('maren', 'gods.whispers.drift.eloquence.up', 5500, 300);
     }
 
     // Dusk — surveille Ombre
     if (statName === 'ombre' && up) {
-        if (Math.random() < 0.4) godSpeak('dusk', "Voilà comment on se déplace.", 5000, 200);
+        if (Math.random() < 0.4) godSpeakKey('dusk', 'gods.whispers.drift.ombre.up', 5000, 200);
     }
     if (statName === 'ombre' && !up) {
-        if (Math.random() < 0.3) godSpeak('dusk', "Tu deviens transparent. C'est pitoyable.", 5500, 400);
+        if (Math.random() < 0.3) godSpeakKey('dusk', 'gods.whispers.drift.ombre.down', 5500, 400);
     }
 
     // Ylene — surveille Intelligence
     if (statName === 'intelligence' && !up) {
-        if (Math.random() < 0.35) godSpeak('ylene', "Tu cesses d'observer. Tu deviens... ordinaire.", 6000, 600);
+        if (Math.random() < 0.35) godSpeakKey('ylene', 'gods.whispers.drift.intelligence.down', 6000, 600);
     }
 
     // Orvane — commente les contrastes (Force monte + Ombre monte = rare)
     if (Math.random() < 0.05) {
         const f = playerStats.force, o = playerStats.ombre;
         if (f > 65 && o > 55) {
-            godSpeak('orvane', "Un guerrier qui se cache. J'adore ce monde.", 6000, 1000);
+            godSpeakKey('orvane', 'gods.whispers.drift.contrast.force-ombre', 6000, 1000);
         }
     }
 }
@@ -198,42 +204,55 @@ export const GOD_QUARRELS = {
 
     // Joueur amorce un dialogue au lieu de combattre
     dialogue_instead_of_fight: () => godDialogue([
-        { id:'brahl',  text:"Qu'est-ce que c'est que ça. Tu parles, maintenant ?", duration:5500 },
-        { id:'dusk',   text:"Intéressant. Continue, c'est divertissant.",           duration:5500, delay:5200 },
-        { id:'brahl',  text:"Reprends-toi. Tu sais ce que tu es.",                  duration:5500, delay:10400 },
-        { id:'maren',  text:"Il y a peut-être quelque chose qui change en toi.",    duration:6000, delay:15900 },
+        { id:'brahl',  textKey:'gods.dialogue.dialogue-instead-of-fight.line-1', duration:5500 },
+        { id:'dusk',   textKey:'gods.dialogue.dialogue-instead-of-fight.line-2', duration:5500, delay:5200 },
+        { id:'brahl',  textKey:'gods.dialogue.dialogue-instead-of-fight.line-3', duration:5500, delay:10400 },
+        { id:'maren',  textKey:'gods.dialogue.dialogue-instead-of-fight.line-4', duration:6000, delay:15900 },
     ]),
 
     // Joueur vole quelqu'un
     pickpocket: () => godDialogue([
-        { id:'vareth', text:"Bien joué. Il ne l'aurait pas dépensé utilement.",  duration:5000 },
-        { id:'sorel',  text:"...",                                                duration:3000, delay:4800 },
-        { id:'dusk',   text:"Sorel se tait. Ça lui fait du bien.",               duration:5000, delay:8000 },
+        { id:'vareth', textKey:'gods.dialogue.pickpocket.line-1', duration:5000 },
+        { id:'sorel',  textKey:'gods.dialogue.pickpocket.line-2', duration:3000, delay:4800 },
+        { id:'dusk',   textKey:'gods.dialogue.pickpocket.line-3', duration:5000, delay:8000 },
     ]),
 
     // Joueur aide quelqu'un sans raison apparente
     help_unprompted: () => godDialogue([
-        { id:'maren',  text:"Voilà. C'est ça.",                                  duration:4000 },
-        { id:'vareth', text:"Tu aurais pu demander quelque chose en échange.",   duration:5000, delay:4200 },
-        { id:'maren',  text:"Tais-toi, Vareth.",                                 duration:3500, delay:9400 },
-        { id:'vareth', text:"... D'accord.",                                     duration:3000, delay:13200 },
+        { id:'maren',  textKey:'gods.dialogue.help-unprompted.line-1', duration:4000 },
+        { id:'vareth', textKey:'gods.dialogue.help-unprompted.line-2', duration:5000, delay:4200 },
+        { id:'maren',  textKey:'gods.dialogue.help-unprompted.line-3', duration:3500, delay:9400 },
+        { id:'vareth', textKey:'gods.dialogue.help-unprompted.line-4', duration:3000, delay:13200 },
     ]),
 
     // Joueur entre dans les Entrailles pour la première fois
     entering_underworld: () => godDialogue([
-        { id:'brahl',  text:"Je ne dirai pas 'ne vas pas là-dedans'. Mais sache que là-dessous... je ne peux plus te voir.", duration:8000 },
-        { id:'maren',  text:"S'il te plaît.",                                    duration:4000, delay:8500 },
-        { id:'dusk',   text:"Je n'ai pas de blague. C'est tout ce que tu as besoin de savoir.",  duration:7000, delay:13000 },
-        { id:'orvane', text:"Je serais curieux de savoir ce que tu vas trouver. Si tu reviens, raconte-moi.", duration:8000, delay:20500 },
+        { id:'brahl',  textKey:'gods.dialogue.entering-underworld.line-1', duration:8000 },
+        { id:'maren',  textKey:'gods.dialogue.entering-underworld.line-2', duration:4000, delay:8500 },
+        { id:'dusk',   textKey:'gods.dialogue.entering-underworld.line-3', duration:7000, delay:13000 },
+        { id:'orvane', textKey:'gods.dialogue.entering-underworld.line-4', duration:8000, delay:20500 },
     ]),
 
     // Joueur ressort des Entrailles
     exiting_underworld: () => godDialogue([
-        { id:'ylene',  text:"Tu es revenu. Quelque chose a changé.",             duration:6000 },
-        { id:'maren',  text:"Tu es là.",                                         duration:3500, delay:6500 },
-        { id:'orvane', text:"Alors ? Qu'est-ce qu'il y avait ?",                 duration:5000, delay:10500 },
+        { id:'ylene',  textKey:'gods.dialogue.exiting-underworld.line-1', duration:6000 },
+        { id:'maren',  textKey:'gods.dialogue.exiting-underworld.line-2', duration:3500, delay:6500 },
+        { id:'orvane', textKey:'gods.dialogue.exiting-underworld.line-3', duration:5000, delay:10500 },
     ]),
 };
+
+export function getGodName(godId) {
+    return GODS[godId]?.name || godId;
+}
+
+export function getGodDomain(godId) {
+    return GODS[godId]?.domain || '';
+}
+
+onLocaleChange(() => {
+    if (!_currentSpeech?.god?.el) return;
+    _currentSpeech.god.el.querySelector('.god-text').textContent = resolveGodSpeechText(_currentSpeech);
+});
 
 /** Retourner l'influence accumulée pour un dieu */
 export function getInfluence(godId) { return _influence[godId] || 0; }

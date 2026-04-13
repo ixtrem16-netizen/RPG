@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Medieval Village — Browser</title>
@@ -73,10 +73,14 @@ body { background:#0d0f12; font-family:'Georgia', serif; color:#c8b89a;
 </script>
 </head>
 <body>
+<script type="module">
+import { initI18n } from './src/i18n.js';
+initI18n();
+</script>
 
 <!-- Sidebar -->
 <div id="sidebar">
-    <input id="search" type="text" placeholder="Rechercher...">
+    <input id="search" type="text" placeholder="Search...">
     <div id="categories"></div>
     <div id="list"></div>
     <div id="count"></div>
@@ -85,14 +89,15 @@ body { background:#0d0f12; font-family:'Georgia', serif; color:#c8b89a;
 <!-- Vue 3D -->
 <div id="viewport">
     <div id="obj-name">—</div>
-    <div id="loading-overlay">Chargement...</div>
-    <div id="hint">Clic droit + drag : orbiter<br>Molette : zoom<br>Clic gauche + drag : panoramique</div>
+    <div id="loading-overlay">Loading...</div>
+    <div id="hint"></div>
 </div>
 
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { onLocaleChange, t } from './src/i18n.js';
 
 // ── Liste complète des objets ────────────────────────────────────
 const BASE = 'assets/environment/village/';
@@ -145,7 +150,20 @@ const OBJECTS = [
     'Window_Roof_Thin','Window_Roof_Wide','Window_Thin_Flat1','Window_Thin_Round1','Window_Wide_Flat1','Window_Wide_Round1',
 ];
 
-const CATEGORIES = ['Tout','Balcony','Corner','Door','Floor','HoleCover','Overhang','Prop','Roof','Stair','Wall','Window'];
+const CATEGORIES = [
+    { id: 'all', prefix: null, labelKey: 'pages.village-browser.categories.all' },
+    { id: 'Balcony', prefix: 'Balcony', labelKey: 'pages.village-browser.categories.balcony' },
+    { id: 'Corner', prefix: 'Corner', labelKey: 'pages.village-browser.categories.corner' },
+    { id: 'Door', prefix: 'Door', labelKey: 'pages.village-browser.categories.door' },
+    { id: 'Floor', prefix: 'Floor', labelKey: 'pages.village-browser.categories.floor' },
+    { id: 'HoleCover', prefix: 'HoleCover', labelKey: 'pages.village-browser.categories.hole-cover' },
+    { id: 'Overhang', prefix: 'Overhang', labelKey: 'pages.village-browser.categories.overhang' },
+    { id: 'Prop', prefix: 'Prop', labelKey: 'pages.village-browser.categories.prop' },
+    { id: 'Roof', prefix: 'Roof', labelKey: 'pages.village-browser.categories.roof' },
+    { id: 'Stair', prefix: 'Stair', labelKey: 'pages.village-browser.categories.stair' },
+    { id: 'Wall', prefix: 'Wall', labelKey: 'pages.village-browser.categories.wall' },
+    { id: 'Window', prefix: 'Window', labelKey: 'pages.village-browser.categories.window' },
+];
 
 // ── Scène ────────────────────────────────────────────────────────
 const scene  = new THREE.Scene();
@@ -187,6 +205,9 @@ scene.add(grid);
 let current = null;
 const loader = new GLTFLoader();
 const overlay = document.getElementById('loading-overlay');
+const searchEl = document.getElementById('search');
+const hintEl = document.getElementById('hint');
+const countEl = document.getElementById('count');
 
 function loadObject(name) {
     overlay.classList.add('visible');
@@ -223,33 +244,43 @@ function loadObject(name) {
 }
 
 // ── UI ───────────────────────────────────────────────────────────
-let activeCat = 'Tout', searchTerm = '';
+let activeCat = 'all', searchTerm = '';
 
-// Catégories
 const catEl = document.getElementById('categories');
-CATEGORIES.forEach(cat => {
-    const btn = document.createElement('div');
-    btn.className = 'cat-btn' + (cat === 'Tout' ? ' active' : '');
-    btn.textContent = cat;
-    btn.addEventListener('click', () => {
-        activeCat = cat;
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderList();
-    });
-    catEl.appendChild(btn);
-});
+function setPageTitle() {
+    document.title = t('pages.village-browser.title');
+}
 
-// Recherche
-document.getElementById('search').addEventListener('input', e => {
+function renderStaticText() {
+    searchEl.placeholder = t('pages.village-browser.search-placeholder');
+    overlay.textContent = t('pages.village-browser.loading');
+    hintEl.innerHTML = `${t('pages.village-browser.hint.orbit')}<br>${t('pages.village-browser.hint.zoom')}<br>${t('pages.village-browser.hint.pan')}`;
+}
+
+function renderCategories() {
+    catEl.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+        const btn = document.createElement('div');
+        btn.className = 'cat-btn' + (cat.id === activeCat ? ' active' : '');
+        btn.textContent = t(cat.labelKey);
+        btn.addEventListener('click', () => {
+            activeCat = cat.id;
+            renderCategories();
+            renderList();
+        });
+        catEl.appendChild(btn);
+    });
+}
+
+searchEl.addEventListener('input', e => {
     searchTerm = e.target.value.toLowerCase();
     renderList();
 });
 
-// Liste
 function renderList() {
     const filtered = OBJECTS.filter(name => {
-        const catMatch = activeCat === 'Tout' || name.startsWith(activeCat);
+        const category = CATEGORIES.find(cat => cat.id === activeCat);
+        const catMatch = !category?.prefix || name.startsWith(category.prefix);
         const srcMatch = name.toLowerCase().includes(searchTerm);
         return catMatch && srcMatch;
     });
@@ -264,13 +295,23 @@ function renderList() {
         el.addEventListener('click', () => loadObject(name));
         listEl.appendChild(el);
     });
-    document.getElementById('count').textContent = filtered.length + ' objets';
+    countEl.textContent = t('pages.village-browser.count', { count: filtered.length });
 }
 
+setPageTitle();
+renderStaticText();
+renderCategories();
 renderList();
 
 // Charger le premier par défaut
 loadObject('Wall_Plaster_Straight');
+
+onLocaleChange(() => {
+    setPageTitle();
+    renderStaticText();
+    renderCategories();
+    renderList();
+});
 
 // ── Boucle ───────────────────────────────────────────────────────
 (function animate() {
@@ -285,7 +326,7 @@ window.addEventListener('resize', () => {
     renderer.setSize(vp.clientWidth, vp.clientHeight);
 });
 </script>
-<script src="src/asset-check.js"></script>
-<script src="src/nav.js"></script>
+<script type="module" src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>

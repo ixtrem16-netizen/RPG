@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Character Builder</title>
@@ -202,102 +202,110 @@ input[type=range]::-moz-range-thumb {
 </script>
 </head>
 <body>
+<script type="module">
+import { initI18n } from './src/i18n.js';
+initI18n({ translate: true });
+</script>
 <div id="panel">
 
     <div class="section">
-        <div class="section-title">Corps</div>
+        <div class="section-title" data-i18n="pages.char-builder.sections.body">Body</div>
         <div class="btn-grid" id="body-btns">
-            <div class="opt-btn active" data-body="M">♂ Masculin</div>
-            <div class="opt-btn"        data-body="F">♀ Féminin</div>
+            <div class="opt-btn active" data-body="M" data-i18n="char-creation.body.male">♂ Male</div>
+            <div class="opt-btn"        data-body="F" data-i18n="char-creation.body.female">♀ Female</div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Outfit</div>
+        <div class="section-title" data-i18n="pages.char-builder.sections.outfit">Outfit</div>
         <div id="outfit-btns">
-            <div class="opt-btn full muted" data-outfit="" style="margin-bottom:4px">— Aucun —</div>
+            <div class="opt-btn full muted" data-outfit="" style="margin-bottom:4px" data-i18n="pages.char-builder.options.none">— None —</div>
             <div class="outfit-split">
                 <div class="outfit-col">
-                    <div class="col-hdr">♂ Mâle</div>
-                    <div class="opt-btn active" data-outfit="Male_Ranger">Ranger</div>
-                    <div class="opt-btn"        data-outfit="Male_Peasant">Peasant</div>
-                    <div class="opt-btn"        data-outfit="Male_Knight">Knight</div>
-                    <div class="opt-btn"        data-outfit="Male_Knight_Cloth">Knight Cloth</div>
-                    <div class="opt-btn"        data-outfit="Male_Noble">Noble</div>
-                    <div class="opt-btn"        data-outfit="Male_Wizard">Wizard</div>
+                    <div class="col-hdr" data-i18n="pages.char-builder.columns.male">♂ Male</div>
+                    <div class="opt-btn active" data-outfit="Male_Ranger" data-i18n="char-creation.outfits.ranger">Ranger</div>
+                    <div class="opt-btn"        data-outfit="Male_Peasant" data-i18n="char-creation.outfits.peasant">Peasant</div>
+                    <div class="opt-btn"        data-outfit="Male_Knight" data-i18n="char-creation.outfits.knight">Knight</div>
+                    <div class="opt-btn"        data-outfit="Male_Knight_Cloth" data-i18n="char-creation.outfits.knight-cloth">Knight Cloth</div>
+                    <div class="opt-btn"        data-outfit="Male_Noble" data-i18n="char-creation.outfits.noble">Noble</div>
+                    <div class="opt-btn"        data-outfit="Male_Wizard" data-i18n="char-creation.outfits.wizard">Wizard</div>
                 </div>
                 <div class="outfit-col">
-                    <div class="col-hdr">♀ Femelle</div>
-                    <div class="opt-btn" data-outfit="Female_Ranger">Ranger</div>
-                    <div class="opt-btn" data-outfit="Female_Peasant">Peasant</div>
-                    <div class="opt-btn" data-outfit="Female_Knight">Knight</div>
-                    <div class="opt-btn" data-outfit="Female_Knight_Cloth">Knight Cloth</div>
-                    <div class="opt-btn" data-outfit="Female_Noble">Noble</div>
-                    <div class="opt-btn" data-outfit="Female_Wizard">Wizard</div>
+                    <div class="col-hdr" data-i18n="pages.char-builder.columns.female">♀ Female</div>
+                    <div class="opt-btn" data-outfit="Female_Ranger" data-i18n="char-creation.outfits.ranger">Ranger</div>
+                    <div class="opt-btn" data-outfit="Female_Peasant" data-i18n="char-creation.outfits.peasant">Peasant</div>
+                    <div class="opt-btn" data-outfit="Female_Knight" data-i18n="char-creation.outfits.knight">Knight</div>
+                    <div class="opt-btn" data-outfit="Female_Knight_Cloth" data-i18n="char-creation.outfits.knight-cloth">Knight Cloth</div>
+                    <div class="opt-btn" data-outfit="Female_Noble" data-i18n="char-creation.outfits.noble">Noble</div>
+                    <div class="opt-btn" data-outfit="Female_Wizard" data-i18n="char-creation.outfits.wizard">Wizard</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Variante texture</div>
+        <div class="section-title" data-i18n="pages.char-builder.sections.texture-variant">Texture variant</div>
         <div class="btn-grid" id="tex-btns">
-            <div class="opt-btn active" data-tex="1">Couleur 1</div>
-            <div class="opt-btn"        data-tex="2">Couleur 2</div>
-            <div class="opt-btn"        data-tex="3">Couleur 3</div>
+            <div class="opt-btn active" data-tex="1" data-i18n="pages.char-builder.textures.color-1">Color 1</div>
+            <div class="opt-btn"        data-tex="2" data-i18n="pages.char-builder.textures.color-2">Color 2</div>
+            <div class="opt-btn"        data-tex="3" data-i18n="pages.char-builder.textures.color-3">Color 3</div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Coiffure</div>
+        <div class="section-title" data-i18n="pages.char-builder.sections.hair">Hair</div>
         <div class="btn-grid" id="hair-btns">
-            <div class="opt-btn full muted active" data-hair="">— Aucune —</div>
-            <div class="opt-btn" data-hair="Hair_Long">Long</div>
-            <div class="opt-btn" data-hair="Hair_SimpleParted">Parted</div>
-            <div class="opt-btn" data-hair="Hair_Buzzed">Buzzed ♂</div>
-            <div class="opt-btn" data-hair="Hair_BuzzedFemale">Buzzed ♀</div>
-            <div class="opt-btn" data-hair="Hair_Buns">Buns</div>
+            <div class="opt-btn full muted active" data-hair="" data-i18n="pages.char-builder.options.none">— None —</div>
+            <div class="opt-btn" data-hair="Hair_Long" data-i18n="char-creation.hair.long">Long</div>
+            <div class="opt-btn" data-hair="Hair_SimpleParted" data-i18n="char-creation.hair.parted">Parted</div>
+            <div class="opt-btn" data-hair="Hair_Buzzed" data-i18n="char-creation.hair.buzzed-male">Buzzed ♂</div>
+            <div class="opt-btn" data-hair="Hair_BuzzedFemale" data-i18n="char-creation.hair.buzzed-female">Buzzed ♀</div>
+            <div class="opt-btn" data-hair="Hair_Buns" data-i18n="char-creation.hair.buns">Buns</div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Barbe</div>
+        <div class="section-title" data-i18n="pages.char-builder.sections.beard">Beard</div>
         <div class="btn-grid" id="beard-btns">
-            <div class="opt-btn full muted active" data-beard="">— Aucune —</div>
-            <div class="opt-btn full" data-beard="Hair_Beard">Barbe</div>
+            <div class="opt-btn full muted active" data-beard="" data-i18n="pages.char-builder.options.none">— None —</div>
+            <div class="opt-btn full" data-beard="Hair_Beard" data-i18n="char-creation.beard.beard">Beard</div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Couleur cheveux &amp; barbe</div>
+        <div class="section-title" data-i18n="pages.char-builder.sections.hair-color">Hair &amp; beard color</div>
         <div class="color-grid" id="hair-colors"></div>
-        <input type="color" id="hair-color-custom" value="#3d2b1a" title="Couleur personnalisée">
+        <input type="color" id="hair-color-custom" value="#3d2b1a" title="Custom color"
+               data-i18n-attr="title:pages.char-builder.pickers.custom">
     </div>
 
     <div class="section">
-        <div class="section-title">Couleur des yeux</div>
+        <div class="section-title" data-i18n="pages.char-builder.sections.eye-color">Eye color</div>
         <div class="color-grid" id="eye-colors"></div>
-        <input type="color" id="eye-color-custom" value="#3a7ab5" title="Couleur personnalisée">
+        <input type="color" id="eye-color-custom" value="#3a7ab5" title="Custom color"
+               data-i18n-attr="title:pages.char-builder.pickers.custom">
     </div>
 
     <div class="section">
-        <div class="section-title">Couleur de peau</div>
+        <div class="section-title" data-i18n="pages.char-builder.sections.skin-color">Skin color</div>
         <div class="color-grid" id="skin-colors"></div>
-        <input type="color" id="skin-color-custom" value="#d4956a" title="Couleur personnalisée">
+        <input type="color" id="skin-color-custom" value="#d4956a" title="Custom color"
+               data-i18n-attr="title:pages.char-builder.pickers.custom">
     </div>
 
     <div class="section" id="proportions-section" style="display:none;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:0;">
             <div class="section-title collapse-toggle" id="proportions-toggle" style="flex:1;margin-bottom:0;font-size:9px;letter-spacing:3px;">
-                Proportions <span class="chevron">▸</span>
+                <span data-i18n="pages.char-builder.sections.proportions">Proportions</span><span class="chevron">▸</span>
             </div>
-            <div class="opt-btn" id="proportions-reset-btn" title="Réinitialiser toutes les proportions"
+            <div class="opt-btn" id="proportions-reset-btn" title="Reset all proportions"
+                 data-i18n-attr="title:pages.char-builder.proportions.reset-all"
                  style="flex-shrink:0;min-width:0;padding:3px 7px;font-size:10px;">↺</div>
         </div>
         <div id="proportions-body" style="display:none;">
-            <div class="sub-title" style="margin-top:8px;">Corps</div>
+            <div class="sub-title" style="margin-top:8px;" data-i18n="pages.char-builder.proportions.body">Body</div>
             <div id="mesh-sliders-body"></div>
-            <div class="sub-title" style="margin-top:12px;">Outfit</div>
+            <div class="sub-title" style="margin-top:12px;" data-i18n="pages.char-builder.proportions.outfit">Outfit</div>
             <div id="mesh-sliders-outfit"></div>
         </div>
     </div>
@@ -306,25 +314,27 @@ input[type=range]::-moz-range-thumb {
 </div>
 
 <div id="viewport">
-    <div id="vp-loading">Chargement...</div>
-    <div id="vp-hint">Clic droit : orbiter · Molette : zoom</div>
+    <div id="vp-loading" data-i18n="pages.char-builder.viewport.loading">Loading...</div>
+    <div id="vp-hint" data-i18n="pages.char-builder.viewport.hint">Right-click: orbit · Wheel: zoom</div>
 </div>
 
 <div id="rightpanel">
 
     <div class="section">
-        <div class="section-title">Configurations</div>
-        <input id="config-name-input" type="text" placeholder="Nom du personnage...">
+        <div class="section-title" data-i18n="pages.char-builder.sections.configurations">Configurations</div>
+        <input id="config-name-input" type="text" placeholder="Character name..."
+               data-i18n-attr="placeholder:pages.char-builder.configs.placeholder">
         <div class="btn-grid">
-            <div class="opt-btn full" id="config-save-btn">+ Sauvegarder la config actuelle</div>
+            <div class="opt-btn full" id="config-save-btn" data-i18n="pages.char-builder.configs.save-current">+ Save current config</div>
         </div>
-        <div id="export-toast">Exporté vers le jeu ✓</div>
+        <div id="export-toast" data-i18n="pages.char-builder.configs.exported">Exported to game ✓</div>
         <div style="margin-top:8px;" id="config-list"></div>
     </div>
 
     <div class="section" style="flex:1;display:flex;flex-direction:column;">
-        <div class="section-title">Animations</div>
-        <input id="clip-search" type="text" placeholder="Filtrer clips...">
+        <div class="section-title" data-i18n="pages.char-builder.sections.animations">Animations</div>
+        <input id="clip-search" type="text" placeholder="Filter clips..."
+               data-i18n-attr="placeholder:pages.char-builder.animations.placeholder">
         <div id="clip-list" style="overflow-y:auto;flex:1;"></div>
     </div>
 
@@ -335,6 +345,7 @@ import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { onLocaleChange, t, translateDOM } from './src/i18n.js';
 import { LiveSync } from './src/live-sync.js';
 import { UAL_PATHS, isHeadRelatedMesh } from './src/char-loader.js';
 
@@ -398,6 +409,10 @@ let activeActionOutfit = null, activeActionBody = null;
 let ualGltf = null, allClips = [], clipFilter = '';
 let headBone = null;
 const headWP = new THREE.Vector3();
+let statusState = { type: 'empty', params: {} };
+let clipListState = 'idle';
+let saveButtonFeedbackActive = false;
+let saveButtonFeedbackTimer = null;
 
 let slots = { body:[], hair:[], beard:[] };
 let outfitMeshes = []; // meshes du outfit cloned — trackés pour visibilité
@@ -409,6 +424,111 @@ let skinColorActive = false;               // false = texture naturelle, true = 
 // Deux maps de bones indépendantes
 let liveBoneMap_outfit = {}, liveBoneMap_body = {};
 const boneScaleOverrides_outfit = {}, boneScaleOverrides_body = {};
+
+const BODY_LABEL_KEYS = {
+    M: 'char-creation.body.male',
+    F: 'char-creation.body.female',
+};
+const HAIR_LABEL_KEYS = {
+    Hair_Long: 'char-creation.hair.long',
+    Hair_SimpleParted: 'char-creation.hair.parted',
+    Hair_Buzzed: 'char-creation.hair.buzzed-male',
+    Hair_BuzzedFemale: 'char-creation.hair.buzzed-female',
+    Hair_Buns: 'char-creation.hair.buns',
+};
+const BEARD_LABEL_KEYS = {
+    Hair_Beard: 'char-creation.beard.beard',
+};
+const MESH_LABEL_KEYS = {
+    superhero_male: 'pages.char-builder.mesh-labels.body-male',
+    superhero_female: 'pages.char-builder.mesh-labels.body-female',
+    eyebrows: 'pages.char-builder.mesh-labels.eyebrows',
+    eyes: 'pages.char-builder.mesh-labels.eyes',
+    hair_long: 'char-creation.hair.long',
+    hair_simpleparted: 'char-creation.hair.parted',
+    hair_buzzed: 'char-creation.hair.buzzed-male',
+    hair_buzzedfemale: 'char-creation.hair.buzzed-female',
+    hair_buns: 'char-creation.hair.buns',
+    hair_beard: 'char-creation.beard.beard',
+};
+const SKIN_TONE_KEYS = [
+    'pages.char-builder.skin-tones.natural',
+    'pages.char-builder.skin-tones.alabaster',
+    'pages.char-builder.skin-tones.fair',
+    'pages.char-builder.skin-tones.medium',
+    'pages.char-builder.skin-tones.tan',
+    'pages.char-builder.skin-tones.brown',
+    'pages.char-builder.skin-tones.ebony',
+];
+
+function setPageTitle() {
+    document.title = t('pages.char-builder.title');
+}
+
+function getBodyLabel(value) {
+    const key = BODY_LABEL_KEYS[value];
+    return key ? t(key) : value;
+}
+
+function getOutfitLabel(value) {
+    if (!value) return t('pages.char-builder.options.none');
+    const slug = value.replace(/^(Male|Female)_/, '').toLowerCase().replace(/_/g, '-');
+    return t(`char-creation.outfits.${slug}`);
+}
+
+function getHairLabel(value) {
+    const key = HAIR_LABEL_KEYS[value];
+    return key ? t(key) : value;
+}
+
+function getBeardLabel(value) {
+    const key = BEARD_LABEL_KEYS[value];
+    return key ? t(key) : value;
+}
+
+function getBoneGroupLabel(groupId) {
+    return t(`pages.char-builder.bone-groups.${groupId}`);
+}
+
+function getMeshLabel(meshOrName) {
+    const name = typeof meshOrName === 'string' ? meshOrName : meshOrName.name;
+    const key = MESH_LABEL_KEYS[name.toLowerCase()];
+    if (key) return t(key);
+    const cleaned = name.replace(/^(Male|Female|Superhero|SuperHero)_[^_]+_?/i, '').replace(/_/g, ' ').trim();
+    return cleaned || name;
+}
+
+function getSkinToneLabel(index) {
+    return t(SKIN_TONE_KEYS[index]);
+}
+
+function renderGeneratedLocaleText(root = document) {
+    root.querySelectorAll('[data-mesh-label]').forEach(node => {
+        node.textContent = getMeshLabel(node.dataset.meshLabel);
+    });
+    root.querySelectorAll('[data-bone-group-label]').forEach(node => {
+        node.textContent = getBoneGroupLabel(node.dataset.boneGroupLabel);
+    });
+    root.querySelectorAll('[data-role="toggle-visibility"]').forEach(node => {
+        node.title = t('pages.char-builder.actions.toggle-visibility');
+    });
+    root.querySelectorAll('[data-role="reset-control"]').forEach(node => {
+        node.title = t('pages.char-builder.actions.reset');
+    });
+    root.querySelectorAll('[data-role="visibility-heading"]').forEach(node => {
+        node.textContent = t('pages.char-builder.sections.visibility');
+    });
+    root.querySelectorAll('[data-skin-tone-index]').forEach(node => {
+        node.title = getSkinToneLabel(Number(node.dataset.skinToneIndex));
+    });
+}
+
+function renderConfigSaveButton() {
+    const btn = document.getElementById('config-save-btn');
+    btn.textContent = saveButtonFeedbackActive
+        ? t('pages.char-builder.configs.save-success')
+        : t('pages.char-builder.configs.save-current');
+}
 
 // Positions de repos (T-Pose) — capturées une fois après rebuild
 // Utilisées comme base stable pour le contre-ajustement (évite l'accumulation)
@@ -765,13 +885,13 @@ function applyTexVariant() {
 
 // ── Reconstruction complète (outfit ou corps changé) ──────────
 async function rebuild() {
-    setStatus('Chargement...');
+    setStatus('loading');
     document.getElementById('vp-loading').style.display = 'block';
 
     if (activeActionOutfit) { activeActionOutfit.stop(); activeActionOutfit=null; }
     if (activeActionBody)   { activeActionBody.stop();  activeActionBody=null; }
-    if (mixerOutfit) { mixerOutfit.stopAllAction(); mixerOutfit=null; }
-    if (mixerBody)   { mixerBody.stopAllAction();   mixerBody=null; }
+    if (mixerOutfit) { mixerOutfit.stopAllActions(); mixerOutfit=null; }
+    if (mixerBody)   { mixerBody.stopAllActions();   mixerBody=null; }
     if (outfitRoot)  { scene.remove(outfitRoot); outfitRoot=null; }
     if (bodyRoot)    { scene.remove(bodyRoot);   bodyRoot=null; }
     slots = { body:[], hair:[], beard:[] };
@@ -871,7 +991,7 @@ async function rebuild() {
 
     } catch(err) {
         document.getElementById('vp-loading').style.display = 'none';
-        setStatus('⚠ ' + err.message); console.error(err);
+        setStatus('error', { message: err.message }); console.error(err);
     }
 }
 
@@ -890,8 +1010,9 @@ async function swapSlot(slot, gltfName) {
 
 // ── Animations (toutes libs fusionnées) ──────────────────────
 async function loadUAL() {
+    clipListState = 'loading';
     document.getElementById('clip-list').innerHTML =
-        '<div style="padding:6px 8px;font-size:9px;opacity:.3;letter-spacing:2px">Chargement animations...</div>';
+        `<div style="padding:6px 8px;font-size:9px;opacity:.3;letter-spacing:2px">${t('pages.char-builder.animations.loading')}</div>`;
     const results = await Promise.allSettled(P_UAL.map(p => loadCached(p)));
     const clipMap = new Map();
     for (const r of results) {
@@ -912,6 +1033,7 @@ function buildClips() {
 }
 
 function renderClips() {
+    clipListState = 'loaded';
     const term = clipFilter.toLowerCase();
     const list = allClips.filter(c=>!term||c.name.toLowerCase().includes(term));
     const el = document.getElementById('clip-list');
@@ -919,7 +1041,7 @@ function renderClips() {
     list.forEach(clip => {
         const btn = document.createElement('div');
         btn.className='clip-btn'; btn.dataset.name=clip.name;
-        btn.innerHTML=`<span>${clip.name}</span><span class="dur">${clip.duration.toFixed(2)}s</span>`;
+        btn.innerHTML=`<span>${clip.name}</span><span class="dur">${clip.duration.toFixed(2)}${t('pages.char-builder.animations.seconds')}</span>`;
         btn.addEventListener('click',()=>{
             document.querySelectorAll('.clip-btn').forEach(b=>b.classList.remove('active'));
             btn.classList.add('active'); playClip(clip);
@@ -948,12 +1070,37 @@ function setActive(selector, key, val) {
     document.querySelectorAll(selector).forEach(b =>
         b.classList.toggle('active', b.dataset[key] === val));
 }
-function setStatus(msg) { document.getElementById('status-bar').textContent = msg; }
+function renderStatus() {
+    const statusBar = document.getElementById('status-bar');
+    switch (statusState.type) {
+        case 'loading':
+            statusBar.textContent = t('pages.char-builder.status.loading');
+            break;
+        case 'error':
+            statusBar.textContent = t('pages.char-builder.status.error', statusState.params);
+            break;
+        case 'summary': {
+            const parts = [];
+            if (state.outfit) parts.push(getOutfitLabel(state.outfit));
+            if (state.hair) parts.push(getHairLabel(state.hair));
+            if (state.beard) parts.push(getBeardLabel(state.beard));
+            statusBar.textContent = parts.join(' + ') || getBodyLabel(state.body);
+            break;
+        }
+        case 'empty':
+        default:
+            statusBar.textContent = t('pages.char-builder.status.empty');
+            break;
+    }
+}
+
+function setStatus(type, params = {}) {
+    statusState = { type, params };
+    renderStatus();
+}
+
 function updateStatus() {
-    const parts = [state.outfit];
-    if (state.hair)  parts.push(state.hair);
-    if (state.beard) parts.push(state.beard);
-    setStatus(parts.join(' + '));
+    setStatus('summary');
 }
 
 // ── Événements ────────────────────────────────────────────────
@@ -998,16 +1145,16 @@ const _groupEyeRegistry = {};
 
 // ── Sliders proportions par zone (bone scaling) ───────────────
 const BONE_GROUPS = [
-    { label: 'Tête',    bones: ['Head'] },
-    { label: 'Cou',     bones: ['neck_01'] },
-    { label: 'Épaules', bones: ['clavicle_l','clavicle_r'] },
-    { label: 'Chest',         bones: ['spine_01','spine_02','spine_03'] },
-    { label: 'Bras',          bones: ['upperarm_l','upperarm_r'] },
-    { label: 'Avant-bras',    bones: ['lowerarm_l','lowerarm_r'] },
-    { label: 'Mains',         bones: ['hand_l','hand_r'] },
-    { label: 'Cuisses',     bones: ['thigh_l','thigh_r','pelvis'] },
-    { label: 'Mollets',     bones: ['calf_l','calf_r'] },
-    { label: 'Pieds',       bones: ['foot_l','foot_r'] },
+    { id: 'head',      bones: ['Head'] },
+    { id: 'neck',      bones: ['neck_01'] },
+    { id: 'shoulders', bones: ['clavicle_l','clavicle_r'] },
+    { id: 'chest',     bones: ['spine_01','spine_02','spine_03'] },
+    { id: 'arms',      bones: ['upperarm_l','upperarm_r'] },
+    { id: 'forearms',  bones: ['lowerarm_l','lowerarm_r'] },
+    { id: 'hands',     bones: ['hand_l','hand_r'] },
+    { id: 'thighs',    bones: ['thigh_l','thigh_r','pelvis'] },
+    { id: 'calves',    bones: ['calf_l','calf_r'] },
+    { id: 'feet',      bones: ['foot_l','foot_r'] },
 ];
 
 // Scales custom à réappliquer APRÈS mixer.update() chaque frame
@@ -1015,38 +1162,21 @@ const boneScaleOverrides = {}; // boneName → scale
 let liveBoneMap = {};
 
 // ── Visibilité des meshes ─────────────────────────────────────
-const MESH_LABELS = {
-    // Noms connus — les nouveaux packs Quaternius seront détectés automatiquement
-    superhero_male: 'Corps ♂', superhero_female: 'Corps ♀',
-    eyebrows: 'Sourcils', eyes: 'Yeux',
-    hair_long: 'Long', hair_simpleparted: 'Parted',
-    hair_buzzed: 'Buzzed ♂', hair_buzzedfemale: 'Buzzed ♀',
-    hair_buns: 'Buns', hair_beard: 'Barbe',
-};
-
-// meshLabel accepte un mesh OU un nom de string
-function meshLabel(meshOrName) {
-    const name = typeof meshOrName === 'string' ? meshOrName : meshOrName.name;
-    // 1. Nom connu dans le dictionnaire
-    if (MESH_LABELS[name.toLowerCase()]) return MESH_LABELS[name.toLowerCase()];
-    // 2. Nettoyer le nom : retirer préfixe Male_/Female_/Superhero_Pack_/etc.
-    const cleaned = name.replace(/^(Male|Female|Superhero|SuperHero)_[^_]+_?/i, '').replace(/_/g, ' ').trim();
-    if (cleaned) return cleaned;
-    return name;
-}
-
 function makeEyeBtn(mesh, container, onChange = null) {
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px;';
 
     const lbl = document.createElement('span');
     lbl.style.cssText = 'font-size:9px;letter-spacing:1px;color:rgba(200,184,154,0.5);flex:1;text-transform:uppercase;';
-    lbl.textContent = meshLabel(mesh); // passe le mesh complet pour détection générique
+    lbl.dataset.meshLabel = mesh.name;
+    lbl.textContent = getMeshLabel(mesh);
 
     const btn = document.createElement('div');
     btn.className = 'eye-btn';
     btn.textContent = '👁';
-    btn.title = 'Afficher / Cacher';
+    btn.dataset.role = 'toggle-visibility';
+    btn.title = t('pages.char-builder.actions.toggle-visibility');
+    btn.classList.toggle('off', !mesh.visible);
     btn.addEventListener('click', () => {
         mesh.visible = !mesh.visible;
         btn.classList.toggle('off', !mesh.visible);
@@ -1065,7 +1195,8 @@ function appendVisibilityBlock(container, meshes, onChange = null) {
     const sep = document.createElement('div');
     sep.className = 'vis-row';
     sep.style.cssText = 'font-size:8px;letter-spacing:3px;color:rgba(200,184,154,0.25);text-transform:uppercase;padding:6px 0 3px;border-top:1px solid rgba(200,184,154,0.07);margin-top:4px;';
-    sep.textContent = 'Visibilité';
+    sep.dataset.role = 'visibility-heading';
+    sep.textContent = t('pages.char-builder.sections.visibility');
     container.appendChild(sep);
 
     for (const mesh of meshes) {
@@ -1113,19 +1244,25 @@ function makeBoneSliders(containerId, boneMap, overrides) {
         const valSpan = document.createElement('span');
         valSpan.textContent = initVal + '%';
 
+        const groupLabel = document.createElement('span');
+        groupLabel.dataset.boneGroupLabel = grp.id;
+        groupLabel.textContent = getBoneGroupLabel(grp.id);
+
         const eyeBtn = document.createElement('div');
         eyeBtn.className = 'eye-btn';
         eyeBtn.textContent = '👁';
-        eyeBtn.title = 'Afficher / Cacher';
+        eyeBtn.dataset.role = 'toggle-visibility';
+        eyeBtn.title = t('pages.char-builder.actions.toggle-visibility');
         eyeBtn.style.marginLeft = '4px';
 
         const resetBtn = document.createElement('div');
         resetBtn.className = 'reset-btn';
         resetBtn.textContent = '↺';
-        resetBtn.title = 'Réinitialiser';
+        resetBtn.dataset.role = 'reset-control';
+        resetBtn.title = t('pages.char-builder.actions.reset');
         resetBtn.style.marginLeft = '3px';
 
-        top.innerHTML = `<span>${grp.label}</span>`;
+        top.appendChild(groupLabel);
         top.appendChild(valSpan);
         top.appendChild(eyeBtn);
         top.appendChild(resetBtn);
@@ -1134,12 +1271,12 @@ function makeBoneSliders(containerId, boneMap, overrides) {
         sl.type = 'range'; sl.min = 50; sl.max = 150; sl.value = initVal; sl.step = 1;
 
         // syncOutfitToCorps : Tête/Cou sont entièrement indépendants — aucune sync croisée dans les deux sens
-        const syncOutfitToCorps = grp.label !== 'Tête' && grp.label !== 'Cou';
+        const syncOutfitToCorps = grp.id !== 'head' && grp.id !== 'neck';
 
         // Enregistrer une fonction pour la sync cross-panel (tous les groupes, pas de garde)
         // uiOnly=true → juste CSS (pas de bone scales) — utilisé pour la sync initiale et croisée
-        if (!_groupEyeRegistry[grp.label]) _groupEyeRegistry[grp.label] = {};
-        _groupEyeRegistry[grp.label][side] = (v, uiOnly = false) => {
+        if (!_groupEyeRegistry[grp.id]) _groupEyeRegistry[grp.id] = {};
+        _groupEyeRegistry[grp.id][side] = (v, uiOnly = false) => {
             visible = v;
             eyeBtn.classList.toggle('off', !v);
             if (!uiOnly) {
@@ -1176,10 +1313,10 @@ function makeBoneSliders(containerId, boneMap, overrides) {
                 if (side === 'outfit') {
                     const bodyUniform = getOutfitGroupBodyUniform(grp);
                     if (bodyUniform) setBodyZone(bodyUniform, false); // outfit redevient visible → corps caché
-                    if (syncOutfitToCorps) _groupEyeRegistry[grp.label]?.body?.(false, false); // corps → off (bones + UI)
+                    if (syncOutfitToCorps) _groupEyeRegistry[grp.id]?.body?.(false, false); // corps → off (bones + UI)
                 } else {
                     // Corps reset → visible : outfit disparaît seulement si sync active (pas Tête/Cou)
-                    if (syncOutfitToCorps) _groupEyeRegistry[grp.label]?.outfit?.(false, false);
+                    if (syncOutfitToCorps) _groupEyeRegistry[grp.id]?.outfit?.(false, false);
                     const bodyUniform = getOutfitGroupBodyUniform(grp);
                     if (bodyUniform) setBodyZone(bodyUniform, true);
                 }
@@ -1195,7 +1332,7 @@ function makeBoneSliders(containerId, boneMap, overrides) {
                 found.forEach(name => { overrides[name] = visible ? userScale : 0.001; });
                 const bodyUniform = getOutfitGroupBodyUniform(grp);
                 if (bodyUniform) setBodyZone(bodyUniform, !visible); // outfit caché → corps visible
-                if (syncOutfitToCorps) _groupEyeRegistry[grp.label]?.body?.(!visible, false);
+                if (syncOutfitToCorps) _groupEyeRegistry[grp.id]?.body?.(!visible, false);
             } else {
                 // Corps : body zone shader (pas de squish des bones trunk → plus d'effondrement tête)
                 const bodyUniform = getOutfitGroupBodyUniform(grp);
@@ -1207,7 +1344,7 @@ function makeBoneSliders(containerId, boneMap, overrides) {
                     found.forEach(name => { overrides[name] = visible ? userScale : 0.001; });
                 }
                 // Sync vers outfit seulement si la logique est active (pas Tête/Cou)
-                if (syncOutfitToCorps) _groupEyeRegistry[grp.label]?.outfit?.(!visible, false);
+                if (syncOutfitToCorps) _groupEyeRegistry[grp.id]?.outfit?.(!visible, false);
             }
         });
 
@@ -1229,9 +1366,9 @@ function buildMeshSliders() {
     makeBoneSliders('mesh-sliders-body',   liveBoneMap_body,   boneScaleOverrides_body);
     makeBoneSliders('mesh-sliders-outfit', liveBoneMap_outfit, boneScaleOverrides_outfit);
     // Sync initiale 1 : outfit visible → corps OFF (body zone shader 0 + UI) sauf Tête/Cou
-    for (const label of Object.keys(_groupEyeRegistry)) {
-        if (label === 'Tête' || label === 'Cou') continue;
-        const reg = _groupEyeRegistry[label];
+    for (const groupId of Object.keys(_groupEyeRegistry)) {
+        if (groupId === 'head' || groupId === 'neck') continue;
+        const reg = _groupEyeRegistry[groupId];
         if (reg.outfit && reg.body) {
             reg.body(false, false); // full : bones 0.001 + UI off
         }
@@ -1330,8 +1467,6 @@ const SKIN_PRESETS = [
     '#6b3820',  // Brun
     '#2e150a',  // Ébène
 ];
-const SKIN_LABELS = ['Nat.','Albâtre','Clair','Médium','Bronzé','Brun','Ébène'];
-
 const skinGrid   = document.getElementById('skin-colors');
 const skinPicker = document.getElementById('skin-color-custom');
 
@@ -1339,7 +1474,8 @@ SKIN_PRESETS.forEach((hex, i) => {
     const sw = document.createElement('div');
     sw.className = 'cswatch' + (i === 0 ? ' active' : '');
     sw.style.background = hex || '#888';
-    sw.title = SKIN_LABELS[i];
+    sw.dataset.skinToneIndex = String(i);
+    sw.title = getSkinToneLabel(i);
     if (!hex) {
         // Bouton "Naturel" : icône texture
         sw.style.background = 'repeating-linear-gradient(45deg,#555 0,#555 3px,#333 3px,#333 6px)';
@@ -1486,7 +1622,7 @@ function exportConfigToGame(cfg) {
     delete gameConfig.name;
     localStorage.setItem('darkrpg_character_v1', JSON.stringify(gameConfig));
     // Notifier tous les onglets Studio ouverts
-    LiveSync.broadcast('char-updated', { name: cfg.name || 'Joueur' });
+    LiveSync.broadcast('char-updated', { name: cfg.name || t('pages.char-builder.configs.fallback-name') });
     const toast = document.getElementById('export-toast');
     toast.style.display = 'block';
     setTimeout(() => { toast.style.display = 'none'; }, 2000);
@@ -1503,7 +1639,10 @@ function renderConfigList() {
     const el = document.getElementById('config-list');
     el.innerHTML = '';
     if (!list.length) {
-        el.innerHTML = '<div style="font-size:9px;opacity:.3;letter-spacing:2px;padding:4px 0;">Aucune config sauvegardée</div>';
+        const empty = document.createElement('div');
+        empty.style.cssText = 'font-size:9px;opacity:.3;letter-spacing:2px;padding:4px 0;';
+        empty.textContent = t('pages.char-builder.configs.empty');
+        el.appendChild(empty);
         return;
     }
     list.forEach(cfg => {
@@ -1513,13 +1652,13 @@ function renderConfigList() {
         const nameEl = document.createElement('div');
         nameEl.className = 'config-item-name';
         nameEl.textContent = cfg.name;
-        nameEl.title = 'Charger "' + cfg.name + '"';
+        nameEl.title = t('pages.char-builder.configs.load', { name: cfg.name });
         nameEl.addEventListener('click', () => loadConfig(cfg));
 
         const saveBtn = document.createElement('div');
         saveBtn.className = 'config-action save';
         saveBtn.textContent = '💾';
-        saveBtn.title = 'Écraser avec la config actuelle';
+        saveBtn.title = t('pages.char-builder.configs.overwrite');
         saveBtn.addEventListener('click', () => {
             saveCurrentConfig(cfg.name);
             saveBtn.textContent = '✓';
@@ -1528,14 +1667,14 @@ function renderConfigList() {
 
         const exportBtn = document.createElement('div');
         exportBtn.className = 'config-action export';
-        exportBtn.textContent = '→ Jeu';
-        exportBtn.title = 'Exporter vers le jeu';
+        exportBtn.textContent = t('pages.char-builder.configs.to-game');
+        exportBtn.title = t('pages.char-builder.configs.export');
         exportBtn.addEventListener('click', () => exportConfigToGame(cfg));
 
         const delBtn = document.createElement('div');
         delBtn.className = 'config-action del';
         delBtn.textContent = '✕';
-        delBtn.title = 'Supprimer';
+        delBtn.title = t('pages.char-builder.configs.delete');
         delBtn.addEventListener('click', () => deleteConfig(cfg.name));
 
         row.appendChild(nameEl);
@@ -1556,16 +1695,40 @@ document.getElementById('config-save-btn').addEventListener('click', () => {
     }
     saveCurrentConfig(name);
     const btn = document.getElementById('config-save-btn');
-    const orig = btn.textContent;
-    btn.textContent = 'Sauvegardé ✓';
     btn.style.color = 'rgba(160,220,130,0.75)';
-    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+    saveButtonFeedbackActive = true;
+    renderConfigSaveButton();
+    clearTimeout(saveButtonFeedbackTimer);
+    saveButtonFeedbackTimer = setTimeout(() => {
+        saveButtonFeedbackActive = false;
+        btn.style.color = '';
+        renderConfigSaveButton();
+    }, 1500);
+});
+
+function renderLocaleSensitiveUI() {
+    setPageTitle();
+    translateDOM(document.body);
+    renderGeneratedLocaleText();
+    renderConfigSaveButton();
+    renderStatus();
+    renderConfigList();
+    if (clipListState === 'loading') {
+        document.getElementById('clip-list').innerHTML =
+            `<div style="padding:6px 8px;font-size:9px;opacity:.3;letter-spacing:2px">${t('pages.char-builder.animations.loading')}</div>`;
+    } else if (clipListState === 'loaded') {
+        renderClips();
+    }
+}
+
+renderLocaleSensitiveUI();
+onLocaleChange(() => {
+    renderLocaleSensitiveUI();
 });
 
 // ── Init ──────────────────────────────────────────────────────
 rebuild();
 loadUAL();
-renderConfigList();
 
 // ── Boucle ────────────────────────────────────────────────────
 const clock = new THREE.Clock();
@@ -1587,7 +1750,7 @@ window.addEventListener('resize', () => {
     renderer.setSize(vp.clientWidth, vp.clientHeight);
 });
 </script>
-<script src="src/asset-check.js"></script>
-<script src="src/nav.js"></script>
+<script type="module" src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Animation Inspector</title>
@@ -33,8 +33,12 @@ canvas { border:1px solid rgba(200,184,154,0.1); }
 </script>
 </head>
 <body>
-<h1>Animation Library — Clips disponibles</h1>
-<div id="status">Chargement des animations...</div>
+<script type="module">
+import { initI18n } from './src/i18n.js';
+initI18n({ translate: true });
+</script>
+<h1 data-i18n="pages.anim-inspect.heading">Animation Library — Available Clips</h1>
+<div id="status">Loading animations...</div>
 <div id="count"></div>
 <div id="list"></div>
 <div id="preview"></div>
@@ -44,6 +48,7 @@ import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { UAL_PATHS } from './src/char-loader.js';
+import { onLocaleChange, t, translateDOM } from './src/i18n.js';
 
 // ── Mini scène 3D ────────────────────────────────────────────────
 const W = Math.min(600, innerWidth - 60), H = 400;
@@ -83,9 +88,47 @@ let mixer = null, active = null, currentModel = null;
 const ANIM_PATHS = UAL_PATHS; // → src/char-loader.js
 
 const loader = new GLTFLoader();
+const statusEl = document.getElementById('status');
+let statusState = { type: 'loading', params: {} };
+
+function setPageTitle() {
+    document.title = t('pages.anim-inspect.title');
+}
+
+function renderStatus() {
+    switch (statusState.type) {
+        case 'missing':
+            statusEl.textContent = t('pages.anim-inspect.status.missing');
+            break;
+        case 'loaded':
+            statusEl.textContent = t('pages.anim-inspect.status.loaded', statusState.params);
+            break;
+        case 'error':
+            statusEl.textContent = t('pages.anim-inspect.status.error', statusState.params);
+            break;
+        case 'loading':
+        default:
+            statusEl.textContent = t('pages.anim-inspect.status.loading');
+            break;
+    }
+}
+
+function setStatus(type, params = {}) {
+    statusState = { type, params };
+    renderStatus();
+}
+
+setPageTitle();
+translateDOM(document.body);
+renderStatus();
+onLocaleChange(() => {
+    setPageTitle();
+    translateDOM(document.body);
+    renderStatus();
+});
 
 async function loadAllAnims() {
-    document.getElementById('status').textContent = 'Chargement des animations...';
+    setStatus('loading');
     document.getElementById('list').innerHTML = '';
     document.getElementById('count').textContent = '';
     if (active) { active.stop(); active = null; }
@@ -98,7 +141,7 @@ async function loadAllAnims() {
         try { baseGltf = await new Promise((res, rej) => loader.load(p, res, undefined, rej)); break; }
         catch {}
     }
-    if (!baseGltf) { document.getElementById('status').textContent = '⚠ Aucun fichier animation trouvé.'; return; }
+    if (!baseGltf) { setStatus('missing'); return; }
 
     const model = baseGltf.scene;
     const box = new THREE.Box3().setFromObject(model);
@@ -122,7 +165,7 @@ async function loadAllAnims() {
     }
     const clips = [...clipMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 
-    document.getElementById('status').textContent = clips.length + ' animations chargées';
+    setStatus('loaded', { count: clips.length });
     document.getElementById('count').textContent  = '';
 
     const listEl = document.getElementById('list');
@@ -153,7 +196,7 @@ const clock = new THREE.Clock();
     renderer.render(scene, camera);
 })();
 </script>
-<script src="src/asset-check.js"></script>
-<script src="src/nav.js"></script>
+<script type="module" src="src/asset-check.js"></script>
+<script type="module" src="src/nav.js"></script>
 </body>
 </html>
