@@ -477,10 +477,11 @@ function loadGLTF(url) {
 // ═══════════════════════════════════════════════════════════════
 //  ETAT — double main (R + L indépendants)
 // ═══════════════════════════════════════════════════════════════
-let charRenderer = null; // CharacterRenderer — dual-skeleton + shader zones
-let allClips     = [];
-let animFilter   = '';
-let ualLoaded    = false;
+let charRenderer     = null; // CharacterRenderer — dual-skeleton + shader zones
+let allClips         = [];
+let animFilter       = '';
+let ualLoaded        = false;
+let _currentClipName = '';   // nom du clip en cours (remplace activeAction supprimé)
 
 // Un état complet par main (Right / Left)
 const hands = {
@@ -699,7 +700,7 @@ function renderClipList() {
 function makeClipRow(clip) {
     const row = document.createElement('div');
     row.className = 'clip-row';
-    if (activeAction && activeAction.getClip().name === clip.name) row.classList.add('active');
+    if (_currentClipName && _currentClipName === clip.name) row.classList.add('active');
     row.innerHTML = `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${clip.name}</span>`
                   + `<span class="clip-dur">${clip.duration.toFixed(1)}s</span>`;
     row.addEventListener('click', () => {
@@ -713,6 +714,7 @@ function makeClipRow(clip) {
 function playClip(clip) {
     if (!charRenderer) return;
     charRenderer.play(clip);
+    _currentClipName = clip.name;
     document.querySelectorAll('.clip-row').forEach(r => {
         const span = r.querySelector('span');
         r.classList.toggle('active', !!span && span.textContent === clip.name);

@@ -204,11 +204,14 @@ function _injectBodyZoneShader(mesh) {
     };
 
     // Toutes les zones cachées par défaut — Tête/Cou toujours visibles (shader)
+    // uSkinColor/uSkinBlend : teinte peau optionnelle (identique char-builder)
     const bodyZoneUnis = {
         uShowShldr:  { value: 0.0 }, uShowChest:  { value: 0.0 },
         uShowArms:   { value: 0.0 }, uShowFArms:  { value: 0.0 },
         uShowHands:  { value: 0.0 }, uShowThighs: { value: 0.0 },
         uShowCalves: { value: 0.0 }, uShowFeet:   { value: 0.0 },
+        uSkinColor:  { value: new THREE.Color(1, 1, 1) },
+        uSkinBlend:  { value: 0.0 },
     };
 
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -245,6 +248,8 @@ vFtW      =${zoneExpr(zones.foot)};
                 'void main() {',
 `varying float vNeckHeadW,vShldrW,vChestW,vArmW,vFArmW,vHndW,vThghW,vClfW,vFtW;
 uniform float uShowShldr,uShowChest,uShowArms,uShowFArms,uShowHands,uShowThighs,uShowCalves,uShowFeet;
+uniform vec3  uSkinColor;
+uniform float uSkinBlend;
 void main() {
 float keep=0.;
 if(vNeckHeadW>0.35) keep=1.;
@@ -257,6 +262,19 @@ if(uShowThighs>0.5&&vThghW  >0.25) keep=1.;
 if(uShowCalves>0.5&&vClfW   >0.25) keep=1.;
 if(uShowFeet  >0.5&&vFtW    >0.25) keep=1.;
 if(keep<0.5) discard;`
+            );
+
+            // Teinte peau après échantillonnage texture (identique char-builder)
+            shader.fragmentShader = shader.fragmentShader.replace(
+                '#include <map_fragment>',
+`#include <map_fragment>
+if(uSkinBlend>0.0){
+ float lum=dot(diffuseColor.rgb,vec3(0.299,0.587,0.114));
+ float sLum=max(dot(uSkinColor,vec3(0.299,0.587,0.114)),0.001);
+ vec3 tinted=uSkinColor*(lum/sLum);
+ tinted/=max(max(tinted.r,max(tinted.g,tinted.b)),1.0);
+ diffuseColor.rgb=mix(diffuseColor.rgb,tinted,uSkinBlend);
+}`
             );
         };
         m.userData.bodyZoneUniforms = bodyZoneUnis;
@@ -392,6 +410,45 @@ export class CharacterRenderer {
                 _injectBodyZoneShader(m);
             }
         });
+
+        // ── Appliquer les couleurs depuis la config ────────────────
+        // eyeColor — active le shader iris sur les yeux
+        if (cfg.eyeColor) {
+            const ec = new THREE.Color(cfg.eyeColor);
+            bodyRoot.traverse(n => {
+                if (!n.isMesh) return;
+                const nl = n.name.toLowerCase();
+                if (nl !== 'eyes' && !nl.includes('mi_eye')) return;
+                (Array.isArray(n.material) ? n.material : [n.material]).forEach(m => {
+                    const u = m?.userData?.eyeUniforms;
+                    if (u) { u.uIrisColor.value.set(ec); u.uIrisEnabled.value = 1.0; }
+                });
+            });
+        }
+
+        // hairColor — teinte cheveux, barbe, sourcils
+        if (cfg.hairColor) {
+            const hc = new THREE.Color(cfg.hairColor);
+            bodyRoot.traverse(n => {
+                if (!n.isMesh || isFullBodyMesh(n)) return;
+                const nl = n.name.toLowerCase();
+                if (nl === 'eyes' || nl.includes('mi_eye')) return;
+                (Array.isArray(n.material) ? n.material : [n.material])
+                    .forEach(m => { if (m) m.color.set(hc); });
+            });
+        }
+
+        // skinColor — teinte peau via shader uSkinColor/uSkinBlend
+        if (cfg.skinColor) {
+            const sc = new THREE.Color(cfg.skinColor);
+            bodyRoot.traverse(n => {
+                if (!n.isMesh || !isFullBodyMesh(n)) return;
+                (Array.isArray(n.material) ? n.material : [n.material]).forEach(m => {
+                    const u = m?.userData?.bodyZoneUniforms;
+                    if (u) { u.uSkinColor.value.set(sc); u.uSkinBlend.value = 1.0; }
+                });
+            });
+        }
     }
 
     // ── Jouer un clip sur les deux mixers ─────────────────────────
