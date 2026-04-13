@@ -53,7 +53,7 @@ export const fr = {
     tools: {
         'gameplay-test': {
             name: 'Gameplay Test',
-            description: 'Locomotion · Combat · Physique · Ville de Valcrest. Prototype jouable complet - epee, bouclier, arc, magie.',
+            description: 'Locomotion · Combat · Physique · Ville de Valcrest. Prototype jouable complet - épée, bouclier, arc, magie.',
         },
         'char-builder': {
             name: 'Char Builder',
@@ -61,7 +61,7 @@ export const fr = {
         },
         'char-combined': {
             name: 'Char Combine',
-            description: 'Builder + apercu plein corps cote a cote.',
+            description: 'Builder + aperçu plein corps côte à côte.',
         },
         'character-preview': {
             name: 'Char Preview',
@@ -69,7 +69,7 @@ export const fr = {
         },
         'anim-inspect': {
             name: 'Anim Inspector',
-            description: 'Browse et preview de tous les clips d animation des librairies fusionnees.',
+            description: "Browse et preview de tous les clips d'animation des librairies fusionnées.",
         },
         'asset-browser': {
             name: 'Asset Browser',
@@ -99,8 +99,8 @@ export const fr = {
             'third-person-free': '3e personne - curseur libre',
         },
         pause: {
-            fullscreen: 'PLEIN ECRAN',
-            windowed: 'MODE FENETRE',
+            fullscreen: 'PLEIN ÉCRAN',
+            windowed: 'MODE FENÊTRE',
             save: 'SAUVEGARDER',
             saved: 'SAUVEGARDÉ',
         },
@@ -111,11 +111,11 @@ export const fr = {
         stats: {
             force: 'Force',
             endurance: 'Endurance',
-            agilite: 'Agilite',
+            agilite: 'Agilité',
             intelligence: 'Intelligence',
-            eloquence: 'Eloquence',
+            eloquence: 'Éloquence',
             perception: 'Perception',
-            volonte: 'Volonte',
+            volonte: 'Volonté',
             ombre: 'Ombre',
         },
         minimap: {
@@ -137,7 +137,7 @@ export const fr = {
                     '1': 'Le poids de tes armes semble moindre.',
                 },
                 down: {
-                    '0': 'Tes mains cherchent le pommeau d une epee qui n est plus la.',
+                    '0': "Tes mains cherchent le pommeau d'une épée qui n'est plus là.",
                     '1': 'Quelque chose se ramollit en toi. Pas tes muscles. Pas encore.',
                 },
             },
@@ -151,8 +151,8 @@ export const fr = {
             },
             agilite: {
                 up: {
-                    '0': 'Tes pieds cherchent les prises differemment qu avant.',
-                    '1': 'Tu te deplaces autrement. Plus econome.',
+                    '0': "Tes pieds cherchent les prises différemment qu'avant.",
+                    '1': 'Tu te déplaces autrement. Plus économe.',
                 },
                 down: {
                     '0': 'L equipement pese. Tu le sens dans les virages.',
@@ -160,8 +160,8 @@ export const fr = {
             },
             intelligence: {
                 up: {
-                    '0': 'Tu commences a peser tes observations avant de parler.',
-                    '1': 'Les connexions s etablissent plus vite.',
+                    '0': 'Tu commences à peser tes observations avant de parler.',
+                    '1': "Les connexions s'établissent plus vite.",
                 },
                 down: {
                     '0': 'Tu agis sans reflechir. C est plus rapide. Pas necessairement mieux.',
@@ -179,7 +179,7 @@ export const fr = {
             perception: {
                 up: {
                     '0': 'Tu remarques ce que les autres ignorent.',
-                    '1': 'Quelque chose s est affine dans ta facon de regarder.',
+                    '1': "Quelque chose s'est affiné dans ta façon de regarder.",
                 },
                 down: {
                     '0': 'Tu passes a cote de choses. Tu le sais. Tu continues quand meme.',
@@ -187,8 +187,8 @@ export const fr = {
             },
             volonte: {
                 up: {
-                    '0': 'Quelque chose s est endurci. Pas tes muscles. Autre chose.',
-                    '1': 'Tu resistes mieux a ce qui te sollicite.',
+                    '0': "Quelque chose s'est endurci. Pas tes muscles. Autre chose.",
+                    '1': 'Tu résistes mieux à ce qui te sollicite.',
                 },
                 down: {
                     '0': 'Tu vacilles la ou tu tenais bon avant.',
@@ -196,8 +196,8 @@ export const fr = {
             },
             ombre: {
                 up: {
-                    '0': 'Tu apprends a occuper moins d espace.',
-                    '1': 'Tu passes inapercu plus facilement. Tu n es pas sur que c est bien.',
+                    '0': "Tu apprends à occuper moins d'espace.",
+                    '1': "Tu passes inaperçu plus facilement. Tu n'es pas sûr que c'est bien.",
                 },
                 down: {
                     '0': 'Tu agis a visage decouvert. Certains le remarquent.',
@@ -285,12 +285,12 @@ export const fr = {
     },
     pages: {
         'anim-inspect': {
-            title: 'Inspecteur d animations',
-            heading: 'Bibliotheque d animation — clips disponibles',
+            title: "Inspecteur d'animations",
+            heading: "Bibliothèque d'animation — clips disponibles",
             status: {
                 loading: 'Chargement des animations...',
-                missing: '⚠ Aucun fichier d animation trouve.',
-                loaded: '{count} animations chargees',
+                missing: "⚠ Aucun fichier d'animation trouvé.",
+                loaded: '{count} animations chargées',
                 error: 'Erreur : {message}',
             },
         },
@@ -412,9 +412,9 @@ export const fr = {
             seconds: 's',
         },
         'asset-browser': {
-            title: 'Navigateur d assets',
+            title: "Navigateur d'assets",
             panel: {
-                title: 'Navigateur d assets',
+                title: "Navigateur d'assets",
                 close: 'Fermer le panneau',
                 open: 'Ouvrir le panneau',
             },
@@ -654,7 +654,7 @@ export const fr = {
             },
         },
         'soldier-test': {
-            title: 'Soldat — test d animations',
+            title: "Soldat — test d'animations",
             buttons: {
                 idle: 'Repos',
                 walk: 'Marche',
@@ -874,7 +874,7 @@ export const fr = {
                 desc: 'Concentree. Amere. Elle brule en descendant.',
             },
             'potion-stamina': {
-                name: 'Tonique d endurance',
+                name: "Tonique d'endurance",
                 desc: 'Un tonique vert. Il offre un second souffle.',
             },
             'potion-minor': {
@@ -883,7 +883,7 @@ export const fr = {
             },
             chalice: {
                 name: 'Calice béni',
-                desc: 'Une coupe touchee par quelque chose d ancien.',
+                desc: "Une coupe touchée par quelque chose d'ancien.",
             },
             antidote: {
                 name: 'Antidote',
@@ -907,11 +907,11 @@ export const fr = {
             },
             'key-gold': {
                 name: "Clé d'or",
-                desc: 'Une cle ornee. Tu ignores ce qu elle ouvre.',
+                desc: "Une clé ornée. Tu ignores ce qu'elle ouvre.",
             },
             'key-iron': {
                 name: 'Clé de fer',
-                desc: 'Une cle simple. Lourde.',
+                desc: 'Une clé simple. Lourde.',
             },
             rope: {
                 name: 'Corde',
@@ -930,7 +930,7 @@ export const fr = {
                 desc: 'Une carte sommaire. Les routes y sont a peine tracees.',
             },
             coin: {
-                name: 'Piece d or',
+                name: "Pièce d'or",
                 desc: 'Une monnaie ordinaire. Elle vaut quelque chose, quelque part.',
             },
             'coin-pile': {
@@ -978,8 +978,8 @@ export const fr = {
                 desc: '"Cela ne devrait pas exister."',
             },
             'bone-ring': {
-                name: 'Anneau d os',
-                desc: 'Sculpte dans quelque chose qu on n aurait jamais du tailler.',
+                name: "Anneau d'os",
+                desc: "Sculpté dans quelque chose qu'on n'aurait jamais dû tailler.",
             },
             'old-dagger': {
                 name: 'Dague rouillee',
