@@ -259,7 +259,7 @@ export function updateGPS(x, y, z, yawDeg) {
 export function update(delta, player, camYaw, zones, dayNight) {
     // Zone
     const zone = getDominantZone(player.position.x, player.position.z);
-    if (zone) showZoneName(zone.name);
+    if (zone) showZoneName(t('zones.' + zone.id.replace(/_/g, '-')));
 
     // Timer zone
     if (_zoneTimer > 0) {

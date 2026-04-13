@@ -25,6 +25,23 @@ export const fr = {
         reload: 'Recharger',
         unnamed: '(sans nom)',
     },
+    zones: {
+        kaldrath: 'Kaldrath',
+        grimveld: 'Grimveld',
+        valdur: 'Valdur',
+        harncross: 'Harncross',
+        duskmere: 'Duskmere',
+        ashfen: 'Ashfen',
+        stonemark: 'Stonemark',
+        'terres-brulees': 'Terres Brûlées',
+        'grande-foret': 'Grande Forêt Sans Nom',
+        'marais-visages': 'Marais des Visages',
+        'desert-sel': 'Désert de Sel',
+        'lande-pendus': 'Lande des Pendus',
+        'gorges-pierre': 'Gorges de Pierre',
+        'cote-brisee': 'Côte Brisée',
+        approche: "L'Approche",
+    },
     shell: {
         home: {
             'studio-label': 'Quaternius Studio',
