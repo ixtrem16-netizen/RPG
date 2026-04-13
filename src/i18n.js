@@ -1,5 +1,6 @@
 import { en } from './locales/en.js';
 import { fr } from './locales/fr.js';
+import { LiveSync } from './live-sync.js';
 
 export const SUPPORTED_LOCALES = Object.freeze(['en', 'fr']);
 export const DEFAULT_LOCALE = 'en';
@@ -9,8 +10,10 @@ const DICTIONARIES = { en, fr };
 const localeListeners = new Set();
 const missingWarnings = new Set();
 const storageWarnings = new Set();
+const LOCALE_SYNC_EVENT = 'locale-changed';
 
 let currentLocale = resolveInitialLocale();
+let liveSyncInitialized = false;
 
 function warnOnce(bucket, key, message, error) {
     if (bucket.has(key)) return;
@@ -123,6 +126,17 @@ function emitLocaleChange(nextLocale, previousLocale) {
     }
 }
 
+function initLocaleSync() {
+    if (liveSyncInitialized || typeof window === 'undefined') return;
+    liveSyncInitialized = true;
+
+    LiveSync.on(LOCALE_SYNC_EVENT, payload => {
+        const syncedLocale = normalizeLocale(payload?.locale);
+        if (!syncedLocale || syncedLocale === currentLocale) return;
+        setLocale(syncedLocale, { broadcast: false });
+    });
+}
+
 export function normalizeLocale(locale) {
     if (typeof locale !== 'string') return null;
     const trimmed = locale.trim().toLowerCase();
@@ -151,7 +165,7 @@ export function getLocale() {
     return currentLocale;
 }
 
-export function setLocale(locale, { persist = true } = {}) {
+export function setLocale(locale, { persist = true, broadcast = true } = {}) {
     const nextLocale = normalizeLocale(locale);
     if (!nextLocale) {
         throw new Error(`[i18n] Unsupported locale "${locale}".`);
@@ -164,6 +178,9 @@ export function setLocale(locale, { persist = true } = {}) {
     applyLocaleToDocument();
 
     if (nextLocale !== previousLocale) {
+        if (broadcast) {
+            LiveSync.broadcast(LOCALE_SYNC_EVENT, { locale: nextLocale });
+        }
         emitLocaleChange(nextLocale, previousLocale);
     }
 
@@ -226,6 +243,7 @@ export function translateDOM(root = getDocument()) {
 }
 
 export function initI18n({ root = getDocument(), translate = false } = {}) {
+    initLocaleSync();
     applyLocaleToDocument(root?.ownerDocument || (root?.nodeType === 9 ? root : getDocument()));
     if (translate) translateDOM(root);
     return getLocale();

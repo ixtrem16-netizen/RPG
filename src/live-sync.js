@@ -19,6 +19,7 @@ export const LiveSync = {
 
     _init() {
         if (this._ch) return;
+        if (typeof window === 'undefined') return;
         if (!window.BroadcastChannel) {
             console.warn('[LiveSync] BroadcastChannel non supporté — live sync désactivé.');
             return;

@@ -1,4 +1,4 @@
-import { t } from './i18n.js';
+import { SUPPORTED_LOCALES, getLocale, onLocaleChange, setLocale, t } from './i18n.js';
 import { HOME_TOOL_ID, TOOL_DEFINITIONS, TOOL_SECTION_ORDER, getToolFile } from './tool-metadata.js';
 
 const IN_FRAME = window !== window.top;
@@ -39,6 +39,30 @@ if (!IN_FRAME) {
             box-shadow: 0 -8px 32px rgba(0,0,0,0.8);
         }
         #_nav-menu._open { display: block; }
+        #_nav-menu ._nav-locale {
+            display: flex; gap: 4px;
+            padding: 8px 14px 6px;
+            border-bottom: 1px solid rgba(200,184,154,0.08);
+            margin-bottom: 4px;
+        }
+        #_nav-menu ._nav-locale-btn {
+            background: rgba(200,184,154,0.04);
+            border: 1px solid rgba(200,184,154,0.14);
+            color: rgba(200,184,154,0.5);
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-size: 8px;
+            letter-spacing: 1.5px;
+            padding: 4px 7px;
+            text-transform: uppercase;
+            transition: color 0.12s, border-color 0.12s, background 0.12s;
+        }
+        #_nav-menu ._nav-locale-btn:hover { color: rgba(200,184,154,0.85); border-color: rgba(200,184,154,0.35); }
+        #_nav-menu ._nav-locale-btn._active {
+            color: #d4a84b;
+            border-color: rgba(212,168,75,0.6);
+            background: rgba(212,168,75,0.10);
+        }
         #_nav-menu ._nav-cat {
             font-size: 8px; letter-spacing: 3.5px; text-transform: uppercase;
             color: rgba(200,184,154,0.25); padding: 8px 14px 4px;
@@ -93,23 +117,43 @@ if (!IN_FRAME) {
         menu.appendChild(item);
     }
 
-    appendItem({ id: HOME_TOOL_ID, icon: '⌂', nameKey: 'nav.home' });
+    function renderMenu() {
+        const currentLocale = getLocale();
+        menu.replaceChildren();
 
-    for (const section of TOOL_SECTION_ORDER) {
-        const tools = TOOL_DEFINITIONS.filter(tool => tool.section === section);
-        if (!tools.length) continue;
+        const localeRow = document.createElement('div');
+        localeRow.className = '_nav-locale';
+        for (const locale of SUPPORTED_LOCALES) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = '_nav-locale-btn' + (locale === currentLocale ? ' _active' : '');
+            button.dataset.locale = locale;
+            button.textContent = locale.toUpperCase();
+            button.title = `${t('locale.label')}: ${t(`locale.names.${locale}`)}`;
+            localeRow.appendChild(button);
+        }
+        menu.appendChild(localeRow);
 
-        const sep = document.createElement('div');
-        sep.className = '_nav-sep';
-        menu.appendChild(sep);
+        appendItem({ id: HOME_TOOL_ID, icon: '⌂', nameKey: 'nav.home' });
 
-        const cat = document.createElement('div');
-        cat.className = '_nav-cat';
-        cat.textContent = t(`shell.sections.${section}`);
-        menu.appendChild(cat);
+        for (const section of TOOL_SECTION_ORDER) {
+            const tools = TOOL_DEFINITIONS.filter(tool => tool.section === section);
+            if (!tools.length) continue;
 
-        tools.forEach(appendItem);
+            const sep = document.createElement('div');
+            sep.className = '_nav-sep';
+            menu.appendChild(sep);
+
+            const cat = document.createElement('div');
+            cat.className = '_nav-cat';
+            cat.textContent = t(`shell.sections.${section}`);
+            menu.appendChild(cat);
+
+            tools.forEach(appendItem);
+        }
     }
+
+    renderMenu();
 
     toggle.addEventListener('click', e => {
         e.stopPropagation();
@@ -121,6 +165,19 @@ if (!IN_FRAME) {
         toggle.classList.remove('_open');
     });
     menu.addEventListener('click', e => e.stopPropagation());
+    menu.addEventListener('click', e => {
+        const button = e.target.closest('._nav-locale-btn');
+        if (!button) return;
+        setLocale(button.dataset.locale);
+    });
+
+    onLocaleChange(() => {
+        const open = menu.classList.contains('_open');
+        toggle.title = t('nav.toggle.title');
+        renderMenu();
+        menu.classList.toggle('_open', open);
+        toggle.classList.toggle('_open', open);
+    });
 
     widget.appendChild(menu);
     widget.appendChild(toggle);
