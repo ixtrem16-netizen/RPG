@@ -199,12 +199,17 @@ export function subscribeLocaleChange(listener) {
 
 export const onLocaleChange = subscribeLocaleChange;
 
-export function t(key, params = {}, locale = getLocale()) {
+export function t(key, params = {}, locale) {
     if (typeof key !== 'string' || !key.trim()) {
         throw new TypeError('[i18n] Translation key must be a non-empty string.');
     }
 
-    const resolvedLocale = normalizeLocale(locale) || getLocale();
+    const explicitLocale = locale !== undefined;
+    const normalized = explicitLocale ? normalizeLocale(locale) : null;
+    if (explicitLocale && !normalized) {
+        warnOnce(missingWarnings, `invalid-locale:${locale}`, `[i18n] Unsupported locale "${locale}", falling back to ${DEFAULT_LOCALE}.`);
+    }
+    const resolvedLocale = normalized || (explicitLocale ? DEFAULT_LOCALE : getLocale());
     const localized = lookupKey(resolvedLocale, key);
     if (localized !== undefined) return interpolate(localized, params);
 
