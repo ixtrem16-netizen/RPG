@@ -6,7 +6,8 @@
   "bin": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "npx pkg . --target node18-win-x64 --output Studio.exe --compress GZip"
+    "build": "npx pkg . --target node18-win-x64 --output Studio.exe --compress GZip",
+    "audit:locales": "node scripts/audit-locales.mjs"
   },
   "pkg": {
     "targets": ["node18-win-x64"],

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Character Preview</title>
@@ -41,6 +41,10 @@ body { background:#111418; overflow:hidden; font-family:'Georgia', serif; }
 </script>
 </head>
 <body>
+<script type="module">
+import { initI18n } from './src/i18n.js';
+initI18n();
+</script>
 
 <div id="status">Cliquez un personnage</div>
 <div id="info">Clic droit + drag : orbiter<br>Molette : zoom</div>

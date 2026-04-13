@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Nature Pack — Browser</title>
@@ -68,6 +68,10 @@ body { background:#0d0f12; font-family:'Georgia', serif; color:#c8b89a;
 </script>
 </head>
 <body>
+<script type="module">
+import { initI18n } from './src/i18n.js';
+initI18n();
+</script>
 
 <div id="sidebar">
     <input id="search" type="text" placeholder="Rechercher...">
