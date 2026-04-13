@@ -2236,7 +2236,7 @@ function _buildBelt() {
         // Étiquette
         const lbl = document.createElement('span');
         lbl.className = 'belt-lbl';
-        lbl.textContent = def ? getWeaponLabel(key) : '—';
+        lbl.textContent = getWeaponLabel(key);
         slot.appendChild(lbl);
 
         // Clic gauche = activer
