@@ -1070,14 +1070,14 @@ function _jogAnim()  { return 'jog'; }
 
 // ── Label HUD pour le mode courant ────────────────────────────
 function getLocoLabel(isSprinting) {
-    if (STATE.traversal === 'swim')   return 'Nage';
-    if (STATE.traversal === 'climb')  return 'Grimpe';
-    if (STATE.traversal === 'slide')  return 'Slide';
-    if (STATE.posture   === 'crouch') return 'Accroupi';
-    if (STATE.posture   === 'crawl')  return 'Rampant';
-    if (isSprinting)                  return 'Sprint';
-    if (STATE.walkToggle)             return 'Marche';
-    return 'Course';
+    if (STATE.traversal === 'swim')   return t('pages.gameplay-test.locomotion.swim');
+    if (STATE.traversal === 'climb')  return t('pages.gameplay-test.locomotion.climb');
+    if (STATE.traversal === 'slide')  return t('pages.gameplay-test.locomotion.slide');
+    if (STATE.posture   === 'crouch') return t('pages.gameplay-test.locomotion.crouch');
+    if (STATE.posture   === 'crawl')  return t('pages.gameplay-test.locomotion.crawl');
+    if (isSprinting)                  return t('pages.gameplay-test.locomotion.sprint');
+    if (STATE.walkToggle)             return t('pages.gameplay-test.locomotion.walk');
+    return t('pages.gameplay-test.locomotion.run');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1237,16 +1237,24 @@ function toggleCamMode() {
         CAM.cursorLock = true;
         canvas.requestPointerLock?.();
         document.getElementById('crosshair').style.display = 'block';
-        document.getElementById('cam-mode-lbl').textContent = '1ST';
     } else {
         CAM.yaw     = CAM.fpYaw;
         CAM.pitch   = CAM.fpPitch + 0.35;
         CAM.mode    = 'third';
         if (!CAM.cursorLock) document.exitPointerLock?.();
         document.getElementById('crosshair').style.display = 'none';
-        document.getElementById('cam-mode-lbl').textContent = '3RD';
     }
+    updateCameraModeLabel();
 }
+
+function updateCameraModeLabel() {
+    document.getElementById('cam-mode-lbl').textContent =
+        t(CAM.mode === 'first'
+            ? 'pages.gameplay-test.camera.first-short'
+            : 'pages.gameplay-test.camera.third-short');
+}
+
+updateCameraModeLabel();
 
 function updateCamera(delta) {
     CAM.leanCurrent += (CAM.leanTarget * 3 - CAM.leanCurrent) * Math.min(1, delta * 10);
@@ -1563,7 +1571,7 @@ function _showLiveToast(msg, cls = '') {
 
 async function hotReloadCharacter() {
     if (!charRoot) return;
-    _showLiveToast('Actualisation personnage…', 'syncing');
+    _showLiveToast(t('pages.gameplay-test.live-sync.reloading-character'), 'syncing');
 
     // 1. Déséquiper toutes les armes
     _clearSlot('R');
@@ -1599,7 +1607,7 @@ async function hotReloadCharacter() {
     await _attachToBack('sword');
     _refreshWeaponUI();
 
-    _showLiveToast('Personnage mis à jour ✓');
+    _showLiveToast(t('pages.gameplay-test.live-sync.updated'));
 }
 
 // Écouter les mises à jour depuis char-builder (même session serveur)
@@ -1621,29 +1629,71 @@ LiveSync.on('char-updated', () => hotReloadCharacter());
 // combat : 0=aucun 1=épée 2=poings 3=magie 4=arc 5=hache 6=couteau 7=pioche 8=torche -1=bouclier
 const WEAPON_DEFS = {
     // ── Armes physiques ──────────────────────────────────────────────
-    sword:   { label:'Épée',     icon:'⚔',  category:'weapon',  hand:'R',
+    sword:   { labelKey:'pages.gameplay-test.weapons.sword',   icon:'⚔',  category:'weapon',  hand:'R',
                path:'assets/environment/props/Sword_Bronze.gltf',
                len:0.75, pos:[0,0.06,0.01], rot:[Math.PI/2,0,0], combat:1, hasBack:true },
-    axe:     { label:'Hache',    icon:'🪓',  category:'tool',    hand:'R',
+    axe:     { labelKey:'pages.gameplay-test.weapons.axe',     icon:'🪓',  category:'tool',    hand:'R',
                path:'assets/environment/props/Axe_Bronze.gltf',
                len:0.55, pos:[0,0.05,0   ], rot:[Math.PI/2,0,0], combat:5 },
-    knife:   { label:'Couteau',  icon:'🗡',  category:'weapon',  hand:'R',
+    knife:   { labelKey:'pages.gameplay-test.weapons.knife',   icon:'🗡',  category:'weapon',  hand:'R',
                path:'assets/environment/props/Table_Knife.gltf',
                len:0.22, pos:[0,0.03,0   ], rot:[Math.PI/2,0,0], combat:6 },
-    torch:   { label:'Torche',   icon:'🔦',  category:'utility', hand:'L',
+    torch:   { labelKey:'pages.gameplay-test.weapons.torch',   icon:'🔦',  category:'utility', hand:'L',
                path:'assets/environment/props/CandleStick.gltf',
                len:0.35, pos:[0,0.04,0   ], rot:[Math.PI/2,0,0], combat:8 },
-    pickaxe: { label:'Pioche',   icon:'⛏',  category:'tool',    hand:'R',
+    pickaxe: { labelKey:'pages.gameplay-test.weapons.pickaxe', icon:'⛏',  category:'tool',    hand:'R',
                path:'assets/environment/props/Pickaxe_Bronze.gltf',
                len:0.60, pos:[0,0.06,0.01], rot:[Math.PI/2,0,0], combat:7 },
-    shield:  { label:'Bouclier', icon:'🛡',  category:'shield',  hand:'L',
+    shield:  { labelKey:'pages.gameplay-test.weapons.shield',  icon:'🛡',  category:'shield',  hand:'L',
                path:'assets/environment/props/Shield_Wooden.gltf',
                len:0.45, pos:[0,0,0.03   ], rot:[0,0,Math.PI/2], combat:-1 },
     // ── Stances virtuelles (hand: null — pas de mesh physique) ──────
-    fists:   { label:'Poings',   icon:'👊',  category:'weapon',  hand:null, path:null, combat:2 },
-    magic:   { label:'Magie',    icon:'✨',  category:'spell',   hand:null, path:null, combat:3 },
-    bow:     { label:'Arc',      icon:'🏹',  category:'ranged',  hand:null, path:null, combat:4 },
+    fists:   { labelKey:'pages.gameplay-test.weapons.fists',   icon:'👊',  category:'weapon',  hand:null, path:null, combat:2 },
+    magic:   { labelKey:'pages.gameplay-test.weapons.magic',   icon:'✨',  category:'spell',   hand:null, path:null, combat:3 },
+    bow:     { labelKey:'pages.gameplay-test.weapons.bow',     icon:'🏹',  category:'ranged',  hand:null, path:null, combat:4 },
 };
+
+const COMBAT_MODE_WEAPON_KEYS = [null, 'sword', 'fists', 'magic', 'bow', 'axe', 'knife', 'pickaxe', 'torch'];
+
+function getWeaponLabel(key) {
+    if (!key || key === 'none') return t('pages.gameplay-test.weapon-panel.none');
+    const def = WEAPON_DEFS[key];
+    return def?.labelKey ? t(def.labelKey) : key;
+}
+
+function getHandLabel(slot) {
+    return t(slot === 'R' ? 'pages.gameplay-test.hands.right' : 'pages.gameplay-test.hands.left');
+}
+
+function getCombatModeLabel(mode) {
+    if (mode <= 0) return t('pages.gameplay-test.debug.none');
+    const weaponKey = COMBAT_MODE_WEAPON_KEYS[mode];
+    return weaponKey ? getWeaponLabel(weaponKey) : '';
+}
+
+function formatCombatMode(mode) {
+    const label = getCombatModeLabel(mode);
+    const icon = COMBAT_ICONS[mode] || '';
+    return label ? `${icon} ${label}`.trim() : '—';
+}
+
+function renderCombatModeDisplay() {
+    const debugEl = document.getElementById('dbg-combat');
+    const modeEl = document.getElementById('combat-mode');
+    if (STATE.combatMode > 0) {
+        debugEl.textContent = getCombatModeLabel(STATE.combatMode);
+        modeEl.textContent = formatCombatMode(STATE.combatMode);
+        return;
+    }
+    if (STATE.hasShield) {
+        const shieldLabel = getWeaponLabel('shield');
+        debugEl.textContent = shieldLabel;
+        modeEl.textContent = `🛡 ${shieldLabel}`;
+        return;
+    }
+    debugEl.textContent = t('pages.gameplay-test.debug.none');
+    modeEl.textContent = '—';
+}
 
 // Slots : quelles armes peuvent aller dans chaque main (pour le panel grip)
 const SLOT_WEAPONS = {
@@ -1790,8 +1840,7 @@ async function drawSword() {
     STATE.combatMode    = 1;
     STATE.inCombatStance = true;
     comboStep = 0; comboTimer = 0; attackCooldown = 0;
-    document.getElementById('dbg-combat').textContent  = 'Épée';
-    document.getElementById('combat-mode').textContent = '⚔ Épée';
+    renderCombatModeDisplay();
 
     // Jouer sword_enter, puis attacher l'épée à la fin de l'anim
     playAnim('sword_enter', 0.1, () => {
@@ -1804,7 +1853,7 @@ async function drawSword() {
         playAnim('sword_idle', 0.2);
     });
     STATE.oneShotLock = true;
-    showNotif('⚔ Épée');
+    showNotif(formatCombatMode(1));
 }
 
 // Rengaine l'épée (joue sword_exit puis met au dos)
@@ -1821,8 +1870,7 @@ function _sheathSword() {
         _refreshWeaponUI();
         _hideGripEditor();
         STATE.combatMode = 0;
-        document.getElementById('dbg-combat').textContent  = '';
-        document.getElementById('combat-mode').textContent = '—';
+        renderCombatModeDisplay();
         playAnim('idle', 0.25);
         _attachToBack('sword'); // async, fire-and-forget
     });
@@ -1887,7 +1935,10 @@ async function equipWeapon(slot, key) {
     _applyWeaponCombatMode();
     _refreshWeaponUI();
     _showGripEditor(slot, key, mesh);
-    showNotif(def.label + (slot === 'R' ? ' ▶ main droite' : ' ▶ main gauche'));
+    showNotif(t('pages.gameplay-test.notifications.weapon-equipped', {
+        weapon: getWeaponLabel(key),
+        hand: getHandLabel(slot),
+    }));
 }
 
 // Active le mode combat correspondant aux armes équipées
@@ -1909,9 +1960,7 @@ function _applyWeaponCombatMode() {
     }
 
     // Màj HUD
-    document.getElementById('combat-mode').textContent =
-        STATE.combatMode > 0 ? (COMBAT_ICONS[STATE.combatMode]||'') + ' ' + COMBAT_NAMES[STATE.combatMode]
-        : STATE.hasShield ? '🛡 Bouclier' : '—';
+    renderCombatModeDisplay();
 }
 
 // ── Grip editor (sliders temps réel) ─────────────────────────────
@@ -2044,7 +2093,7 @@ function logGripOffsets() {
     const sc    = mesh.scale.x / (mesh.userData._baseScale || mesh.scale.x);
     _saveGrip(key, p.x, p.y, p.z, r.x, r.y, r.z, sc, ty, pivX, pivZ, rollX, rollZ);
     console.log('[Grip]', `${key}: pos:[${p.x.toFixed(4)},${p.y.toFixed(4)},${p.z.toFixed(4)}] rot:[${r.x.toFixed(4)},${r.y.toFixed(4)},${r.z.toFixed(4)}] sc:${sc.toFixed(3)} pivot.rot:[${rollX.toFixed(4)},${ty.toFixed(4)},${rollZ.toFixed(4)}] piv:[${pivX.toFixed(4)},${pivZ.toFixed(4)}]`);
-    showNotif('✓ Grip sauvegardé — ' + key);
+    showNotif(t('pages.gameplay-test.notifications.grip-saved', { weapon: getWeaponLabel(key) }));
 }
 
 // ─── Icônes belt ────────────────────────────────────────────
@@ -2187,7 +2236,7 @@ function _buildBelt() {
         // Étiquette
         const lbl = document.createElement('span');
         lbl.className = 'belt-lbl';
-        lbl.textContent = def ? def.label : '—';
+        lbl.textContent = def ? getWeaponLabel(key) : '—';
         slot.appendChild(lbl);
 
         // Clic gauche = activer
@@ -2230,10 +2279,9 @@ function _setBeltKickCooldown(_on) {
 
 function _buildWeaponPanel() {
     const addBtn = (containerId, slot, key) => {
-        const lbl = key === 'none' ? 'Aucune' : (WEAPON_DEFS[key]?.label ?? key);
         const btn = document.createElement('button');
         btn.className = 'wp-btn'; btn.dataset.slot = slot; btn.dataset.key = key;
-        btn.textContent = lbl;
+        btn.textContent = getWeaponLabel(key);
         btn.addEventListener('click', () => equipWeapon(slot, key));
         document.getElementById(containerId).appendChild(btn);
     };
@@ -2263,9 +2311,8 @@ function activateBeltSlot(idx) {
             _clearSlot('R'); _clearSlot('L');
             exitCombatStance();
             STATE.combatMode = 0;
-            document.getElementById('dbg-combat').textContent = 'Aucun';
-            document.getElementById('combat-mode').textContent = '—';
-            showNotif('Désarmé');
+            renderCombatModeDisplay();
+            showNotif(t('pages.gameplay-test.notifications.disarmed'));
         } else {
             // Retirer armes physiques si besoin
             if (activeKeyR !== 'none') { _clearSlot('R'); }
@@ -2297,12 +2344,12 @@ function _showBeltPicker(idx, slotEl) {
 
     const picker = document.createElement('div');
     picker.id = 'belt-picker';
-    picker.innerHTML = `<div class="bp-title">Slot ${idx < 9 ? idx + 1 : 0}</div>`;
+    picker.innerHTML = `<div class="bp-title">${t('pages.gameplay-test.belt.slot-title', { slot: idx < 9 ? idx + 1 : 0 })}</div>`;
 
     // Vide en premier
     const empty = document.createElement('div');
     empty.className = 'bp-item empty-item' + (!BELT_CONFIG[idx] ? ' active' : '');
-    empty.textContent = '— Vide';
+    empty.textContent = t('pages.gameplay-test.belt.empty');
     empty.addEventListener('click', () => {
         BELT_CONFIG[idx] = null; _saveBeltConfig(); _buildBelt(); picker.remove();
     });
@@ -2312,7 +2359,7 @@ function _showBeltPicker(idx, slotEl) {
     for (const [k, def] of Object.entries(WEAPON_DEFS)) {
         const row = document.createElement('div');
         row.className = 'bp-item' + (BELT_CONFIG[idx] === k ? ' active' : '');
-        row.innerHTML = `<span style="font-size:12px;width:18px;text-align:center;flex-shrink:0">${def.icon}</span><span>${def.label}</span>`;
+        row.innerHTML = `<span style="font-size:12px;width:18px;text-align:center;flex-shrink:0">${def.icon}</span><span>${getWeaponLabel(k)}</span>`;
         row.addEventListener('click', () => {
             BELT_CONFIG[idx] = k; _saveBeltConfig(); _buildBelt(); picker.remove();
         });
@@ -2459,14 +2506,14 @@ function playAnim(name, crossfade=0.15, onEnd=null) {
 //  ROUE D'ÉMOTES
 // ═══════════════════════════════════════════════════════════════
 const EMOTES = [
-    { icon:'💃', name:'Dance',     anim:'dance',       loop:true  },
-    { icon:'🎉', name:'Célébrer', anim:'celebrate',   loop:false },
-    { icon:'😢', name:'Pleurer',  anim:'cry',         loop:false },
-    { icon:'🔄', name:'Backflip', anim:'backflip',    loop:false },
-    { icon:'🍺', name:'Boire',    anim:'drink',       loop:false },
-    { icon:'🪑', name:'S\'asseoir',anim:'sit_enter',  loop:true  },
-    { icon:'🧘', name:'Sol',      anim:'gnd_enter',   loop:true  },
-    { icon:'👋', name:'Saluer',   anim:'wave',        loop:true  },
+    { icon:'💃', labelKey:'pages.gameplay-test.emotes.dance',     anim:'dance',       loop:true  },
+    { icon:'🎉', labelKey:'pages.gameplay-test.emotes.celebrate', anim:'celebrate',   loop:false },
+    { icon:'😢', labelKey:'pages.gameplay-test.emotes.cry',       anim:'cry',         loop:false },
+    { icon:'🔄', labelKey:'pages.gameplay-test.emotes.backflip',  anim:'backflip',    loop:false },
+    { icon:'🍺', labelKey:'pages.gameplay-test.emotes.drink',     anim:'drink',       loop:false },
+    { icon:'🪑', labelKey:'pages.gameplay-test.emotes.sit',       anim:'sit_enter',   loop:true  },
+    { icon:'🧘', labelKey:'pages.gameplay-test.emotes.ground',    anim:'gnd_enter',   loop:true  },
+    { icon:'👋', labelKey:'pages.gameplay-test.emotes.wave',      anim:'wave',        loop:true  },
 ];
 
 let emoteWheelOpen = false;
@@ -2483,7 +2530,7 @@ function buildEmoteWheel() {
         slot.className = 'emote-slot';
         slot.style.left = x + 'px';
         slot.style.top  = y + 'px';
-        slot.innerHTML  = `<div class="eicon">${em.icon}</div><div class="ename">${em.name}</div>`;
+        slot.innerHTML  = `<div class="eicon">${em.icon}</div><div class="ename">${t(em.labelKey)}</div>`;
         slot.dataset.idx = i;
         slot.addEventListener('click', () => triggerEmote(i));
         slot.addEventListener('mouseenter', () => { hoveredEmote = i; slot.classList.add('hovered'); });
@@ -2535,7 +2582,7 @@ function triggerEmote(idx) {
             playAnim('idle', 0.3);
         });
     }
-    showNotif(em.name);
+    showNotif(t(em.labelKey));
 }
 
 function exitEmote() {
@@ -2554,7 +2601,7 @@ function startSitting() {
         STATE.oneShotLock = false;
     });
     STATE.oneShotLock = true;
-    showNotif('Assis — Espace pour se lever');
+    showNotif(t('pages.gameplay-test.notifications.sitting'));
 }
 
 function startGroundSitting() {
@@ -2565,7 +2612,7 @@ function startGroundSitting() {
         STATE.oneShotLock = false;
     });
     STATE.oneShotLock = true;
-    showNotif('Assis au sol — Espace pour se lever');
+    showNotif(t('pages.gameplay-test.notifications.ground-sitting'));
 }
 
 function exitSitting() {
@@ -2939,7 +2986,9 @@ function _updateInner(delta) {
     // 3 modes : Marche (Caps ON) → Run (Caps OFF) → Sprint (Shift maintenu)
     if (capsJust && STATE.posture === 'stand') {
         STATE.walkToggle = !STATE.walkToggle;
-        showNotif(STATE.walkToggle ? 'Marche' : 'Course');
+        showNotif(t(STATE.walkToggle
+            ? 'pages.gameplay-test.notifications.walk'
+            : 'pages.gameplay-test.notifications.run'));
     }
 
     // Sprint / saut annule le block
@@ -3086,6 +3135,14 @@ function triggerIdleVariation() {
     idleVarActive = true;
     STATE.idleTimer = 0;
     const variant = IDLE_VARIANTS[Math.floor(Math.random() * IDLE_VARIANTS.length)];
+    const variantKey = variant === 'idle_look'
+        ? 'pages.gameplay-test.idle-variants.idle-look'
+        : variant === 'turn_L'
+            ? 'pages.gameplay-test.idle-variants.turn-left'
+            : variant === 'turn_R'
+                ? 'pages.gameplay-test.idle-variants.turn-right'
+                : 'pages.gameplay-test.idle-variants.idle-fold';
+    const variantLabel = t(variantKey);
     if (variant === 'turn_L' || variant === 'turn_R') {
         playAnim(variant, 0.1, () => {
             idleVarActive = false;
@@ -3103,7 +3160,7 @@ function triggerIdleVariation() {
             }
         }, 6000 + Math.random()*4000);
     }
-    showNotif('Idle variation: ' + variant);
+    showNotif(t('pages.gameplay-test.notifications.idle-variation', { variant: variantLabel }));
 }
 
 // ── Sauter ────────────────────────────────────────────────────
@@ -3186,7 +3243,7 @@ function doVault(wallHit) {
         playAnim('idle', 0.25);
     });
     STATE.oneShotLock = true;
-    showNotif('Safety Vault');
+    showNotif(t('pages.gameplay-test.notifications.safety-vault'));
 }
 
 // ── Roulade ───────────────────────────────────────────────────
@@ -3206,7 +3263,7 @@ function doRoll() {
         // → jog direct si WASD maintenu, idle sinon
     });
     STATE.oneShotLock = true;
-    showNotif('Roulade');
+    showNotif(t('pages.gameplay-test.notifications.roll'));
 }
 
 // ── Esquive ───────────────────────────────────────────────────
@@ -3239,7 +3296,7 @@ function startSlide() {
     // Pas de oneShotLock — la physique de glissade démarre immédiatement.
     // slide_start est un blend cosmétique depuis sprint (0.1s) → slide_loop.
     playAnim('slide_start', 0.1, () => playAnim('slide_loop', 0.15));
-    showNotif('Slide');
+    showNotif(t('pages.gameplay-test.notifications.slide'));
 }
 
 function updateSlide(delta) {
@@ -3293,7 +3350,7 @@ function enterClimb(hit) {
         playAnim('climb_idle', 0.1);
     });
     STATE.oneShotLock = true;
-    showNotif('Grimpe — W/S : haut/bas | A/D : latéral | F/Espace : sortir par le haut');
+    showNotif(t('pages.gameplay-test.notifications.climb'));
 }
 
 function updateClimbing(delta, fwd, bck, lft, rgt, spaceJust, fJust) {
@@ -3405,7 +3462,7 @@ function updateSwimming(delta, fwd, bck, lft, rgt, shift) {
     if (STATE.traversal !== 'swim') {
         setTraversal('swim');
         STATE.vy = 0;
-        showNotif('Nage — WASD déplacer | Espace remonter');
+        showNotif(t('pages.gameplay-test.notifications.swim'));
     }
     const camYaw = getMovementYaw();
     _flatFwd.set(-Math.sin(camYaw), 0, -Math.cos(camYaw));
@@ -3441,13 +3498,12 @@ function doInteract() {
         playAnim('idle', 0.3);
     });
     STATE.oneShotLock = true;
-    showNotif('Interagir');
+    showNotif(t('pages.gameplay-test.notifications.interact'));
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  MODE COMBAT
 // ═══════════════════════════════════════════════════════════════
-const COMBAT_NAMES = ['Aucun','Épée','Poings','Magie','Arc','Hache','Couteau','Pioche','Torche'];
 const COMBAT_ICONS = ['—','⚔','👊','✨','🏹','🪓','🗡','⛏','🔦'];
 let attackCooldown = 0;
 let comboStep = 0;
@@ -3464,9 +3520,8 @@ function setCombatMode(mode) {
         _hideGripEditor();
         exitCombatStance();
         STATE.combatMode = 0;
-        document.getElementById('dbg-combat').textContent = 'Aucun';
-        document.getElementById('combat-mode').textContent = '—';
-        showNotif('Désarmé');
+        renderCombatModeDisplay();
+        showNotif(t('pages.gameplay-test.notifications.disarmed'));
         return;
     }
 
@@ -3477,10 +3532,9 @@ function setCombatMode(mode) {
     }
 
     STATE.combatMode = mode;
-    document.getElementById('dbg-combat').textContent = COMBAT_NAMES[mode] || '';
-    document.getElementById('combat-mode').textContent = COMBAT_ICONS[mode] + ' ' + COMBAT_NAMES[mode];
+    renderCombatModeDisplay();
     enterCombatStance();
-    showNotif(COMBAT_ICONS[mode] + ' ' + COMBAT_NAMES[mode]);
+    showNotif(formatCombatMode(mode));
 }
 
 function enterCombatStance() {
@@ -3499,7 +3553,7 @@ function enterCombatStance() {
     } else {
         playAnim(getCombatIdleAnim(), 0.25);
     }
-    showNotif(COMBAT_ICONS[STATE.combatMode] + ' ' + COMBAT_NAMES[STATE.combatMode]);
+    showNotif(formatCombatMode(STATE.combatMode));
 }
 
 function exitCombatStance() {
@@ -3825,7 +3879,9 @@ function updateHUD(delta) {
     document.getElementById('stamina-bar').style.width = STATE.stamina + '%';
     const _sprint = STATE.wasSprintingLast;
     document.getElementById('dbg-phys').textContent =
-        getLocoLabel(_sprint) + ' | ' + (STATE.grounded ? 'Sol' : 'Aérien');
+        getLocoLabel(_sprint) + ' | ' + t(STATE.grounded
+            ? 'pages.gameplay-test.locomotion.ground'
+            : 'pages.gameplay-test.locomotion.airborne');
     document.getElementById('dbg-pos').textContent =
         STATE.pos.x.toFixed(1) + ', ' + STATE.pos.y.toFixed(1) + ', ' + STATE.pos.z.toFixed(1);
 
@@ -3895,7 +3951,7 @@ buildEmoteWheel();
 
         await new Promise(r => setTimeout(r, 600));
         document.getElementById('loading').style.display = 'none';
-        showNotif('Bienvenue, ' + cfg.name + ' — I pour l\'inventaire · G pour les émotes');
+        showNotif(t('pages.gameplay-test.notifications.welcome', { name: cfg.name }));
 
         // Épée dans le dos dès le départ (holster visuel)
         _attachToBack('sword');
