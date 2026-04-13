@@ -3008,7 +3008,7 @@ export class BuildMode {
     }
 
     _saveHotbar() {
-        const data = this._hotbar.map(e => e ? { catIdx: e.catIdx, itemIdx: e.itemIdx } : null);
+        const data = this._hotbar.map(e => e ? { catIdx: e.catIdx, itemIdx: e.itemIdx, url: e.url } : null);
         localStorage.setItem(SAVE_HOTBAR_KEY, JSON.stringify(data));
     }
 
@@ -3018,13 +3018,21 @@ export class BuildMode {
             if (!raw) return;
             const data = JSON.parse(raw);
             if (!Array.isArray(data)) return;
+            let needsSave = false;
             this._hotbar = data.map(e => {
                 if (!e) return null;
+                const metaByUrl = e.url ? _getCatalogItemMetaByUrl(e.url) : null;
+                if (metaByUrl) {
+                    if (e.catIdx !== metaByUrl.catIdx || e.itemIdx !== metaByUrl.itemIdx) needsSave = true;
+                    return { catIdx: metaByUrl.catIdx, itemIdx: metaByUrl.itemIdx, url: metaByUrl.item.url };
+                }
                 const cat = CATALOG[e.catIdx];
                 if (!cat || !cat.items[e.itemIdx]) return null;
                 const item = cat.items[e.itemIdx];
+                needsSave = true;
                 return { catIdx: e.catIdx, itemIdx: e.itemIdx, url: item.url };
             });
+            if (needsSave) this._saveHotbar();
             this._refreshHotbar();
         } catch (err) {
             console.warn('[BuildMode] Erreur chargement hotbar:', err);
