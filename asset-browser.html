@@ -194,35 +194,35 @@ initI18n();
     <div id="panel-header">
         <div id="panel-title-row">
             <span id="panel-title">Asset Browser</span>
-            <button id="panel-close" title="Fermer le panneau">✕</button>
+            <button id="panel-close" title="Close panel">✕</button>
         </div>
         <div id="tabs">
-            <div class="tab active" data-cat="Personnages">Perso</div>
-            <div class="tab" data-cat="Cheveux">Cheveux</div>
+            <div class="tab active" data-cat="Personnages">Characters</div>
+            <div class="tab" data-cat="Cheveux">Hair</div>
             <div class="tab" data-cat="Nature">Nature</div>
-            <div class="tab" data-cat="Bâtiments">Bâtim.</div>
+            <div class="tab" data-cat="Bâtiments">Buildings</div>
             <div class="tab" data-cat="Props">Props</div>
         </div>
     </div>
     <div id="search-wrap">
-        <input id="search" type="text" placeholder="Rechercher…" autocomplete="off">
-        <button id="search-clear" title="Effacer">✕</button>
+        <input id="search" type="text" placeholder="Search..." autocomplete="off">
+        <button id="search-clear" title="Clear">✕</button>
     </div>
     <div id="item-list"></div>
     <div id="model-count">—</div>
     <div id="anim-panel">
         <div id="anim-header">Animations</div>
-        <input id="anim-search" type="text" placeholder="Filtrer clips…">
+        <input id="anim-search" type="text" placeholder="Filter clips...">
         <div id="clip-list"></div>
     </div>
 </div>
 
 <!-- ══ Viewport ════════════════════════════════════════════════ -->
 <div id="viewport">
-    <button id="panel-open" title="Ouvrir le panneau">☰</button>
-    <div id="vp-label">Sélectionne un asset</div>
-    <div id="vp-loading">Chargement…</div>
-    <div id="vp-hint">Clic droit : orbiter · Molette : zoom · Clic milieu : pan</div>
+    <button id="panel-open" title="Open panel">☰</button>
+    <div id="vp-label">Select an asset</div>
+    <div id="vp-loading">Loading...</div>
+    <div id="vp-hint"></div>
 </div>
 
 <script type="module">
@@ -230,6 +230,7 @@ import * as THREE from 'three';
 import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { onLocaleChange, t } from './src/i18n.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  CATALOGUE — { catégorie: { sous-cat: [items] } }
@@ -372,6 +373,43 @@ const CATALOG = {
     },
 };
 
+const CATEGORY_LABEL_KEYS = {
+    Personnages: 'pages.asset-browser.categories.characters',
+    Cheveux: 'pages.asset-browser.categories.hair',
+    Nature: 'pages.asset-browser.categories.nature',
+    Bâtiments: 'pages.asset-browser.categories.buildings',
+    Props: 'pages.asset-browser.categories.props',
+};
+
+const SUBCATEGORY_LABEL_KEYS = {
+    Masculin: 'pages.asset-browser.subcategories.male',
+    Féminin: 'pages.asset-browser.subcategories.female',
+    Coiffures: 'pages.asset-browser.subcategories.hairstyles',
+    Sourcils: 'pages.asset-browser.subcategories.eyebrows',
+    Bouleaux: 'pages.asset-browser.subcategories.birch',
+    Érables: 'pages.asset-browser.subcategories.maple',
+    'Arbres Morts': 'pages.asset-browser.subcategories.dead-trees',
+    Buissons: 'pages.asset-browser.subcategories.bushes',
+    Fleurs: 'pages.asset-browser.subcategories.flowers',
+    Herbe: 'pages.asset-browser.subcategories.grass',
+    'Murs Plâtre': 'pages.asset-browser.subcategories.plaster-walls',
+    'Murs Brique': 'pages.asset-browser.subcategories.brick-walls',
+    Coins: 'pages.asset-browser.subcategories.corners',
+    Sols: 'pages.asset-browser.subcategories.floors',
+    Toits: 'pages.asset-browser.subcategories.roofs',
+    Portes: 'pages.asset-browser.subcategories.doors',
+    Fenêtres: 'pages.asset-browser.subcategories.windows',
+    'Balcons & Escaliers': 'pages.asset-browser.subcategories.balconies-stairs',
+    'Éléments Ext.': 'pages.asset-browser.subcategories.exterior-elements',
+    'Armes & Outils': 'pages.asset-browser.subcategories.weapons-tools',
+    Éclairage: 'pages.asset-browser.subcategories.lighting',
+    Mobilier: 'pages.asset-browser.subcategories.furniture',
+    Conteneurs: 'pages.asset-browser.subcategories.containers',
+    'Nourriture & Potions': 'pages.asset-browser.subcategories.food-potions',
+    Commerce: 'pages.asset-browser.subcategories.trade',
+    Décoration: 'pages.asset-browser.subcategories.decoration',
+};
+
 function flattenCat(cat) {
     return Object.values(CATALOG[cat] || {}).flat();
 }
@@ -453,12 +491,79 @@ let ualLoaded  = false;
 let allClips   = [], animFilter = '';
 let bodyClipPlane = null, headBone = null;
 const headBoneWP  = new THREE.Vector3();
+let currentClip = null;
+let clipPanelState = 'idle';
+let viewportLabelState = { type: 'empty' };
+
+const panelTitleEl = document.getElementById('panel-title');
+const panelCloseEl = document.getElementById('panel-close');
+const panelOpenEl = document.getElementById('panel-open');
+const searchEl = document.getElementById('search');
+const searchClearEl = document.getElementById('search-clear');
+const animHeaderEl = document.getElementById('anim-header');
+const animSearchEl = document.getElementById('anim-search');
+const vpLabelEl = document.getElementById('vp-label');
+const vpLoadingEl = document.getElementById('vp-loading');
+const vpHintEl = document.getElementById('vp-hint');
+const modelCountEl = document.getElementById('model-count');
+
+function setPageTitle() {
+    document.title = t('pages.asset-browser.title');
+}
+
+function translateSubcategoryLabel(name) {
+    const key = SUBCATEGORY_LABEL_KEYS[name];
+    return key ? t(key) : name;
+}
+
+function renderTabs() {
+    document.querySelectorAll('.tab').forEach(tab => {
+        const key = CATEGORY_LABEL_KEYS[tab.dataset.cat];
+        tab.textContent = key ? t(key) : tab.dataset.cat;
+    });
+}
+
+function renderViewportLabel() {
+    if (viewportLabelState.type === 'item') {
+        vpLabelEl.textContent = viewportLabelState.itemName;
+        return;
+    }
+    if (viewportLabelState.type === 'error') {
+        vpLabelEl.textContent = t('pages.asset-browser.viewport.error', { error: viewportLabelState.error });
+        return;
+    }
+    vpLabelEl.textContent = t('pages.asset-browser.viewport.empty');
+}
+
+function setViewportLabel(state) {
+    viewportLabelState = state;
+    renderViewportLabel();
+}
+
+function renderStaticText() {
+    setPageTitle();
+    panelTitleEl.textContent = t('pages.asset-browser.panel.title');
+    panelCloseEl.title = t('pages.asset-browser.panel.close');
+    panelOpenEl.title = t('pages.asset-browser.panel.open');
+    searchEl.placeholder = t('pages.asset-browser.search-placeholder');
+    searchClearEl.title = t('pages.asset-browser.search-clear');
+    animHeaderEl.textContent = t('pages.asset-browser.animations.title');
+    animSearchEl.placeholder = t('pages.asset-browser.animations.search-placeholder');
+    vpLoadingEl.textContent = t('pages.asset-browser.viewport.loading');
+    vpHintEl.textContent = t('pages.asset-browser.viewport.hint');
+    renderViewportLabel();
+}
+
+function renderClipLoading() {
+    document.getElementById('clip-list').innerHTML =
+        `<div style="padding:8px 14px;font-size:9px;opacity:.3;letter-spacing:2px">${t('pages.asset-browser.animations.loading')}</div>`;
+}
 
 async function loadUAL() {
     if (ualLoaded) return;
     allClips = [];
-    document.getElementById('clip-list').innerHTML =
-        '<div style="padding:8px 14px;font-size:9px;opacity:.3;letter-spacing:2px">CHARGEMENT…</div>';
+    clipPanelState = 'loading';
+    renderClipLoading();
     const results = await Promise.allSettled(UAL_PATHS.map(p => loadGLTF(p)));
     const clipMap = new Map();
     for (const r of results) {
@@ -468,6 +573,7 @@ async function loadUAL() {
     }
     allClips  = [...clipMap.values()].sort((a, b) => a.name.localeCompare(b.name));
     ualLoaded = true;
+    clipPanelState = 'ready';
     if (currentMdl?._animated) rebuildClips();
 }
 
@@ -516,7 +622,7 @@ function loadModel(item) {
     bodyClipPlane = null; headBone = null;
 
     document.getElementById('vp-loading').style.display = 'block';
-    document.getElementById('vp-label').textContent = item.name;
+    setViewportLabel({ type: 'item', itemName: item.name });
 
     const pOutfit = loadGLTF(item.src);
     const pBody   = item.bodyUrl ? loadGLTF(item.bodyUrl) : Promise.resolve(null);
@@ -564,7 +670,7 @@ function loadModel(item) {
         }
     }).catch(err => {
         document.getElementById('vp-loading').style.display = 'none';
-        document.getElementById('vp-label').textContent = '⚠ ' + err.message;
+        setViewportLabel({ type: 'error', error: err.message });
     });
 }
 
@@ -586,7 +692,8 @@ function renderClipList() {
     for (const clip of list) {
         const div = document.createElement('div');
         div.className = 'clip-item';
-        div.innerHTML = `<span>${clip.name}</span><span class="dur">${clip.duration.toFixed(2)}s</span>`;
+        div.classList.toggle('active', currentClip?.name === clip.name);
+        div.innerHTML = `<span>${clip.name}</span><span class="dur">${clip.duration.toFixed(2)}${t('pages.asset-browser.animations.seconds')}</span>`;
         div.addEventListener('click', () => {
             document.querySelectorAll('.clip-item').forEach(b => b.classList.remove('active'));
             div.classList.add('active');
@@ -602,6 +709,7 @@ function playClip(clip) {
     const action = mixer.clipAction(clip);
     action.reset().fadeIn(0.2).play();
     activeAction = action;
+    currentClip = clip;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -634,18 +742,20 @@ function renderList() {
     if (term) {
         const filtered = allItems.filter(i => i.name.toLowerCase().includes(term));
         filtered.forEach(makeRow);
-        document.getElementById('model-count').textContent =
-            filtered.length + ' / ' + allItems.length + ' assets';
+        modelCountEl.textContent = t('pages.asset-browser.count.filtered', {
+            visible: filtered.length,
+            total: allItems.length,
+        });
     } else {
         for (const [subName, items] of Object.entries(subs)) {
             if (!items.length) continue;
             const hdr = document.createElement('div');
             hdr.className = 'list-subcat';
-            hdr.textContent = subName;
+            hdr.textContent = translateSubcategoryLabel(subName);
             el.appendChild(hdr);
             items.forEach(makeRow);
         }
-        document.getElementById('model-count').textContent = allItems.length + ' assets';
+        modelCountEl.textContent = t('pages.asset-browser.count.total', { total: allItems.length });
     }
 }
 
@@ -665,21 +775,21 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 
 // ── Recherche ──────────────────────────────────────────────────
-document.getElementById('search').addEventListener('input', e => {
+searchEl.addEventListener('input', e => {
     searchTerm = e.target.value;
-    document.getElementById('search-clear').classList.toggle('visible', searchTerm.length > 0);
+    searchClearEl.classList.toggle('visible', searchTerm.length > 0);
     renderList();
 });
-document.getElementById('search-clear').addEventListener('click', () => {
-    document.getElementById('search').value = '';
-    document.getElementById('search-clear').classList.remove('visible');
+searchClearEl.addEventListener('click', () => {
+    searchEl.value = '';
+    searchClearEl.classList.remove('visible');
     searchTerm = '';
     renderList();
-    document.getElementById('search').focus();
+    searchEl.focus();
 });
 
 // ── Animations ────────────────────────────────────────────────
-document.getElementById('anim-search').addEventListener('input', e => {
+animSearchEl.addEventListener('input', e => {
     animFilter = e.target.value;
     renderClipList();
 });
@@ -706,7 +816,22 @@ document.getElementById('panel-open').addEventListener('click', () => {
 });
 
 // ── Init ──────────────────────────────────────────────────────
+setViewportLabel({ type: 'empty' });
+setPageTitle();
+renderStaticText();
+renderTabs();
 renderList();
+
+onLocaleChange(() => {
+    renderStaticText();
+    renderTabs();
+    renderList();
+    if (clipPanelState === 'loading') {
+        renderClipLoading();
+    } else if (clipPanelState === 'ready') {
+        renderClipList();
+    }
+});
 
 // ═══════════════════════════════════════════════════════════════
 //  BOUCLE
