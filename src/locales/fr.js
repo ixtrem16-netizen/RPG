@@ -23,6 +23,7 @@ export const fr = {
         open: 'Ouvrir',
         close: 'Fermer',
         reload: 'Recharger',
+        unnamed: '(sans nom)',
     },
     shell: {
         home: {

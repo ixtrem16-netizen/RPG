@@ -23,6 +23,7 @@ export const en = {
         open: 'Open',
         close: 'Close',
         reload: 'Reload',
+        unnamed: '(unnamed)',
     },
     shell: {
         home: {

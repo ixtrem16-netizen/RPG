@@ -462,7 +462,7 @@ function _pickName(obj) {
         if (o.name && o.name !== '') parts.push(o.name);
         o = o.parent;
     }
-    return parts.length ? parts.join(' › ') : '(sans nom)';
+    return parts.length ? parts.join(' › ') : t('common.unnamed');
 }
 
 function _startTeleport(trap) {
