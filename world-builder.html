@@ -83,7 +83,7 @@ import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { BuildMode }     from './src/build_mode.js';
 import { resolveCharConfig } from './src/char-config.js';
-import { UAL_PATHS, CharacterRenderer } from './src/char-loader.js';
+import { UAL_PATHS, CharacterRenderer, findIdleClip } from './src/char-loader.js';
 
 // ── Scène ────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
@@ -194,10 +194,7 @@ async function loadPlayer() {
                 for (const c of r.value.animations) clipMap.set(c.name, c);
         }
         const clips = [...clipMap.values()];
-        const idle  = clips.find(c => /^idle_loop$/i.test(c.name))
-                   || clips.find(c => /^idle$/i.test(c.name))
-                   || clips.find(c => /^idle/i.test(c.name))
-                   || clips.find(c => /idle/i.test(c.name));
+        const idle = findIdleClip(clips);
         if (idle) charRenderer.play(idle);
         charStatus.textContent = '★ ' + (cfg.name || 'Joueur');
     } catch(e) {

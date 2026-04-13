@@ -319,7 +319,7 @@ import { GLTFLoader }    from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { resolveCharConfig, getAllCharConfigs } from './src/char-config.js';
-import { UAL_PATHS, CharacterRenderer } from './src/char-loader.js';
+import { UAL_PATHS, CharacterRenderer, findIdleClip } from './src/char-loader.js';
 
 // ═══════════════════════════════════════════════════════════════
 //  CONSTANTES
@@ -630,11 +630,7 @@ async function loadCharacterFromConfig(cfg) {
         if (!ualLoaded) {
             await loadAnimations();
         } else {
-            const idle = allClips.find(c => /^idle_loop$/i.test(c.name))
-                      || allClips.find(c => /^idle$/i.test(c.name))
-                      || allClips.find(c => /^idle/i.test(c.name))
-                      || allClips.find(c => /idle/i.test(c.name))
-                      || allClips[0];
+            const idle = findIdleClip(allClips);
             if (idle) playClip(idle);
             setStatus(allClips.length + ' clips');
         }
@@ -663,9 +659,7 @@ async function loadAnimations() {
     allClips  = [...clipMap.values()].sort((a, b) => a.name.localeCompare(b.name));
     ualLoaded = true;
     renderClipList();
-    const idle = allClips.find(c => /idle_loop/i.test(c.name))
-              || allClips.find(c => /idle/i.test(c.name))
-              || allClips[0];
+    const idle = findIdleClip(allClips);
     if (idle) playClip(idle);
     setStatus(allClips.length + ' clips');
 }

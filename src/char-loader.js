@@ -5,6 +5,7 @@
  *
  * Exports simples :
  *   UAL_PATHS           — chemins des 4 fichiers d'animation
+ *   findIdleClip(clips) — trouve le clip idle (priorité stricte ^idle_loop$)
  *   isHeadRelatedMesh   — détection tête/yeux par os (char-builder)
  *   isFullBodyMesh      — détection mesh corps complet (spine + head)
  *   attachSkinned       — attache des SkinnedMesh sur un squelette cible
@@ -26,6 +27,23 @@ export const UAL_PATHS = [
     'assets/characters/animations/UAL2_Standard.glb',
     'assets/characters/animations/UAL2_Source.glb',
 ];
+
+/**
+ * Trouve le clip idle avec priorité stricte — source unique de vérité pour
+ * l'animation par défaut dans tous les outils.
+ *
+ * Priorité :  ^idle_loop$  >  ^idle$  >  ^idle…  >  …idle…  >  premier clip
+ *
+ * Le test `^idle_loop$` (ancré) évite que "Climb_Idle_Loop" soit choisi.
+ */
+export function findIdleClip(clips) {
+    return clips.find(c => /^idle_loop$/i.test(c.name))
+        || clips.find(c => /^idle$/i.test(c.name))
+        || clips.find(c => /^idle/i.test(c.name))
+        || clips.find(c => /idle/i.test(c.name))
+        || clips[0]
+        || null;
+}
 
 // ════════════════════════════════════════════════════════════════
 //  DÉTECTION DE MESH PAR OS
