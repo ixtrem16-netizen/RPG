@@ -122,7 +122,8 @@ function applyLocaleToDocument(doc = getDocument()) {
 
 function emitLocaleChange(nextLocale, previousLocale) {
     for (const listener of localeListeners) {
-        listener(nextLocale, previousLocale);
+        try { listener(nextLocale, previousLocale); }
+        catch (e) { console.warn('[i18n] locale-change listener threw:', e); }
     }
 }
 

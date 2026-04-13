@@ -26,9 +26,11 @@ export const LiveSync = {
         }
         this._ch = new BroadcastChannel('threejs_game_editor');
         this._ch.onmessage = ({ data }) => {
+            if (!data || typeof data !== 'object' || typeof data.type !== 'string') return;
             const { type, payload } = data;
-            (this._listeners[type] || []).forEach(fn => fn(payload));
-            (this._listeners['*']  || []).forEach(fn => fn(type, payload));
+            const call = fn => { try { fn(payload); } catch (e) { console.warn('[LiveSync] listener threw:', e); } };
+            (this._listeners[type] || []).forEach(call);
+            (this._listeners['*']  || []).forEach(fn => { try { fn(type, payload); } catch (e) { console.warn('[LiveSync] listener threw:', e); } });
         };
     },
 
